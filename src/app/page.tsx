@@ -31,7 +31,8 @@ import { shuffle } from 'lodash';
 
 const GRID_SIZE = 16;
 const COUPLES_TO_INCLUDE = 2;
-const HINT_COST = 50;
+const COUPLE_HINT_COST = 100;
+const EX_HINT_COST = 50;
 
 const ScoreBoard = ({ score }: { score: number }) => (
   <div className="text-center mb-4">
@@ -181,7 +182,7 @@ const HintSidebar = ({
             </ul>
             {unlockedCouplesCount < couples.length && (
               <Button onClick={onUnlockCouple} className="w-full">
-                <Lock className="mr-2" /> Unlock for {HINT_COST} points
+                <Lock className="mr-2" /> Unlock for {COUPLE_HINT_COST} points
               </Button>
             )}
           </div>
@@ -225,7 +226,7 @@ const HintSidebar = ({
             </ul>
             {unlockedExesCount < exes.length && (
               <Button onClick={onUnlockEx} className="w-full">
-                <Lock className="mr-2" /> Unlock for {HINT_COST} points
+                <Lock className="mr-2" /> Unlock for {EX_HINT_COST} points
               </Button>
             )}
           </div>
@@ -531,15 +532,15 @@ export default function Home() {
 
   const handleUnlockCouple = () => {
     if (unlockedCouplesCount < gameCouples.length) {
-      setScore(s => s - HINT_COST);
+      setScore(s => s - COUPLE_HINT_COST);
       setUnlockedCouplesCount(c => c + 1);
     }
   };
 
   const handleUnlockEx = () => {
     if (unlockedExesCount < gameExes.length) {
-      setScore(s => s - HINT_COST);
-      setUnlockedExesCount(c => c + 1);
+      setScore(s => s - EX_HINT_COST);
+      setUnlockedExesCount(e => e + 1);
     }
   };
 
@@ -623,5 +624,3 @@ export default function Home() {
     </SidebarProvider>
   );
 }
-
-    
