@@ -8,7 +8,7 @@ import type { Celebrity, Cell } from "@/lib/types";
 import { celebritiesData } from "@/lib/game-data";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart, ZapOff, RotateCw, Trophy, Undo, HelpCircle, Users, UserX, Star } from "lucide-react";
+import { Heart, ZapOff, RotateCw, Trophy, Undo, HelpCircle, Users, UserX, Star, Lock } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,14 +24,14 @@ import {
   SidebarHeader,
   SidebarProvider,
   SidebarTrigger,
-  SidebarInset,
-  useSidebar
+  SidebarInset
 } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { shuffle } from 'lodash';
 
 const GRID_SIZE = 16;
 const COUPLES_TO_INCLUDE = 2;
+const HINT_COST = 50;
 
 const ScoreBoard = ({ score }: { score: number }) => (
   <div className="text-center mb-4">
@@ -115,60 +115,73 @@ const CelebrityCard = ({
   );
 };
 
-const HintSidebar = ({ couples, exes }: { couples: Celebrity[], exes: { p1: string, p2: string }[] }) => {
-  const { setOpen } = useSidebar();
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(min-width: 768px)');
-    const initialOpen = mediaQuery.matches;
-    setOpen(initialOpen);
-
-    const handler = (e: MediaQueryListEvent) => setOpen(e.matches);
-    mediaQuery.addEventListener('change', handler);
-    return () => mediaQuery.removeEventListener('change', handler);
-  }, [setOpen]);
-
+const HintSidebar = ({
+  couples,
+  exes,
+  onUnlockCouples,
+  onUnlockExes,
+  unlockedCouples,
+  unlockedExes,
+  score,
+}: {
+  couples: Celebrity[],
+  exes: { p1: string, p2: string }[],
+  onUnlockCouples: () => void,
+  onUnlockExes: () => void,
+  unlockedCouples: boolean,
+  unlockedExes: boolean,
+  score: number
+}) => {
   return (
     <Sidebar collapsible="icon" variant="sidebar" side="left">
-        <SidebarHeader className="border-b border-sidebar-border bg-sidebar-accent">
-           <div className="flex items-center gap-2 p-2 justify-center">
-              <Star className="w-8 h-8 text-yellow-400" />
-              <h2 className="text-2xl font-bold font-headline text-sidebar-primary-foreground">Hints</h2>
-          </div>
-        </SidebarHeader>
-        <SidebarContent className="bg-sidebar">
-          <div className="p-4 space-y-6">
-            {couples.length > 0 && (
-              <div>
-                <h3 className="font-semibold text-lg mb-3 flex items-center gap-2 text-green-300">
-                    <Users className="w-5 h-5" />
-                    Match these couples!
-                </h3>
-                <ul className="space-y-2">
-                  {couples.map((c, i) => (
-                    <li key={i} className="text-sm bg-sidebar-accent/50 p-2 rounded-md">{c.name} & {c.partner}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {exes.length > 0 && (
-              <>
-                {couples.length > 0 && <Separator className="bg-sidebar-border" />}
-                <div>
-                  <h3 className="font-semibold text-lg mb-3 flex items-center gap-2 text-red-400">
-                      <UserX className="w-5 h-5"/>
-                      Don't match these exes!
-                  </h3>
-                  <ul className="space-y-2">
-                    {exes.map((e, i) => (
-                      <li key={i} className="text-sm bg-sidebar-accent/50 p-2 rounded-md">{e.p1} & {e.p2}</li>
-                    ))}
-                  </ul>
-                </div>
-              </>
+      <SidebarHeader className="border-b border-sidebar-border bg-sidebar-accent">
+        <div className="flex items-center gap-2 p-2 justify-center">
+          <Star className="w-8 h-8 text-yellow-400" />
+          <h2 className="text-2xl font-bold font-headline text-sidebar-primary-foreground">Hints</h2>
+        </div>
+      </SidebarHeader>
+      <SidebarContent className="bg-sidebar">
+        <div className="p-4 space-y-6">
+          <div>
+            <h3 className="font-semibold text-lg mb-3 flex items-center gap-2 text-green-300">
+              <Users className="w-5 h-5" />
+              Match these couples!
+            </h3>
+            {unlockedCouples ? (
+              <ul className="space-y-2">
+                {couples.map((c, i) => (
+                  <li key={i} className="text-sm bg-sidebar-accent/50 p-2 rounded-md">{c.name} & {c.partner}</li>
+                ))}
+              </ul>
+            ) : (
+              <Button onClick={onUnlockCouples} disabled={score < HINT_COST} className="w-full">
+                <Lock className="mr-2" /> Unlock for {HINT_COST} points
+              </Button>
             )}
           </div>
-        </SidebarContent>
-      </Sidebar>
+
+          <Separator className="bg-sidebar-border" />
+
+          <div>
+            <h3 className="font-semibold text-lg mb-3 flex items-center gap-2 text-red-400">
+              <UserX className="w-5 h-5" />
+              Don't match these exes!
+            </h3>
+            {unlockedExes ? (
+              <ul className="space-y-2">
+                {exes.map((e, i) => (
+                  <li key={i} className="text-sm bg-sidebar-accent/50 p-2 rounded-md">{e.p1} & {e.p2}</li>
+                ))}
+              </ul>
+            ) : (
+              <Button onClick={onUnlockExes} disabled={score < HINT_COST} className="w-full">
+                <Lock className="mr-2" /> Unlock for {HINT_COST} points
+              </Button>
+            )}
+          </div>
+        </div>
+      </SidebarContent>
+    </Sidebar>
   );
 };
 
@@ -184,6 +197,8 @@ export default function Home() {
   const [gameCouples, setGameCouples] = useState<Celebrity[]>([]);
   const [gameExes, setGameExes] = useState<{p1: string, p2: string}[]>([]);
   const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
+  const [unlockedCouplesHint, setUnlockedCouplesHint] = useState(false);
+  const [unlockedExesHint, setUnlockedExesHint] = useState(false);
 
   const draggedItem = useRef<number | null>(null);
 
@@ -306,6 +321,8 @@ export default function Home() {
     setFightingIds(new Set());
     setGameOver(false);
     setSelectedCardIndex(null);
+    setUnlockedCouplesHint(false);
+    setUnlockedExesHint(false);
   }, []);
 
   const updateCells = (newCells: Cell[]) => {
@@ -418,9 +435,6 @@ export default function Home() {
 
     updateCells(newCells);
 
-    if (cell1.type !== 'empty' || cell2.type !== 'empty') {
-      setScore(prev => Math.max(0, prev - 1));
-    }
   }, [cells, matchedPairs]);
 
   const handleCardClick = (index: number) => {
@@ -469,6 +483,20 @@ export default function Home() {
     }
   };
 
+  const handleUnlockCouples = () => {
+    if (score >= HINT_COST) {
+      setScore(s => s - HINT_COST);
+      setUnlockedCouplesHint(true);
+    }
+  };
+
+  const handleUnlockExes = () => {
+    if (score >= HINT_COST) {
+      setScore(s => s - HINT_COST);
+      setUnlockedExesHint(true);
+    }
+  };
+
 
   if (!isClient) {
     return null;
@@ -476,7 +504,15 @@ export default function Home() {
 
   return (
     <SidebarProvider>
-      <HintSidebar couples={gameCouples} exes={gameExes} />
+      <HintSidebar
+        couples={gameCouples}
+        exes={gameExes}
+        onUnlockCouples={handleUnlockCouples}
+        onUnlockExes={handleUnlockExes}
+        unlockedCouples={unlockedCouplesHint}
+        unlockedExes={unlockedExesHint}
+        score={score}
+      />
       <SidebarInset>
         <main className="min-h-screen w-full bg-background p-4 sm:p-8">
           <div className="max-w-4xl mx-auto">
@@ -541,5 +577,3 @@ export default function Home() {
     </SidebarProvider>
   );
 }
-
-    
