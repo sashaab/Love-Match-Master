@@ -2,7 +2,7 @@
 import type { Celebrity } from './types';
 
 export const celebritiesData: Celebrity[] = [
-  // Пары (Couples)
+  // Hollywood Couples
   { id: '1', type: 'celebrity', name: 'Justin Bieber', imageUrl: 'https://placehold.co/150x150.png', partner: 'Hailey Bieber', exes: ['Selena Gomez'] },
   { id: '2', type: 'celebrity', name: 'Hailey Bieber', imageUrl: 'https://placehold.co/150x150.png', partner: 'Justin Bieber', exes: [] },
   { id: '3', type: 'celebrity', name: 'Taylor Swift', imageUrl: 'https://placehold.co/150x150.png', partner: 'Travis Kelce', exes: ['Harry Styles', 'The Weeknd'] },
@@ -20,7 +20,7 @@ export const celebritiesData: Celebrity[] = [
   { id: '29', type: 'celebrity', name: 'Jessica Biel', imageUrl: 'https://placehold.co/150x150.png', partner: 'Justin Timberlake', exes: [] },
   { id: '30', type: 'celebrity', name: 'Justin Timberlake', imageUrl: 'https://placehold.co/150x150.png', partner: 'Jessica Biel', exes: ['Britney Spears'] },
 
-  // Бывшие и одиночки (Exes & Fillers)
+  // Hollywood Exes & Fillers
   { id: '11', type: 'celebrity', name: 'Selena Gomez', imageUrl: 'https://placehold.co/150x150.png', exes: ['Justin Bieber', 'The Weeknd'] },
   { id: '12', type: 'celebrity', name: 'Shawn Mendes', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
   { id: '13', type: 'celebrity', name: 'Drake', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
@@ -45,4 +45,72 @@ export const celebritiesData: Celebrity[] = [
   { id: '38', type: 'celebrity', name: 'Lady Gaga', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
   { id: '39', type: 'celebrity', name: 'Chris Hemsworth', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
   { id: '40', type: 'celebrity', name: 'Margot Robbie', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+
+  // Russian Couples
+  { id: '41', type: 'celebrity', name: 'Alla Pugacheva', imageUrl: 'https://placehold.co/150x150.png', partner: 'Maxim Galkin', exes: ['Philipp Kirkorov'] },
+  { id: '42', type: 'celebrity', name: 'Maxim Galkin', imageUrl: 'https://placehold.co/150x150.png', partner: 'Alla Pugacheva', exes: [] },
+  { id: '43', type: 'celebrity', name: 'Pavel Volya', imageUrl: 'https://placehold.co/150x150.png', partner: 'Laysan Utiasheva', exes: [] },
+  { id: '44', type: 'celebrity', name: 'Laysan Utiasheva', imageUrl: 'https://placehold.co/150x150.png', partner: 'Pavel Volya', exes: [] },
+  { id: '45', type: 'celebrity', name: 'Ksenia Sobchak', imageUrl: 'https://placehold.co/150x150.png', partner: 'Konstantin Bogomolov', exes: ['Maxim Vitorgan'] },
+  { id: '46', type: 'celebrity', name: 'Konstantin Bogomolov', imageUrl: 'https://placehold.co/150x150.png', partner: 'Ksenia Sobchak', exes: [] },
+  { id: '47', type: 'celebrity', name: 'Fedor Bondarchuk', imageUrl: 'https://placehold.co/150x150.png', partner: 'Paulina Andreeva', exes: [] },
+  { id: '48', type: 'celebrity', name: 'Paulina Andreeva', imageUrl: 'https://placehold.co/150x150.png', partner: 'Fedor Bondarchuk', exes: [] },
+  { id: '49', type: 'celebrity', name: 'Agata Muceniece', imageUrl: 'https://placehold.co/150x150.png', exes: ['Pavel Priluchny'] },
+  { id: '50', type: 'celebrity', name: 'Pavel Priluchny', imageUrl: 'https://placehold.co/150x150.png', exes: ['Agata Muceniece'] },
+
+  // Russian Exes & Fillers
+  { id: '51', type: 'celebrity', name: 'Philipp Kirkorov', imageUrl: 'https://placehold.co/150x150.png', exes: ['Alla Pugacheva'] },
+  { id: '52', type: 'celebrity', name: 'Maxim Vitorgan', imageUrl: 'https://placehold.co/150x150.png', exes: ['Ksenia Sobchak'] },
+  { id: '53', type: 'celebrity', name: 'Ivan Urgant', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+  { id: '54', type: 'celebrity', name: 'Danila Kozlovsky', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+  { id: '55', type: 'celebrity', name: 'Svetlana Khodchenkova', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+  { id: '56', type: 'celebrity', name: 'Alexander Petrov', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+  { id: '57', type: 'celebrity', name: 'Polina Gagarina', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+
+  // Cross-national couples/exes
+  { id: '58', type: 'celebrity', name: 'Irina Shayk', imageUrl: 'https://placehold.co/150x150.png', exes: ['Bradley Cooper'] },
+  { id: '59', type: 'celebrity', name: 'Bradley Cooper', imageUrl: 'https://placehold.co/150x150.png', exes: ['Irina Shayk'] },
+  { id: '60', type: 'celebrity', name: 'Anna Kournikova', imageUrl: 'https://placehold.co/150x150.png', partner: 'Enrique Iglesias', exes: [] },
+  { id: '61', type: 'celebrity', name: 'Enrique Iglesias', imageUrl: 'https://placehold.co/150x150.png', partner: 'Anna Kournikova', exes: [] },
+  { id: '62', type: 'celebrity', name: 'Natalia Vodianova', imageUrl: 'https://placehold.co/150x150.png', partner: 'Antoine Arnault', exes: [] },
+  { id: '63', type: 'celebrity', name: 'Antoine Arnault', imageUrl: 'https://placehold.co/150x150.png', partner: 'Natalia Vodianova', exes: [] },
+
+  // More fillers
+  { id: '64', type: 'celebrity', name: 'Naomi Campbell', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+  { id: '65', type: 'celebrity', name: 'Mickey Rourke', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+  { id: '66', type: 'celebrity', name: 'Cristiano Ronaldo', imageUrl: 'https://placehold.co/150x150.png', exes: ['Irina Shayk'] },
+  { id: '67', type: 'celebrity', name: 'Dmitry Nagiev', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+  { id: '68', type: 'celebrity', name: 'Sergey Shnurov', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+  { id: '69', type: 'celebrity', name: 'Renata Litvinova', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+  { id: '70', type: 'celebrity', name: 'Adrien Brody', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+  { id: '71', type: 'celebrity', name: 'Jason Statham', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+  { id: '72', type: 'celebrity', name: 'Keanu Reeves', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+  { id: '73', type: 'celebrity', name: 'Dwayne Johnson', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+  { id: '74', type: 'celebrity', name: 'Jennifer Lopez', imageUrl: 'https://placehold.co/150x150.png', exes: ['Ben Affleck'] },
+  { id: '75', type: 'celebrity', name: 'Ben Affleck', imageUrl: 'https://placehold.co/150x150.png', exes: ['Jennifer Lopez', 'Jennifer Garner'] },
+  { id: '76', type: 'celebrity', name: 'Jennifer Garner', imageUrl: 'https://placehold.co/150x150.png', exes: ['Ben Affleck'] },
+  { id: '77', type: 'celebrity', name: 'Will Smith', imageUrl: 'https://placehold.co/150x150.png', partner: 'Jada Pinkett Smith', exes: [] },
+  { id: '78', type: 'celebrity', name: 'Jada Pinkett Smith', imageUrl: 'https://placehold.co/150x150.png', partner: 'Will Smith', exes: [] },
+  { id: '79', type: 'celebrity', name: 'George Clooney', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+  { id: '80', type: 'celebrity', name: 'Julia Roberts', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+  { id: '81', type: 'celebrity', name: 'Basta', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+  { id: '82', type: 'celebrity', name: 'Egor Kreed', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+  { id: '83', type: 'celebrity', name: 'Timati', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+  { id: '84', type: 'celebrity', name: 'Olga Buzova', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+  { id: '85', type: 'celebrity', name: 'Khabib Nurmagomedov', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+  { id: '86', type: 'celebrity', name: 'Alexander Ovechkin', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+  { id: '87', type: 'celebrity', name: 'Maria Sharapova', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+  { id: '88', type: 'celebrity', name: 'Mads Mikkelsen', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+  { id: '89', type: 'celebrity', name: 'Tom Hardy', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+  { id: '90', type: 'celebrity', name: 'Cillian Murphy', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+  { id: '91', type: 'celebrity', name: 'Emma Stone', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+  { id: '92', type: 'celebrity', name: 'Ryan Gosling', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+  { id: '93', type: 'celebrity', name: 'Katy Perry', imageUrl: 'https://placehold.co/150x150.png', exes: ['Orlando Bloom'] },
+  { id: '94', type: 'celebrity', name: 'Orlando Bloom', imageUrl: 'https://placehold.co/150x150.png', exes: ['Katy Perry'] },
+  { id: '95', type: 'celebrity', name: 'Cardi B', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+  { id: '96', type: 'celebrity', name: 'Nicki Minaj', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+  { id: '97', type: 'celebrity', name: 'Billie Eilish', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+  { id: '98', type: 'celebrity', name: 'Kylie Jenner', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+  { id: '99', type: 'celebrity', name: 'Robert Downey Jr.', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
+  { id: '100', type: 'celebrity', name: 'Chris Pratt', imageUrl: 'https://placehold.co/150x150.png', exes: [] }
 ];
