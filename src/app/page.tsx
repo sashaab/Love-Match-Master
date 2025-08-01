@@ -8,7 +8,7 @@ import type { Celebrity, Cell } from "@/lib/types";
 import { celebritiesData } from "@/lib/game-data";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart, ZapOff, RotateCw, Trophy, Undo, HelpCircle } from "lucide-react";
+import { Heart, ZapOff, RotateCw, Trophy, Undo, HelpCircle, Users, UserX, Star } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -113,9 +113,9 @@ const HintSidebar = ({ couples, exes }: { couples: Celebrity[], exes: { p1: stri
   useEffect(() => {
     // Keep sidebar open on desktop by default
     const mediaQuery = window.matchMedia('(min-width: 768px)');
-    if (mediaQuery.matches) {
-      setOpen(true);
-    }
+    const initialOpen = mediaQuery.matches;
+    setOpen(initialOpen);
+
     const handler = (e: MediaQueryListEvent) => setOpen(e.matches);
     mediaQuery.addEventListener('change', handler);
     return () => mediaQuery.removeEventListener('change', handler);
@@ -123,24 +123,37 @@ const HintSidebar = ({ couples, exes }: { couples: Celebrity[], exes: { p1: stri
   
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader>
-        <h2 className="text-2xl font-bold font-headline">Hints</h2>
+      <SidebarHeader className="border-b border-sidebar-border">
+         <div className="flex items-center gap-2 p-2">
+            <Star className="w-8 h-8 text-yellow-400" />
+            <h2 className="text-2xl font-bold font-headline text-sidebar-primary-foreground">Hints</h2>
+        </div>
       </SidebarHeader>
       <SidebarContent>
-        <div className="p-4">
-          <h3 className="font-semibold text-lg mb-2 text-primary">Match these couples!</h3>
-          <ul>
-            {couples.map((c, i) => (
-              <li key={i} className="mb-1 text-sm">{c.name} & {c.partner}</li>
-            ))}
-          </ul>
-          <Separator className="my-4" />
-          <h3 className="font-semibold text-lg mb-2 text-destructive">Don't match these exes!</h3>
-          <ul>
-            {exes.map((e, i) => (
-              <li key={i} className="mb-1 text-sm">{e.p1} & {e.p2}</li>
-            ))}
-          </ul>
+        <div className="p-4 space-y-6">
+          <div>
+            <h3 className="font-semibold text-lg mb-3 flex items-center gap-2 text-green-300">
+                <Users className="w-5 h-5" />
+                Match these couples!
+            </h3>
+            <ul className="space-y-2">
+              {couples.map((c, i) => (
+                <li key={i} className="text-sm bg-sidebar-accent/50 p-2 rounded-md">{c.name} & {c.partner}</li>
+              ))}
+            </ul>
+          </div>
+          <Separator className="bg-sidebar-border" />
+          <div>
+            <h3 className="font-semibold text-lg mb-3 flex items-center gap-2 text-red-400">
+                <UserX className="w-5 h-5"/>
+                Don't match these exes!
+            </h3>
+            <ul className="space-y-2">
+              {exes.map((e, i) => (
+                <li key={i} className="text-sm bg-sidebar-accent/50 p-2 rounded-md">{e.p1} & {e.p2}</li>
+              ))}
+            </ul>
+          </div>
         </div>
       </SidebarContent>
     </Sidebar>
@@ -165,17 +178,25 @@ export default function Home() {
     setGameCouples(couples);
 
     let gameCelebs: Celebrity[] = [];
+    const gameCelebsNames = new Set<string>();
+
     couples.forEach(c => {
-      gameCelebs.push(c);
+      if (!gameCelebsNames.has(c.name)) {
+        gameCelebs.push(c);
+        gameCelebsNames.add(c.name);
+      }
       const partner = celebritiesData.find(p => p.name === c.partner);
-      if(partner) gameCelebs.push(partner);
+      if (partner && !gameCelebsNames.has(partner.name)) {
+        gameCelebs.push(partner);
+        gameCelebsNames.add(partner.name);
+      }
     });
     
     const exesInGame: {p1: string, p2: string}[] = [];
     for(const celeb of gameCelebs) {
       if(celeb.exes) {
         for(const exName of celeb.exes) {
-          if(gameCelebs.find(c => c.name === exName)) {
+          if(gameCelebsNames.has(exName)) {
              if (!exesInGame.some(e => (e.p1 === exName && e.p2 === celeb.name) || (e.p1 === celeb.name && e.p2 === exName))) {
                 exesInGame.push({p1: celeb.name, p2: exName});
              }
@@ -185,7 +206,7 @@ export default function Home() {
     }
     setGameExes(exesInGame);
 
-    const fillers = shuffle(celebritiesData.filter(c => !c.partner && !gameCelebs.some(gc => gc.name === c.name))).slice(0, GRID_SIZE - gameCelebs.length);
+    const fillers = shuffle(celebritiesData.filter(c => !gameCelebsNames.has(c.name))).slice(0, GRID_SIZE - gameCelebs.length);
     const initialCells = shuffle([...gameCelebs, ...fillers]);
 
     while(initialCells.length < GRID_SIZE) {
