@@ -403,23 +403,15 @@ export default function Home() {
     if (matchedPairs.has(draggedCell.id)) return;
     
     const targetCell = cells[index];
-    if (targetCell.type !== 'empty') return;
     
-    const gridWidth = Math.sqrt(GRID_SIZE);
-    const isAdjacent = 
-        (index === draggedIndex - 1 && draggedIndex % gridWidth !== 0) ||
-        (index === draggedIndex + 1 && draggedIndex % gridWidth !== gridWidth - 1) ||
-        index === draggedIndex - gridWidth ||
-        index === draggedIndex + gridWidth;
-
-    if (!isAdjacent) return;
-
-
     const newCells = [...cells];
     [newCells[draggedIndex], newCells[index]] = [newCells[index], newCells[draggedIndex]];
     updateCells(newCells);
     draggedItem.current = null;
-    setScore(prev => prev - 1);
+    
+    if (targetCell.type === 'empty') {
+      setScore(prev => prev - 1);
+    }
   };
 
   if (!isClient) {
@@ -491,3 +483,5 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
+    
