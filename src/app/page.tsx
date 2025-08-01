@@ -118,20 +118,23 @@ const CelebrityCard = ({
 const HintSidebar = ({
   couples,
   exes,
-  onUnlockCouples,
-  onUnlockExes,
-  unlockedCouples,
-  unlockedExes,
+  onUnlockCouple,
+  onUnlockEx,
+  unlockedCouplesCount,
+  unlockedExesCount,
   score,
 }: {
   couples: Celebrity[],
   exes: { p1: string, p2: string }[],
-  onUnlockCouples: () => void,
-  onUnlockExes: () => void,
-  unlockedCouples: boolean,
-  unlockedExes: boolean,
+  onUnlockCouple: () => void,
+  onUnlockEx: () => void,
+  unlockedCouplesCount: number,
+  unlockedExesCount: number,
   score: number
 }) => {
+  const revealedCouples = couples.slice(0, unlockedCouplesCount);
+  const revealedExes = exes.slice(0, unlockedExesCount);
+
   return (
     <Sidebar collapsible="icon" variant="sidebar" side="left">
       <SidebarHeader className="border-b border-sidebar-border bg-sidebar-accent">
@@ -147,14 +150,37 @@ const HintSidebar = ({
               <Users className="w-5 h-5" />
               Match these couples!
             </h3>
-            {unlockedCouples ? (
-              <ul className="space-y-2">
-                {couples.map((c, i) => (
-                  <li key={i} className="text-sm bg-sidebar-accent/50 p-2 rounded-md">{c.name} & {c.partner}</li>
-                ))}
-              </ul>
-            ) : (
-              <Button onClick={onUnlockCouples} disabled={score < HINT_COST} className="w-full">
+            <ul className="space-y-2 mb-4">
+              {revealedCouples.map((c, i) => (
+                <li key={i} className="text-sm bg-sidebar-accent/50 p-2 rounded-md">{c.name} & {c.partner}</li>
+              ))}
+              {unlockedCouplesCount < couples.length && (
+                 <li className="text-sm bg-sidebar-accent/50 p-2 rounded-md flex items-center justify-center">
+                   <Lock className="w-4 h-4 mr-2" />
+                   <span>Locked</span>
+                 </li>
+              )}
+               {unlockedCouplesCount > 0 && unlockedCouplesCount < couples.length && (
+                 <li className="text-sm bg-sidebar-accent/50 p-2 rounded-md flex items-center justify-center">
+                   <Lock className="w-4 h-4 mr-2" />
+                   <span>Locked</span>
+                 </li>
+              )}
+               {unlockedCouplesCount === 0 && (
+                 <>
+                  <li className="text-sm bg-sidebar-accent/50 p-2 rounded-md flex items-center justify-center">
+                    <Lock className="w-4 h-4 mr-2" />
+                    <span>Locked</span>
+                  </li>
+                  <li className="text-sm bg-sidebar-accent/50 p-2 rounded-md flex items-center justify-center">
+                    <Lock className="w-4 h-4 mr-2" />
+                    <span>Locked</span>
+                  </li>
+                 </>
+               )}
+            </ul>
+            {unlockedCouplesCount < couples.length && (
+              <Button onClick={onUnlockCouple} className="w-full">
                 <Lock className="mr-2" /> Unlock for {HINT_COST} points
               </Button>
             )}
@@ -167,14 +193,38 @@ const HintSidebar = ({
               <UserX className="w-5 h-5" />
               Don't match these exes!
             </h3>
-            {unlockedExes ? (
-              <ul className="space-y-2">
-                {exes.map((e, i) => (
-                  <li key={i} className="text-sm bg-sidebar-accent/50 p-2 rounded-md">{e.p1} & {e.p2}</li>
-                ))}
-              </ul>
-            ) : (
-              <Button onClick={onUnlockExes} disabled={score < HINT_COST} className="w-full">
+             <ul className="space-y-2 mb-4">
+              {revealedExes.map((e, i) => (
+                <li key={i} className="text-sm bg-sidebar-accent/50 p-2 rounded-md">{e.p1} & {e.p2}</li>
+              ))}
+              {unlockedExesCount < exes.length && (
+                 <li className="text-sm bg-sidebar-accent/50 p-2 rounded-md flex items-center justify-center">
+                   <Lock className="w-4 h-4 mr-2" />
+                   <span>Locked</span>
+                 </li>
+              )}
+              {unlockedExesCount > 0 && unlockedExesCount < exes.length && (
+                 <li className="text-sm bg-sidebar-accent/50 p-2 rounded-md flex items-center justify-center">
+                   <Lock className="w-4 h-4 mr-2" />
+                   <span>Locked</span>
+                 </li>
+              )}
+
+              {unlockedExesCount === 0 && exes.length > 0 && (
+                 <>
+                  <li className="text-sm bg-sidebar-accent/50 p-2 rounded-md flex items-center justify-center">
+                    <Lock className="w-4 h-4 mr-2" />
+                    <span>Locked</span>
+                  </li>
+                   {exes.length > 1 && <li className="text-sm bg-sidebar-accent/50 p-2 rounded-md flex items-center justify-center">
+                    <Lock className="w-4 h-4 mr-2" />
+                    <span>Locked</span>
+                  </li>}
+                 </>
+               )}
+            </ul>
+            {unlockedExesCount < exes.length && (
+              <Button onClick={onUnlockEx} className="w-full">
                 <Lock className="mr-2" /> Unlock for {HINT_COST} points
               </Button>
             )}
@@ -197,72 +247,68 @@ export default function Home() {
   const [gameCouples, setGameCouples] = useState<Celebrity[]>([]);
   const [gameExes, setGameExes] = useState<{p1: string, p2: string}[]>([]);
   const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
-  const [unlockedCouplesHint, setUnlockedCouplesHint] = useState(false);
-  const [unlockedExesHint, setUnlockedExesHint] = useState(false);
+  const [unlockedCouplesCount, setUnlockedCouplesCount] = useState(0);
+  const [unlockedExesCount, setUnlockedExesCount] = useState(0);
 
   const draggedItem = useRef<number | null>(null);
 
   const setupGame = useCallback(() => {
-    // 1. Find couples where at least one person has an ex.
-    const potentialCouples = shuffle(celebritiesData.filter(c => 
+    let potentialCouples = celebritiesData.filter(c => 
         c.partner && celebritiesData.find(p => p.name === c.partner) && (c.exes && c.exes.length > 0)
-    ));
+    );
     
-    // 2. Select the required number of couples for the game.
-    const selectedCouples = potentialCouples.slice(0, COUPLES_TO_INCLUDE);
-    setGameCouples(selectedCouples);
-    
-    let gameCelebs: Celebrity[] = [];
-    const gameCelebsNames = new Set<string>();
+    let selectedCouples: Celebrity[] = [];
+    let selectedExesForCouples: { p1: string, p2: string }[] = [];
+    let celebsForGrid = new Set<string>();
 
-    // 3. Add the selected couples and their partners to the game.
-    for (const couplePerson of selectedCouples) {
-        if (!gameCelebsNames.has(couplePerson.name)) {
-            gameCelebs.push(couplePerson);
-            gameCelebsNames.add(couplePerson.name);
-        }
-        const partner = celebritiesData.find(p => p.name === couplePerson.partner);
-        if (partner && !gameCelebsNames.has(partner.name)) {
-            gameCelebs.push(partner);
-            gameCelebsNames.add(partner.name);
-        }
-    }
+    while (selectedCouples.length < COUPLES_TO_INCLUDE && potentialCouples.length > 0) {
+        const coupleCandidate = potentialCouples.pop()!;
+        const partner = celebritiesData.find(p => p.name === coupleCandidate.partner)!;
+        
+        const exesOfCandidate = coupleCandidate.exes || [];
+        const exesOfPartner = partner.exes || [];
+        const allExesForPair = [...new Set([...exesOfCandidate, ...exesOfPartner])];
 
-    // 4. Add all exes of the people in the game.
-    const exesToAdd = new Set<string>();
-    for (const celeb of gameCelebs) {
-        if (celeb.exes) {
-            for (const exName of celeb.exes) {
-                const exCeleb = celebritiesData.find(c => c.name === exName);
-                if (exCeleb && !gameCelebsNames.has(exCeleb.name)) {
-                    exesToAdd.add(exName);
+        const exCelebsInGame = allExesForPair.map(name => celebritiesData.find(c => c.name === name)).filter(Boolean) as Celebrity[];
+
+        const tempCelebs = new Set([coupleCandidate.name, partner.name, ...exCelebsInGame.map(c => c.name)]);
+        if (celebsForGrid.size + tempCelebs.size > GRID_SIZE) {
+            continue; // Not enough space for this couple and their exes
+        }
+
+        let coupleHasValidExPair = false;
+        for (const celeb of [coupleCandidate, partner]) {
+            if (celeb.exes) {
+                for (const exName of celeb.exes) {
+                    if (exCelebsInGame.find(c => c.name === exName)) {
+                        coupleHasValidExPair = true;
+                        selectedExesForCouples.push({p1: celeb.name, p2: exName});
+                    }
                 }
             }
         }
-    }
-
-    exesToAdd.forEach(exName => {
-        const exCeleb = celebritiesData.find(c => c.name === exName);
-        if (exCeleb) { // exCeleb will always be found, but for safety
-            gameCelebs.push(exCeleb);
-            gameCelebsNames.add(exCeleb.name);
+        
+        if (coupleHasValidExPair) {
+            selectedCouples.push(coupleCandidate);
+            celebsForGrid.add(coupleCandidate.name);
+            celebsForGrid.add(partner.name);
+            exCelebsInGame.forEach(ex => celebsForGrid.add(ex.name));
         }
-    });
-
-    // 5. Fill the rest of the grid with filler celebrities, avoiding duplicates.
-    const fillers = shuffle(celebritiesData.filter(c => !gameCelebsNames.has(c.name)));
-    const remainingSlots = GRID_SIZE - gameCelebs.length;
-    if (remainingSlots > 0) {
-        gameCelebs.push(...fillers.slice(0, remainingSlots));
     }
     
-    let finalCells: Cell[] = gameCelebs.slice(0, GRID_SIZE).map(c => ({...c, type: 'celebrity' as const}));
+    setGameCouples(selectedCouples);
     
-    // Ensure no duplicates by ID
-    const uniqueCelebs = Array.from(new Map(finalCells.map(c => c.type === 'celebrity' ? [c.id, c] : [c.id, c])).values());
-    finalCells = uniqueCelebs as Cell[];
-
-    // 6. Add empty cells if the grid is not full.
+    const fillers = shuffle(celebritiesData.filter(c => !celebsForGrid.has(c.name)));
+    const remainingSlots = GRID_SIZE - celebsForGrid.size;
+    if (remainingSlots > 0) {
+        fillers.slice(0, remainingSlots).forEach(f => celebsForGrid.add(f.name));
+    }
+    
+    let finalCells: Cell[] = Array.from(celebsForGrid).map(name => {
+        const celeb = celebritiesData.find(c => c.name === name)!;
+        return {...celeb, type: 'celebrity' as const};
+    });
+    
     if (finalCells.length < GRID_SIZE) {
         const emptyCellsCount = GRID_SIZE - finalCells.length;
         for (let i = 0; i < emptyCellsCount; i++) {
@@ -270,7 +316,6 @@ export default function Home() {
         }
     }
 
-    // 7. Determine the ex-pairs that are actually in the game.
     const exesInGame: { p1: string, p2: string }[] = [];
     const finalCelebNames = new Set(finalCells.filter(c => c.type === 'celebrity').map(c => (c as Celebrity).name));
     
@@ -302,8 +347,8 @@ export default function Home() {
           const neighbor = layout[nIndex];
           if (neighbor.type === 'empty') continue;
           
-          if (cell.partner === neighbor.name) return true; // Invalid if a couple is adjacent
-          if (cell.exes?.includes(neighbor.name)) return true; // Invalid if exes are adjacent
+          if (cell.partner === neighbor.name) return true;
+          if (cell.exes?.includes(neighbor.name)) return true;
         }
       }
       return false;
@@ -321,8 +366,8 @@ export default function Home() {
     setFightingIds(new Set());
     setGameOver(false);
     setSelectedCardIndex(null);
-    setUnlockedCouplesHint(false);
-    setUnlockedExesHint(false);
+    setUnlockedCouplesCount(0);
+    setUnlockedExesCount(0);
   }, []);
 
   const updateCells = (newCells: Cell[]) => {
@@ -335,7 +380,6 @@ export default function Home() {
       const lastState = history[history.length - 2];
       setCells(lastState);
       setHistory(prev => prev.slice(0, -1));
-      setScore(prev => prev > 0 ? prev - 10 : 0); // Penalty for undo
     }
   }
 
@@ -445,7 +489,9 @@ export default function Home() {
     }
 
     if (selectedCardIndex === null) {
+      if (clickedCard.type !== 'empty') {
         setSelectedCardIndex(index);
+      }
     } else {
         if (selectedCardIndex !== index) {
             if (areNeighbors(selectedCardIndex, index)) {
@@ -483,17 +529,17 @@ export default function Home() {
     }
   };
 
-  const handleUnlockCouples = () => {
-    if (score >= HINT_COST) {
+  const handleUnlockCouple = () => {
+    if (unlockedCouplesCount < gameCouples.length) {
       setScore(s => s - HINT_COST);
-      setUnlockedCouplesHint(true);
+      setUnlockedCouplesCount(c => c + 1);
     }
   };
 
-  const handleUnlockExes = () => {
-    if (score >= HINT_COST) {
+  const handleUnlockEx = () => {
+    if (unlockedExesCount < gameExes.length) {
       setScore(s => s - HINT_COST);
-      setUnlockedExesHint(true);
+      setUnlockedExesCount(c => c + 1);
     }
   };
 
@@ -507,10 +553,10 @@ export default function Home() {
       <HintSidebar
         couples={gameCouples}
         exes={gameExes}
-        onUnlockCouples={handleUnlockCouples}
-        onUnlockExes={handleUnlockExes}
-        unlockedCouples={unlockedCouplesHint}
-        unlockedExes={unlockedExesHint}
+        onUnlockCouple={handleUnlockCouple}
+        onUnlockEx={handleUnlockEx}
+        unlockedCouplesCount={unlockedCouplesCount}
+        unlockedExesCount={unlockedExesCount}
         score={score}
       />
       <SidebarInset>
@@ -577,3 +623,5 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
+    
