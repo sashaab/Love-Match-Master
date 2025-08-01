@@ -367,15 +367,17 @@ export default function Home() {
     setupGame(gameModeKey);
   }, [setupGame]);
 
-  const checkMatches = useCallback(() => {
+  const runChecks = useCallback(() => {
     if (gameOver || isStuck) return;
+    
     let newFightingIds = new Set<string>();
-    let newMatchedPairs = new Set(matchedPairs);
+    let localMatchedPairs = new Set(matchedPairs);
     let scoreDelta = 0;
     const { gridSize } = gameModes[gameModeKey];
     const gridWidth = Math.sqrt(gridSize);
     const currentlyFightingPairs = new Set<string>();
 
+    // 1. Check for matches and fights, update score
     for (let i = 0; i < cells.length; i++) {
       const cell = cells[i];
       if (cell.type === 'empty') continue;
@@ -389,7 +391,7 @@ export default function Home() {
         const neighbor = cells[nIndex];
         if (neighbor.type === 'empty') continue;
         
-        const isAlreadyMatched = newMatchedPairs.has(cell.id) || newMatchedPairs.has(neighbor.id);
+        const isAlreadyMatched = localMatchedPairs.has(cell.id) || localMatchedPairs.has(neighbor.id);
         if (isAlreadyMatched) continue;
 
         if (cell.exes?.includes(neighbor.name)) {
@@ -400,8 +402,8 @@ export default function Home() {
         }
 
         if (cell.partner === neighbor.name) {
-          newMatchedPairs.add(cell.id);
-          newMatchedPairs.add(neighbor.id);
+          localMatchedPairs.add(cell.id);
+          localMatchedPairs.add(neighbor.id);
           scoreDelta += 100;
         }
       }
@@ -409,7 +411,7 @@ export default function Home() {
     
     if (currentlyFightingPairs.size > 0) {
       const penalty = -25 * currentlyFightingPairs.size;
-      scoreDelta += penalty
+      scoreDelta += penalty;
     }
     
     if (scoreDelta !== 0) {
@@ -421,24 +423,21 @@ export default function Home() {
       setTimeout(() => setFightingIds(new Set()), 1000);
     }
 
-    if(newMatchedPairs.size > matchedPairs.size) {
-        setMatchedPairs(newMatchedPairs);
+    if(localMatchedPairs.size > matchedPairs.size) {
+        setMatchedPairs(localMatchedPairs);
     }
     
-    if (newMatchedPairs.size === gameCouples.length * 2 && !gameOver && gameCouples.length > 0) {
+    if (localMatchedPairs.size === gameCouples.length * 2 && gameCouples.length > 0) {
       setGameOver(true);
+      return; // Game is won, no need to check for stuck state
     }
-  }, [cells, matchedPairs, gameOver, isStuck, gameCouples, gameModeKey]);
-
-  const checkForNoMoves = useCallback(() => {
-    if (gameOver || isStuck) return;
-
-    const { gridSize } = gameModes[gameModeKey];
-    const gridWidth = Math.sqrt(gridSize);
-
+    
+    // 2. Check for no more moves AFTER updating matches
+    let hasMoves = false;
     for (let i = 0; i < cells.length; i++) {
+      if (hasMoves) break;
       const cell = cells[i];
-      if (matchedPairs.has(cell.id)) continue;
+      if (localMatchedPairs.has(cell.id)) continue;
 
       const neighbors = [i - 1, i + 1, i - gridWidth, i + gridWidth].filter(n =>
         n >= 0 && n < cells.length &&
@@ -447,26 +446,24 @@ export default function Home() {
       
       for (const nIndex of neighbors) {
         const neighbor = cells[nIndex];
-        if (!matchedPairs.has(neighbor.id)) {
-          // If we find at least one pair of swappable (unmatched) neighbors, there's a possible move.
-          return; 
+        if (!localMatchedPairs.has(neighbor.id)) {
+          hasMoves = true;
+          break;
         }
       }
     }
 
-    // If we loop through all cells and find no swappable neighbors, the game is stuck.
-    setIsStuck(true);
-  }, [cells, matchedPairs, gameOver, isStuck, gameModeKey]);
-
+    if (!hasMoves) {
+      setIsStuck(true);
+    }
+  }, [cells, matchedPairs, gameOver, isStuck, gameCouples, gameModeKey]);
 
   useEffect(() => {
-    const matchTimeout = setTimeout(checkMatches, 300);
-    const stuckTimeout = setTimeout(checkForNoMoves, 300);
+    const checkTimeout = setTimeout(runChecks, 300);
     return () => {
-      clearTimeout(matchTimeout);
-      clearTimeout(stuckTimeout);
+      clearTimeout(checkTimeout);
     };
-  }, [cells, checkMatches, checkForNoMoves]);
+  }, [cells, runChecks]);
 
   const swapCells = useCallback((index1: number, index2: number) => {
     const cell1 = cells[index1];
