@@ -153,32 +153,14 @@ const HintSidebar = ({
             </h3>
             <ul className="space-y-2 mb-4">
               {revealedCouples.map((c, i) => (
-                <li key={i} className="text-sm bg-sidebar-accent/50 p-2 rounded-md">{c.name} & {c.partner}</li>
+                <li key={`couple-${i}`} className="text-sm bg-sidebar-accent/50 p-2 rounded-md">{c.name} & {c.partner}</li>
               ))}
-              {unlockedCouplesCount < couples.length && (
-                 <li className="text-sm bg-sidebar-accent/50 p-2 rounded-md flex items-center justify-center">
-                   <Lock className="w-4 h-4 mr-2" />
-                   <span>Locked</span>
-                 </li>
-              )}
-               {unlockedCouplesCount > 0 && unlockedCouplesCount < couples.length && (
-                 <li className="text-sm bg-sidebar-accent/50 p-2 rounded-md flex items-center justify-center">
-                   <Lock className="w-4 h-4 mr-2" />
-                   <span>Locked</span>
-                 </li>
-              )}
-               {unlockedCouplesCount === 0 && (
-                 <>
-                  <li className="text-sm bg-sidebar-accent/50 p-2 rounded-md flex items-center justify-center">
-                    <Lock className="w-4 h-4 mr-2" />
-                    <span>Locked</span>
-                  </li>
-                  <li className="text-sm bg-sidebar-accent/50 p-2 rounded-md flex items-center justify-center">
-                    <Lock className="w-4 h-4 mr-2" />
-                    <span>Locked</span>
-                  </li>
-                 </>
-               )}
+              {Array.from({ length: couples.length - unlockedCouplesCount }).map((_, i) => (
+                <li key={`locked-couple-${i}`} className="text-sm bg-sidebar-accent/50 p-2 rounded-md flex items-center justify-center">
+                  <Lock className="w-4 h-4 mr-2" />
+                  <span>Locked</span>
+                </li>
+              ))}
             </ul>
             {unlockedCouplesCount < couples.length && (
               <Button onClick={onUnlockCouple} className="w-full">
@@ -196,33 +178,14 @@ const HintSidebar = ({
             </h3>
              <ul className="space-y-2 mb-4">
               {revealedExes.map((e, i) => (
-                <li key={i} className="text-sm bg-sidebar-accent/50 p-2 rounded-md">{e.p1} & {e.p2}</li>
+                <li key={`ex-${i}`} className="text-sm bg-sidebar-accent/50 p-2 rounded-md">{e.p1} & {e.p2}</li>
               ))}
-              {unlockedExesCount < exes.length && (
-                 <li className="text-sm bg-sidebar-accent/50 p-2 rounded-md flex items-center justify-center">
+              {Array.from({ length: exes.length - unlockedExesCount }).map((_, i) => (
+                 <li key={`locked-ex-${i}`} className="text-sm bg-sidebar-accent/50 p-2 rounded-md flex items-center justify-center">
                    <Lock className="w-4 h-4 mr-2" />
                    <span>Locked</span>
                  </li>
-              )}
-              {unlockedExesCount > 0 && unlockedExesCount < exes.length && (
-                 <li className="text-sm bg-sidebar-accent/50 p-2 rounded-md flex items-center justify-center">
-                   <Lock className="w-4 h-4 mr-2" />
-                   <span>Locked</span>
-                 </li>
-              )}
-
-              {unlockedExesCount === 0 && exes.length > 0 && (
-                 <>
-                  <li className="text-sm bg-sidebar-accent/50 p-2 rounded-md flex items-center justify-center">
-                    <Lock className="w-4 h-4 mr-2" />
-                    <span>Locked</span>
-                  </li>
-                   {exes.length > 1 && <li className="text-sm bg-sidebar-accent/50 p-2 rounded-md flex items-center justify-center">
-                    <Lock className="w-4 h-4 mr-2" />
-                    <span>Locked</span>
-                  </li>}
-                 </>
-               )}
+              ))}
             </ul>
             {unlockedExesCount < exes.length && (
               <Button onClick={onUnlockEx} className="w-full">
@@ -490,9 +453,7 @@ export default function Home() {
     }
 
     if (selectedCardIndex === null) {
-      if (clickedCard.type !== 'empty') {
-        setSelectedCardIndex(index);
-      }
+      setSelectedCardIndex(index);
     } else {
         if (selectedCardIndex !== index) {
             if (areNeighbors(selectedCardIndex, index)) {
