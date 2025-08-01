@@ -45,17 +45,21 @@ const CelebrityCard = ({
   index,
   isMatched,
   isFighting,
+  isSelected,
   onDragStart,
   onDragOver,
   onDrop,
+  onClick,
 }: {
   cell: Cell;
   index: number;
   isMatched: boolean;
   isFighting: boolean;
+  isSelected: boolean;
   onDragStart: (e: React.DragEvent<HTMLDivElement>, index: number) => void;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
   onDrop: (e: React.DragEvent<HTMLDivElement>, index: number) => void;
+  onClick: (index: number) => void;
 }) => {
   if (cell.type === 'empty') {
     return (
@@ -63,6 +67,7 @@ const CelebrityCard = ({
         className="aspect-square rounded-lg bg-background/50 border-2 border-dashed border-gray-300"
         onDragOver={onDragOver}
         onDrop={(e) => onDrop(e, index)}
+        onClick={() => onClick(index)}
       ></div>
     );
   }
@@ -73,11 +78,13 @@ const CelebrityCard = ({
       onDragStart={(e) => onDragStart(e, index)}
       onDragOver={onDragOver}
       onDrop={(e) => onDrop(e, index)}
+      onClick={() => onClick(index)}
       className={cn(
         "aspect-square transition-all duration-300 ease-in-out transform hover:scale-105",
         "relative group overflow-hidden rounded-xl shadow-lg",
         isMatched ? "border-primary border-4 shadow-primary/50 cursor-not-allowed" : "cursor-grab active:cursor-grabbing",
-        isFighting && "animate-shake border-red-500 border-4 shadow-red-500/50"
+        isFighting && "animate-shake border-red-500 border-4 shadow-red-500/50",
+        isSelected && !isMatched && "ring-4 ring-blue-500 ring-offset-2"
       )}
     >
       <CardContent className="p-0 relative h-full w-full">
@@ -176,6 +183,7 @@ export default function Home() {
   const [gameOver, setGameOver] = useState(false);
   const [gameCouples, setGameCouples] = useState<Celebrity[]>([]);
   const [gameExes, setGameExes] = useState<{p1: string, p2: string}[]>([]);
+  const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
 
   const draggedItem = useRef<number | null>(null);
 
@@ -233,7 +241,7 @@ export default function Home() {
         gameCelebs.push(...fillers.slice(0, remainingSlots));
     }
     
-    let finalCells: Cell[] = gameCelebs.slice(0, GRID_SIZE).map(c => ({...c}));
+    let finalCells: Cell[] = gameCelebs.slice(0, GRID_SIZE).map(c => ({...c, type: 'celebrity' as const}));
     
     // Ensure no duplicates by ID
     const uniqueCelebs = Array.from(new Map(finalCells.map(c => c.type === 'celebrity' ? [c.id, c] : [c.id, c])).values());
@@ -297,6 +305,7 @@ export default function Home() {
     setMatchedPairs(new Set());
     setFightingIds(new Set());
     setGameOver(false);
+    setSelectedCardIndex(null);
   }, []);
 
   const updateCells = (newCells: Cell[]) => {
@@ -340,15 +349,16 @@ export default function Home() {
         if (neighbor.type === 'empty') continue;
         
         const isAlreadyMatched = newMatchedPairs.has(cell.id) || newMatchedPairs.has(neighbor.id);
+        if (isAlreadyMatched) continue;
 
-        if (cell.exes?.includes(neighbor.name) && !isAlreadyMatched) {
+        if (cell.exes?.includes(neighbor.name)) {
           newFightingIds.add(cell.id);
           newFightingIds.add(neighbor.id);
           const pairKey = [cell.name, neighbor.name].sort().join('-');
           currentlyFightingPairs.add(pairKey);
         }
 
-        if (cell.partner === neighbor.name && !isAlreadyMatched) {
+        if (cell.partner === neighbor.name) {
           newMatchedPairs.add(cell.id);
           newMatchedPairs.add(neighbor.id);
           scoreDelta += 100;
@@ -384,6 +394,41 @@ export default function Home() {
     return () => clearTimeout(timeoutId);
   }, [cells, checkMatches]);
 
+  const swapCells = useCallback((index1: number, index2: number) => {
+    const cell1 = cells[index1];
+    const cell2 = cells[index2];
+
+    if (matchedPairs.has(cell1.id) || matchedPairs.has(cell2.id)) {
+        return;
+    }
+
+    const newCells = [...cells];
+    [newCells[index1], newCells[index2]] = [newCells[index2], newCells[index1]];
+
+    updateCells(newCells);
+
+    if (cell1.type !== 'empty' && cell2.type !== 'empty') {
+        setScore(prev => Math.max(0, prev - 1));
+    }
+  }, [cells, matchedPairs]);
+
+  const handleCardClick = (index: number) => {
+    const clickedCard = cells[index];
+    if (matchedPairs.has(clickedCard.id)) {
+        setSelectedCardIndex(null);
+        return;
+    }
+
+    if (selectedCardIndex === null) {
+        setSelectedCardIndex(index);
+    } else {
+        if (selectedCardIndex !== index) {
+            swapCells(selectedCardIndex, index);
+        }
+        setSelectedCardIndex(null);
+    }
+  };
+
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
     if (matchedPairs.has(cells[index].id)) {
         e.preventDefault();
@@ -404,24 +449,8 @@ export default function Home() {
     const draggedIndex = draggedItem.current;
     draggedItem.current = null;
 
-    if (draggedIndex === index) return;
-
-    const draggedCell = cells[draggedIndex];
-    const targetCell = cells[index];
-
-    // Prevent swapping with an already matched pair
-    if (matchedPairs.has(draggedCell.id) || matchedPairs.has(targetCell.id)) {
-      return;
-    }
-
-    const newCells = [...cells];
-    [newCells[draggedIndex], newCells[index]] = [newCells[index], newCells[draggedIndex]];
-    
-    updateCells(newCells);
-    
-    // Only deduct score if swapping with another celebrity, not an empty space
-    if(targetCell.type === 'celebrity' && draggedCell.type === 'celebrity') {
-      setScore(prev => Math.max(0, prev - 1));
+    if (draggedIndex !== index) {
+      swapCells(draggedIndex, index);
     }
   };
 
@@ -454,9 +483,11 @@ export default function Home() {
                   index={index}
                   isMatched={matchedPairs.has(cell.id)}
                   isFighting={fightingIds.has(cell.id)}
+                  isSelected={selectedCardIndex === index}
                   onDragStart={handleDragStart}
                   onDragOver={handleDragOver}
                   onDrop={handleDrop}
+                  onClick={handleCardClick}
                 />
               ))}
             </div>
@@ -495,3 +526,5 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
+    
