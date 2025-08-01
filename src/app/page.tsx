@@ -8,7 +8,7 @@ import type { Celebrity, Cell } from "@/lib/types";
 import { celebritiesData } from "@/lib/game-data";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart, ZapOff, RotateCw, Trophy, Undo, HelpCircle, Users, UserX, Star, Lock } from "lucide-react";
+import { Heart, ZapOff, RotateCw, Trophy, Undo, HelpCircle, Users, UserX, Star, Lock, Ban } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -207,6 +207,7 @@ export default function Home() {
   const [fightingIds, setFightingIds] = useState<Set<string>>(new Set());
   const [isClient, setIsClient] = useState(false);
   const [gameOver, setGameOver] = useState(false);
+  const [isStuck, setIsStuck] = useState(false);
   const [gameCouples, setGameCouples] = useState<Celebrity[]>([]);
   const [gameExes, setGameExes] = useState<{p1: string, p2: string}[]>([]);
   const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
@@ -215,6 +216,17 @@ export default function Home() {
   const [gameModeKey, setGameModeKey] = useState<GameModeKey>('medium');
 
   const draggedItem = useRef<number | null>(null);
+
+  const areNeighbors = (index1: number, index2: number) => {
+    const { gridSize } = gameModes[gameModeKey];
+    const gridWidth = Math.sqrt(gridSize);
+    const row1 = Math.floor(index1 / gridWidth);
+    const col1 = index1 % gridWidth;
+    const row2 = Math.floor(index2 / gridWidth);
+    const col2 = index2 % gridWidth;
+
+    return (row1 === row2 && Math.abs(col1 - col2) === 1) || (col1 === col2 && Math.abs(row1 - row2) === 1);
+  };
 
   const setupGame = useCallback((modeKey: GameModeKey) => {
     const { gridSize, couplesToInclude } = gameModes[modeKey];
@@ -330,6 +342,7 @@ export default function Home() {
     setMatchedPairs(new Set());
     setFightingIds(new Set());
     setGameOver(false);
+    setIsStuck(false);
     setSelectedCardIndex(null);
     setUnlockedCouplesCount(0);
     setUnlockedExesCount(0);
@@ -355,7 +368,7 @@ export default function Home() {
   }, [setupGame]);
 
   const checkMatches = useCallback(() => {
-    if (gameOver) return;
+    if (gameOver || isStuck) return;
     let newFightingIds = new Set<string>();
     let newMatchedPairs = new Set(matchedPairs);
     let scoreDelta = 0;
@@ -415,23 +428,45 @@ export default function Home() {
     if (newMatchedPairs.size === gameCouples.length * 2 && !gameOver && gameCouples.length > 0) {
       setGameOver(true);
     }
-  }, [cells, matchedPairs, gameOver, gameCouples, gameModeKey]);
+  }, [cells, matchedPairs, gameOver, isStuck, gameCouples, gameModeKey]);
 
-  useEffect(() => {
-    const timeoutId = setTimeout(checkMatches, 300);
-    return () => clearTimeout(timeoutId);
-  }, [cells, checkMatches]);
+  const checkForNoMoves = useCallback(() => {
+    if (gameOver || isStuck) return;
 
-  const areNeighbors = (index1: number, index2: number) => {
     const { gridSize } = gameModes[gameModeKey];
     const gridWidth = Math.sqrt(gridSize);
-    const row1 = Math.floor(index1 / gridWidth);
-    const col1 = index1 % gridWidth;
-    const row2 = Math.floor(index2 / gridWidth);
-    const col2 = index2 % gridWidth;
 
-    return (row1 === row2 && Math.abs(col1 - col2) === 1) || (col1 === col2 && Math.abs(row1 - row2) === 1);
-  };
+    for (let i = 0; i < cells.length; i++) {
+      const cell = cells[i];
+      if (matchedPairs.has(cell.id)) continue;
+
+      const neighbors = [i - 1, i + 1, i - gridWidth, i + gridWidth].filter(n =>
+        n >= 0 && n < cells.length &&
+        !((i % gridWidth === 0 && n === i - 1) || ((i + 1) % gridWidth === 0 && n === i + 1))
+      );
+      
+      for (const nIndex of neighbors) {
+        const neighbor = cells[nIndex];
+        if (!matchedPairs.has(neighbor.id)) {
+          // If we find at least one pair of swappable (unmatched) neighbors, there's a possible move.
+          return; 
+        }
+      }
+    }
+
+    // If we loop through all cells and find no swappable neighbors, the game is stuck.
+    setIsStuck(true);
+  }, [cells, matchedPairs, gameOver, isStuck, gameModeKey]);
+
+
+  useEffect(() => {
+    const matchTimeout = setTimeout(checkMatches, 300);
+    const stuckTimeout = setTimeout(checkForNoMoves, 300);
+    return () => {
+      clearTimeout(matchTimeout);
+      clearTimeout(stuckTimeout);
+    };
+  }, [cells, checkMatches, checkForNoMoves]);
 
   const swapCells = useCallback((index1: number, index2: number) => {
     const cell1 = cells[index1];
@@ -449,6 +484,7 @@ export default function Home() {
   }, [cells, matchedPairs]);
 
   const handleCardClick = (index: number) => {
+    if (gameOver || isStuck) return;
     const clickedCard = cells[index];
     if (matchedPairs.has(clickedCard.id)) {
         setSelectedCardIndex(null);
@@ -468,7 +504,7 @@ export default function Home() {
   };
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
-    if (matchedPairs.has(cells[index].id)) {
+    if (matchedPairs.has(cells[index].id) || gameOver || isStuck) {
         e.preventDefault();
         return;
     }
@@ -609,14 +645,28 @@ export default function Home() {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+          <AlertDialog open={isStuck}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle className="flex items-center justify-center text-2xl font-headline">
+                  <Ban className="mr-4 h-10 w-10 text-destructive" />
+                  No More Moves!
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-center text-lg pt-4">
+                  You've run out of available swaps. The game is over.
+                  <br />
+                  Your final score is: <span className="font-bold text-primary">{score}</span>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogAction onClick={handleReset} className="w-full">
+                  Try Again
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </main>
       </SidebarInset>
     </SidebarProvider>
   );
 }
-
-    
-
-    
-
-    
