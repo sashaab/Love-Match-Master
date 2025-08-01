@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -7,7 +8,7 @@ import type { Celebrity, Cell } from "@/lib/types";
 import { celebritiesData } from "@/lib/game-data";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart, ZapOff, RotateCw, Trophy } from "lucide-react";
+import { Heart, ZapOff, RotateCw, Trophy, Undo, HelpCircle } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,15 +18,24 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarHeader,
+  SidebarProvider,
+  SidebarTrigger,
+  SidebarInset
+} from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
 import { shuffle } from 'lodash';
 
 const GRID_SIZE = 16;
 const COUPLES_IN_GAME = 4;
 
 const ScoreBoard = ({ score }: { score: number }) => (
-  <div className="text-center mb-8">
+  <div className="text-center mb-4">
     <h1 className="font-headline text-5xl md:text-6xl font-bold text-gray-800">Love Match Mania</h1>
-    <p className="mt-4 text-2xl font-semibold text-primary">Score: {score}</p>
+    <p className="mt-2 text-2xl font-semibold text-primary">Score: {score}</p>
   </div>
 );
 
@@ -97,25 +107,70 @@ const CelebrityCard = ({
   );
 };
 
+const HintSidebar = ({ couples, exes }: { couples: Celebrity[], exes: { p1: string, p2: string }[] }) => {
+  return (
+    <Sidebar>
+      <SidebarHeader>
+        <h2 className="text-2xl font-bold font-headline">Hints</h2>
+      </SidebarHeader>
+      <SidebarContent>
+        <div className="p-4">
+          <h3 className="font-semibold text-lg mb-2 text-primary">Match these couples!</h3>
+          <ul>
+            {couples.map((c, i) => (
+              <li key={i} className="mb-1 text-sm">{c.name} & {c.partner}</li>
+            ))}
+          </ul>
+          <Separator className="my-4" />
+          <h3 className="font-semibold text-lg mb-2 text-destructive">Don't match these exes!</h3>
+          <ul>
+            {exes.map((e, i) => (
+              <li key={i} className="mb-1 text-sm">{e.p1} & {e.p2}</li>
+            ))}
+          </ul>
+        </div>
+      </SidebarContent>
+    </Sidebar>
+  );
+};
 
 export default function Home() {
   const [cells, setCells] = useState<Cell[]>([]);
+  const [history, setHistory] = useState<Cell[][]>([]);
   const [score, setScore] = useState(0);
   const [matchedPairs, setMatchedPairs] = useState<Set<string>>(new Set());
   const [fightingIds, setFightingIds] = useState<Set<string>>(new Set());
   const [isClient, setIsClient] = useState(false);
   const [gameOver, setGameOver] = useState(false);
+  const [gameCouples, setGameCouples] = useState<Celebrity[]>([]);
+  const [gameExes, setGameExes] = useState<{p1: string, p2: string}[]>([]);
 
   const draggedItem = useRef<number | null>(null);
 
   const setupGame = useCallback(() => {
     const couples = shuffle(celebritiesData.filter(c => c.partner)).slice(0, COUPLES_IN_GAME);
+    setGameCouples(couples);
+
     let gameCelebs: Celebrity[] = [];
     couples.forEach(c => {
       gameCelebs.push(c);
       const partner = celebritiesData.find(p => p.name === c.partner);
       if(partner) gameCelebs.push(partner);
     });
+    
+    const exesInGame: {p1: string, p2: string}[] = [];
+    for(const celeb of gameCelebs) {
+      if(celeb.exes) {
+        for(const exName of celeb.exes) {
+          if(gameCelebs.find(c => c.name === exName)) {
+             if (!exesInGame.some(e => (e.p1 === exName && e.p2 === celeb.name) || (e.p1 === celeb.name && e.p2 === exName))) {
+                exesInGame.push({p1: celeb.name, p2: exName});
+             }
+          }
+        }
+      }
+    }
+    setGameExes(exesInGame);
 
     const fillers = shuffle(celebritiesData.filter(c => !c.partner && !gameCelebs.some(gc => gc.name === c.name))).slice(0, GRID_SIZE - gameCelebs.length);
     const initialCells = shuffle([...gameCelebs, ...fillers]);
@@ -123,13 +178,30 @@ export default function Home() {
     while(initialCells.length < GRID_SIZE) {
         initialCells.push({type: 'empty', id: `empty-${initialCells.length}`})
     }
+    const finalCells = initialCells.slice(0, GRID_SIZE);
 
-    setCells(initialCells.slice(0, GRID_SIZE));
+    setCells(finalCells);
+    setHistory([finalCells]);
     setScore(0);
     setMatchedPairs(new Set());
     setFightingIds(new Set());
     setGameOver(false);
   }, []);
+  
+  const updateCells = (newCells: Cell[]) => {
+    setHistory(prev => [...prev, newCells]);
+    setCells(newCells);
+  }
+  
+  const undoMove = () => {
+    if (history.length > 1) {
+      const lastState = history[history.length - 2];
+      setCells(lastState);
+      setHistory(prev => prev.slice(0, -1));
+      setScore(prev => prev - 10); // Penalty for undo
+    }
+  }
+
 
   useEffect(() => {
     setIsClient(true);
@@ -155,15 +227,12 @@ export default function Home() {
         const neighbor = cells[nIndex];
         if (neighbor.type === 'empty') continue;
 
-        // Check for exes
         if (cell.exes?.includes(neighbor.name)) {
           newFightingIds.add(cell.id);
           newFightingIds.add(neighbor.id);
-          scoreDelta -= 10;
         }
 
-        // Check for partners
-        if (cell.partner === neighbor.name && !matchedPairs.has(cell.id)) {
+        if (cell.partner === neighbor.name && !matchedPairs.has(cell.id) && !newMatchedPairs.has(cell.id)) {
           newMatchedPairs.add(cell.id);
           newMatchedPairs.add(neighbor.id);
           scoreDelta += 100;
@@ -173,21 +242,23 @@ export default function Home() {
 
     if (newFightingIds.size > 0) {
       setFightingIds(newFightingIds);
+      if(newFightingIds.size !== fightingIds.size){
+         setScore(prev => prev - 10 * newFightingIds.size);
+      }
       setTimeout(() => setFightingIds(new Set()), 1000);
+    } else {
+      setFightingIds(new Set());
     }
     
     if(newMatchedPairs.size > matchedPairs.size) {
         setMatchedPairs(newMatchedPairs);
-    }
-    
-    if (scoreDelta !== 0) {
         setScore(prev => prev + scoreDelta);
     }
     
-    if (newMatchedPairs.size === COUPLES_IN_GAME * 2) {
+    if (newMatchedPairs.size === COUPLES_IN_GAME * 2 && !gameOver) {
       setGameOver(true);
     }
-  }, [cells, matchedPairs]);
+  }, [cells, matchedPairs, fightingIds.size, gameOver]);
 
   useEffect(() => {
     const timeoutId = setTimeout(checkMatches, 300);
@@ -213,11 +284,12 @@ export default function Home() {
     const newCells = [...cells];
     const draggedCell = newCells[draggedIndex];
 
-    if (matchedPairs.has(draggedCell.id)) return; // Prevent moving matched celebs
+    if (matchedPairs.has(draggedCell.id)) return;
 
-    [newCells[draggedIndex], newCells[index]] = [newCells[index], newCells[draggedIndex]]; // Swap
-    setCells(newCells);
+    [newCells[draggedIndex], newCells[index]] = [newCells[index], newCells[draggedIndex]];
+    updateCells(newCells);
     draggedItem.current = null;
+    setScore(prev => prev - 1);
   };
 
   if (!isClient) {
@@ -225,51 +297,69 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen w-full bg-background p-4 sm:p-8">
-      <div className="max-w-4xl mx-auto">
-        <ScoreBoard score={score} />
-        
-        <div className="grid grid-cols-4 gap-2 md:gap-4 mb-8">
-          {cells.map((cell, index) => (
-            <CelebrityCard
-              key={cell.id}
-              cell={cell}
-              index={index}
-              isMatched={matchedPairs.has(cell.id)}
-              isFighting={fightingIds.has(cell.id)}
-              onDragStart={handleDragStart}
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-            />
-          ))}
-        </div>
+    <SidebarProvider>
+      <HintSidebar couples={gameCouples} exes={gameExes} />
+      <SidebarInset>
+        <main className="min-h-screen w-full bg-background p-4 sm:p-8">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex justify-between items-start mb-4">
+               <SidebarTrigger className="md:hidden">
+                 <HelpCircle/>
+              </SidebarTrigger>
+              <div className="flex-grow">
+                <ScoreBoard score={score} />
+              </div>
+              <div className="w-10 md:w-0"></div> {/* Spacer */}
+            </div>
+            
+            <div className="grid grid-cols-4 gap-2 md:gap-4 mb-8">
+              {cells.map((cell, index) => (
+                <CelebrityCard
+                  key={cell.id}
+                  cell={cell}
+                  index={index}
+                  isMatched={matchedPairs.has(cell.id)}
+                  isFighting={fightingIds.has(cell.id)}
+                  onDragStart={handleDragStart}
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                />
+              ))}
+            </div>
 
-        <div className="text-center">
-          <Button onClick={setupGame} size="lg">
-            <RotateCw className="mr-2 h-4 w-4" /> Reset Game
-          </Button>
-        </div>
-      </div>
-      <AlertDialog open={gameOver}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center justify-center text-2xl font-headline">
-              <Trophy className="mr-4 h-10 w-10 text-yellow-500" />
-              Congratulations!
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-center text-lg pt-4">
-              You've matched all the couples!
-              <br />
-              Your final score is: <span className="font-bold text-primary">{score}</span>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={setupGame} className="w-full">
-              Play Again
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </main>
+            <div className="flex justify-center items-center gap-4">
+              <Button onClick={setupGame} size="lg">
+                <RotateCw className="mr-2 h-4 w-4" /> Reset Game
+              </Button>
+              <Button onClick={undoMove} size="lg" variant="outline" disabled={history.length <= 1}>
+                <Undo className="mr-2 h-4 w-4" /> Undo
+              </Button>
+            </div>
+          </div>
+          <AlertDialog open={gameOver}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle className="flex items-center justify-center text-2xl font-headline">
+                  <Trophy className="mr-4 h-10 w-10 text-yellow-500" />
+                  Congratulations!
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-center text-lg pt-4">
+                  You've matched all the couples!
+                  <br />
+                  Your final score is: <span className="font-bold text-primary">{score}</span>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogAction onClick={setupGame} className="w-full">
+                  Play Again
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </main>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
+
+    
