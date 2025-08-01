@@ -31,7 +31,7 @@ import { Separator } from "@/components/ui/separator";
 import { shuffle } from 'lodash';
 
 const GRID_SIZE = 16;
-const COUPLES_IN_GAME = 4;
+const COUPLES_TO_INCLUDE = 2;
 
 const ScoreBoard = ({ score }: { score: number }) => (
   <div className="text-center mb-4">
@@ -119,7 +119,7 @@ const HintSidebar = ({ couples, exes }: { couples: Celebrity[], exes: { p1: stri
     mediaQuery.addEventListener('change', handler);
     return () => mediaQuery.removeEventListener('change', handler);
   }, [setOpen]);
-  
+
   return (
     <Sidebar collapsible="icon" variant="sidebar" side="left">
         <SidebarHeader className="border-b border-sidebar-border bg-sidebar-accent">
@@ -130,20 +130,22 @@ const HintSidebar = ({ couples, exes }: { couples: Celebrity[], exes: { p1: stri
         </SidebarHeader>
         <SidebarContent className="bg-sidebar">
           <div className="p-4 space-y-6">
-            <div>
-              <h3 className="font-semibold text-lg mb-3 flex items-center gap-2 text-green-300">
-                  <Users className="w-5 h-5" />
-                  Match these couples!
-              </h3>
-              <ul className="space-y-2">
-                {couples.map((c, i) => (
-                  <li key={i} className="text-sm bg-sidebar-accent/50 p-2 rounded-md">{c.name} & {c.partner}</li>
-                ))}
-              </ul>
-            </div>
+            {couples.length > 0 && (
+              <div>
+                <h3 className="font-semibold text-lg mb-3 flex items-center gap-2 text-green-300">
+                    <Users className="w-5 h-5" />
+                    Match these couples!
+                </h3>
+                <ul className="space-y-2">
+                  {couples.map((c, i) => (
+                    <li key={i} className="text-sm bg-sidebar-accent/50 p-2 rounded-md">{c.name} & {c.partner}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
             {exes.length > 0 && (
               <>
-                <Separator className="bg-sidebar-border" />
+                {couples.length > 0 && <Separator className="bg-sidebar-border" />}
                 <div>
                   <h3 className="font-semibold text-lg mb-3 flex items-center gap-2 text-red-400">
                       <UserX className="w-5 h-5"/>
@@ -178,85 +180,99 @@ export default function Home() {
   const draggedItem = useRef<number | null>(null);
 
   const setupGame = useCallback(() => {
-    const allCelebs = shuffle(celebritiesData);
-    const couples = allCelebs.filter(c => c.partner && allCelebs.find(p => p.name === c.partner)).slice(0, COUPLES_IN_GAME);
+    // 1. Find couples where at least one person has an ex.
+    const potentialCouples = shuffle(celebritiesData.filter(c => 
+        c.partner && (c.exes && c.exes.length > 0)
+    ));
+    
+    // 2. Select the required number of couples for the game.
+    const selectedCouples = potentialCouples.slice(0, COUPLES_TO_INCLUDE);
+    setGameCouples(selectedCouples);
     
     let gameCelebs: Celebrity[] = [];
     const gameCelebsNames = new Set<string>();
 
-    couples.forEach(c => {
-      const partner = allCelebs.find(p => p.name === c.partner);
-      if (partner && !gameCelebsNames.has(c.name) && !gameCelebsNames.has(partner.name)) {
-        gameCelebs.push(c);
-        gameCelebsNames.add(c.name);
-        gameCelebs.push(partner);
-        gameCelebsNames.add(partner.name);
-      }
-    });
+    // 3. Add the selected couples and their partners to the game.
+    for (const couplePerson of selectedCouples) {
+        if (!gameCelebsNames.has(couplePerson.name)) {
+            gameCelebs.push(couplePerson);
+            gameCelebsNames.add(couplePerson.name);
+        }
+        const partner = celebritiesData.find(p => p.name === couplePerson.partner);
+        if (partner && !gameCelebsNames.has(partner.name)) {
+            gameCelebs.push(partner);
+            gameCelebsNames.add(partner.name);
+        }
+    }
 
-    setGameCouples(couples);
-    
-    // Ensure exes are in the game
-    const exesInGame: {p1: string, p2: string}[] = [];
-    const celebsWithExes = allCelebs.filter(c => c.exes && c.exes.length > 0);
-
-    for (const celeb of celebsWithExes) {
-        if (!gameCelebsNames.has(celeb.name)) {
-            // Try to add this celeb and one of their exes if there's space
-            if (gameCelebs.length + 2 <= GRID_SIZE) {
-                const exName = celeb.exes![0];
-                const exPartner = allCelebs.find(p => p.name === exName);
-
-                if (exPartner && !gameCelebsNames.has(exName)) {
-                    gameCelebs.push(celeb);
-                    gameCelebsNames.add(celeb.name);
-                    gameCelebs.push(exPartner);
-                    gameCelebsNames.add(exPartner.name);
+    // 4. Add all exes of the people in the game.
+    const exesToAdd = new Set<string>();
+    for (const celeb of gameCelebs) {
+        if (celeb.exes) {
+            for (const exName of celeb.exes) {
+                if (!gameCelebsNames.has(exName)) {
+                    exesToAdd.add(exName);
                 }
             }
         }
     }
 
-
-    for(const celeb of gameCelebs) {
-      if(celeb.exes) {
-        for(const exName of celeb.exes) {
-          if(gameCelebsNames.has(exName)) {
-             if (!exesInGame.some(e => (e.p1 === exName && e.p2 === celeb.name) || (e.p1 === celeb.name && e.p2 === exName))) {
-                exesInGame.push({p1: celeb.name, p2: exName});
-             }
-          }
+    exesToAdd.forEach(exName => {
+        const exCeleb = celebritiesData.find(c => c.name === exName);
+        if (exCeleb && !gameCelebsNames.has(exCeleb.name)) {
+            gameCelebs.push(exCeleb);
+            gameCelebsNames.add(exCeleb.name);
         }
-      }
+    });
+
+    // 5. Fill the rest of the grid with filler celebrities, avoiding duplicates.
+    const fillers = shuffle(celebritiesData.filter(c => !gameCelebsNames.has(c.name)));
+    const remainingSlots = GRID_SIZE - gameCelebs.length;
+    if (remainingSlots > 0) {
+        gameCelebs.push(...fillers.slice(0, remainingSlots));
     }
-    setGameExes(exesInGame);
-
-    const remainingCelebs = allCelebs.filter(c => !gameCelebsNames.has(c.name));
-    const fillers = remainingCelebs.slice(0, GRID_SIZE - gameCelebs.length);
-    let initialCells: Cell[] = shuffle([...gameCelebs, ...fillers]);
     
-    const finalCells = initialCells.slice(0, GRID_SIZE);
+    let finalCells: Cell[] = gameCelebs.slice(0, GRID_SIZE);
 
+    // 6. Add empty cells if the grid is not full.
     if (finalCells.length < GRID_SIZE) {
         const emptyCellsCount = GRID_SIZE - finalCells.length;
         for (let i = 0; i < emptyCellsCount; i++) {
-            finalCells.push({type: 'empty', id: `empty-${i}`})
+            finalCells.push({ type: 'empty', id: `empty-${Date.now()}-${i}` });
         }
     }
+
+    // 7. Determine the ex-pairs that are actually in the game.
+    const exesInGame: { p1: string, p2: string }[] = [];
+    const finalCelebNames = new Set(finalCells.filter(c => c.type === 'celebrity').map(c => (c as Celebrity).name));
     
-    setCells(shuffle(finalCells));
-    setHistory([shuffle(finalCells)]);
+    for (const celeb of finalCells) {
+        if (celeb.type === 'celebrity' && celeb.exes) {
+            for (const exName of celeb.exes) {
+                if (finalCelebNames.has(exName)) {
+                    if (!exesInGame.some(e => (e.p1 === exName && e.p2 === celeb.name) || (e.p1 === celeb.name && e.p2 === exName))) {
+                        exesInGame.push({ p1: celeb.name, p2: exName });
+                    }
+                }
+            }
+        }
+    }
+    setGameExes(exesInGame);
+
+    const shuffledCells = shuffle(finalCells);
+    setCells(shuffledCells);
+    setHistory([shuffledCells]);
     setScore(0);
     setMatchedPairs(new Set());
     setFightingIds(new Set());
     setGameOver(false);
   }, []);
-  
+
   const updateCells = (newCells: Cell[]) => {
     setHistory(prev => [...prev, newCells]);
     setCells(newCells);
   }
-  
+
   const undoMove = () => {
     if (history.length > 1) {
       const lastState = history[history.length - 2];
@@ -425,3 +441,5 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
+    
