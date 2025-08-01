@@ -329,6 +329,7 @@ export default function Home() {
   }, [setupGame]);
 
   const checkMatches = useCallback(() => {
+    if (gameOver) return;
     let newFightingIds = new Set<string>();
     let newMatchedPairs = new Set(matchedPairs);
     let scoreDelta = 0;
@@ -394,6 +395,16 @@ export default function Home() {
     return () => clearTimeout(timeoutId);
   }, [cells, checkMatches]);
 
+  const areNeighbors = (index1: number, index2: number) => {
+    const gridWidth = Math.sqrt(GRID_SIZE);
+    const row1 = Math.floor(index1 / gridWidth);
+    const col1 = index1 % gridWidth;
+    const row2 = Math.floor(index2 / gridWidth);
+    const col2 = index2 % gridWidth;
+
+    return (row1 === row2 && Math.abs(col1 - col2) === 1) || (col1 === col2 && Math.abs(row1 - row2) === 1);
+  };
+
   const swapCells = useCallback((index1: number, index2: number) => {
     const cell1 = cells[index1];
     const cell2 = cells[index2];
@@ -407,8 +418,8 @@ export default function Home() {
 
     updateCells(newCells);
 
-    if (cell1.type !== 'empty' && cell2.type !== 'empty') {
-        setScore(prev => Math.max(0, prev - 1));
+    if (cell1.type !== 'empty' || cell2.type !== 'empty') {
+      setScore(prev => Math.max(0, prev - 1));
     }
   }, [cells, matchedPairs]);
 
@@ -423,7 +434,9 @@ export default function Home() {
         setSelectedCardIndex(index);
     } else {
         if (selectedCardIndex !== index) {
-            swapCells(selectedCardIndex, index);
+            if (areNeighbors(selectedCardIndex, index)) {
+                swapCells(selectedCardIndex, index);
+            }
         }
         setSelectedCardIndex(null);
     }
@@ -450,7 +463,9 @@ export default function Home() {
     draggedItem.current = null;
 
     if (draggedIndex !== index) {
-      swapCells(draggedIndex, index);
+      if (areNeighbors(draggedIndex, index)) {
+        swapCells(draggedIndex, index);
+      }
     }
   };
 
