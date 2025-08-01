@@ -29,8 +29,8 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { shuffle } from 'lodash';
 
-const GRID_SIZE = 16;
-const COUPLES_TO_INCLUDE = 2;
+const GRID_SIZE = 25;
+const COUPLES_TO_INCLUDE = 4;
 const COUPLE_HINT_COST = 100;
 const EX_HINT_COST = 50;
 
@@ -534,7 +534,7 @@ export default function Home() {
               <div className="w-10"></div> {/* Spacer */}
             </div>
             
-            <div className="grid grid-cols-4 gap-2 md:gap-4 mb-8">
+            <div className="grid grid-cols-5 gap-2 md:gap-4 mb-8">
               {cells.map((cell, index) => (
                 <CelebrityCard
                   key={cell.id}
