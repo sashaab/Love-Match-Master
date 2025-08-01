@@ -205,6 +205,7 @@ export default function Home() {
   const [score, setScore] = useState(0);
   const [matchedPairs, setMatchedPairs] = useState<Set<string>>(new Set());
   const [fightingIds, setFightingIds] = useState<Set<string>>(new Set());
+  const [penalizedExPairs, setPenalizedExPairs] = useState<Set<string>>(new Set());
   const [isClient, setIsClient] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [isStuck, setIsStuck] = useState(false);
@@ -341,6 +342,7 @@ export default function Home() {
     setScore(0);
     setMatchedPairs(new Set());
     setFightingIds(new Set());
+    setPenalizedExPairs(new Set());
     setGameOver(false);
     setIsStuck(false);
     setSelectedCardIndex(null);
@@ -375,7 +377,9 @@ export default function Home() {
     let scoreDelta = 0;
     const { gridSize } = gameModes[gameModeKey];
     const gridWidth = Math.sqrt(gridSize);
+    
     const currentlyFightingPairs = new Set<string>();
+    const newPenalizedPairs = new Set(penalizedExPairs);
 
     // 1. Check for matches and fights, update score
     for (let i = 0; i < cells.length; i++) {
@@ -394,11 +398,17 @@ export default function Home() {
         const isAlreadyMatched = localMatchedPairs.has(cell.id) || localMatchedPairs.has(neighbor.id);
         if (isAlreadyMatched) continue;
 
+        const pairKey = [cell.name, neighbor.name].sort().join('-');
+        
         if (cell.exes?.includes(neighbor.name)) {
           newFightingIds.add(cell.id);
           newFightingIds.add(neighbor.id);
-          const pairKey = [cell.name, neighbor.name].sort().join('-');
           currentlyFightingPairs.add(pairKey);
+          
+          if (!penalizedExPairs.has(pairKey)) {
+              scoreDelta -= 25;
+              newPenalizedPairs.add(pairKey);
+          }
         }
 
         if (cell.partner === neighbor.name) {
@@ -408,11 +418,15 @@ export default function Home() {
         }
       }
     }
-    
-    if (currentlyFightingPairs.size > 0) {
-      const penalty = -25 * currentlyFightingPairs.size;
-      scoreDelta += penalty;
-    }
+
+    // Clean up penalized pairs that are no longer fighting
+    penalizedExPairs.forEach(pairKey => {
+      if (!currentlyFightingPairs.has(pairKey)) {
+        newPenalizedPairs.delete(pairKey);
+      }
+    });
+
+    setPenalizedExPairs(newPenalizedPairs);
     
     if (scoreDelta !== 0) {
       setScore(prev => prev + scoreDelta);
@@ -427,36 +441,42 @@ export default function Home() {
         setMatchedPairs(localMatchedPairs);
     }
     
-    if (localMatchedPairs.size === gameCouples.length * 2 && gameCouples.length > 0) {
+    if (gameCouples.length > 0 && localMatchedPairs.size === gameCouples.length * 2) {
       setGameOver(true);
       return; // Game is won, no need to check for stuck state
     }
     
     // 2. Check for no more moves AFTER updating matches
     let hasMoves = false;
-    for (let i = 0; i < cells.length; i++) {
-      if (hasMoves) break;
-      const cell = cells[i];
-      if (localMatchedPairs.has(cell.id)) continue;
+    const nonMatchedCelebs = cells.filter(c => c.type === 'celebrity' && !localMatchedPairs.has(c.id));
 
-      const neighbors = [i - 1, i + 1, i - gridWidth, i + gridWidth].filter(n =>
-        n >= 0 && n < cells.length &&
-        !((i % gridWidth === 0 && n === i - 1) || ((i + 1) % gridWidth === 0 && n === i + 1))
-      );
-      
-      for (const nIndex of neighbors) {
-        const neighbor = cells[nIndex];
-        if (!localMatchedPairs.has(neighbor.id)) {
-          hasMoves = true;
-          break;
+    // No moves if all remaining celebs are on the board and there are no empty spaces to swap with.
+    if (nonMatchedCelebs.length > 1) {
+        for (let i = 0; i < cells.length; i++) {
+            if (hasMoves) break;
+            const cell = cells[i];
+            if (localMatchedPairs.has(cell.id)) continue;
+    
+            const neighbors = [i - 1, i + 1, i - gridWidth, i + gridWidth].filter(n =>
+              n >= 0 && n < cells.length &&
+              !((i % gridWidth === 0 && n === i - 1) || ((i + 1) % gridWidth === 0 && n === i + 1))
+            );
+          
+            for (const nIndex of neighbors) {
+                const neighbor = cells[nIndex];
+                if (!localMatchedPairs.has(neighbor.id)) {
+                    hasMoves = true;
+                    break;
+                }
+            }
         }
-      }
     }
 
-    if (!hasMoves) {
+
+    if (!hasMoves && gameCouples.length > 0) {
       setIsStuck(true);
     }
-  }, [cells, matchedPairs, gameOver, isStuck, gameCouples, gameModeKey]);
+  }, [cells, matchedPairs, gameOver, isStuck, gameCouples, gameModeKey, penalizedExPairs]);
 
   useEffect(() => {
     const checkTimeout = setTimeout(runChecks, 300);
