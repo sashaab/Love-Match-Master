@@ -8,7 +8,7 @@ import type { Celebrity, Cell } from "@/lib/types";
 import { celebritiesData } from "@/lib/game-data";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart, ZapOff, RotateCw, Trophy, Undo, HelpCircle, Users, UserX, Star, Lock, Ban } from "lucide-react";
+import { Heart, ZapOff, RotateCw, Trophy, Undo, HelpCircle, Users, UserX, Star, Lock, Ban, Menu } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -595,8 +595,8 @@ export default function Home() {
         <main className="min-h-screen w-full bg-background p-4 sm:p-8">
           <div className="max-w-7xl mx-auto">
             <div className="flex justify-between items-start mb-4">
-               <SidebarTrigger>
-                 <HelpCircle/>
+               <SidebarTrigger className="h-10 w-10">
+                 <Menu className="h-6 w-6"/>
               </SidebarTrigger>
               <div className="flex-grow">
                 <ScoreBoard score={score} />
