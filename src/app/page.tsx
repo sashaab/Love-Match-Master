@@ -29,10 +29,17 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { shuffle } from 'lodash';
 
-const GRID_SIZE = 25;
-const COUPLES_TO_INCLUDE = 4;
 const COUPLE_HINT_COST = 100;
 const EX_HINT_COST = 50;
+
+const gameModes = {
+  easy: { gridSize: 9, couplesToInclude: 1, label: '3x3 (Easy)' },
+  medium: { gridSize: 25, couplesToInclude: 3, label: '5x5 (Medium)' },
+  hard: { gridSize: 100, couplesToInclude: 5, label: '10x10 (Hard)' },
+};
+
+type GameModeKey = keyof typeof gameModes;
+
 
 const ScoreBoard = ({ score }: { score: number }) => (
   <div className="text-center mb-4">
@@ -213,19 +220,22 @@ export default function Home() {
   const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
   const [unlockedCouplesCount, setUnlockedCouplesCount] = useState(0);
   const [unlockedExesCount, setUnlockedExesCount] = useState(0);
+  const [gameModeKey, setGameModeKey] = useState<GameModeKey>('medium');
 
   const draggedItem = useRef<number | null>(null);
 
-  const setupGame = useCallback(() => {
-    let potentialCouples = celebritiesData.filter(c => 
+  const setupGame = useCallback((modeKey: GameModeKey) => {
+    const { gridSize, couplesToInclude } = gameModes[modeKey];
+    setGameModeKey(modeKey);
+
+    let potentialCouples = celebritiesData.filter(c =>
         c.partner && celebritiesData.find(p => p.name === c.partner) && (c.exes && c.exes.length > 0)
     );
     
     let selectedCouples: Celebrity[] = [];
-    let selectedExesForCouples: { p1: string, p2: string }[] = [];
     let celebsForGrid = new Set<string>();
 
-    while (selectedCouples.length < COUPLES_TO_INCLUDE && potentialCouples.length > 0) {
+    while (selectedCouples.length < couplesToInclude && potentialCouples.length > 0) {
         const coupleCandidate = potentialCouples.pop()!;
         const partner = celebritiesData.find(p => p.name === coupleCandidate.partner)!;
         
@@ -236,8 +246,8 @@ export default function Home() {
         const exCelebsInGame = allExesForPair.map(name => celebritiesData.find(c => c.name === name)).filter(Boolean) as Celebrity[];
 
         const tempCelebs = new Set([coupleCandidate.name, partner.name, ...exCelebsInGame.map(c => c.name)]);
-        if (celebsForGrid.size + tempCelebs.size > GRID_SIZE) {
-            continue; // Not enough space for this couple and their exes
+        if (celebsForGrid.size + tempCelebs.size > gridSize) {
+            continue;
         }
 
         let coupleHasValidExPair = false;
@@ -246,7 +256,6 @@ export default function Home() {
                 for (const exName of celeb.exes) {
                     if (exCelebsInGame.find(c => c.name === exName)) {
                         coupleHasValidExPair = true;
-                        selectedExesForCouples.push({p1: celeb.name, p2: exName});
                     }
                 }
             }
@@ -263,7 +272,7 @@ export default function Home() {
     setGameCouples(selectedCouples);
     
     const fillers = shuffle(celebritiesData.filter(c => !celebsForGrid.has(c.name)));
-    const remainingSlots = GRID_SIZE - celebsForGrid.size;
+    const remainingSlots = gridSize - celebsForGrid.size;
     if (remainingSlots > 0) {
         fillers.slice(0, remainingSlots).forEach(f => celebsForGrid.add(f.name));
     }
@@ -273,8 +282,8 @@ export default function Home() {
         return {...celeb, type: 'celebrity' as const};
     });
     
-    if (finalCells.length < GRID_SIZE) {
-        const emptyCellsCount = GRID_SIZE - finalCells.length;
+    if (finalCells.length < gridSize) {
+        const emptyCellsCount = gridSize - finalCells.length;
         for (let i = 0; i < emptyCellsCount; i++) {
             finalCells.push({ type: 'empty', id: `empty-${Date.now()}-${i}` });
         }
@@ -297,7 +306,7 @@ export default function Home() {
     setGameExes(exesInGame);
 
     const isLayoutInvalid = (layout: Cell[]): boolean => {
-      const gridWidth = Math.sqrt(GRID_SIZE);
+      const gridWidth = Math.sqrt(gridSize);
       for (let i = 0; i < layout.length; i++) {
         const cell = layout[i];
         if (cell.type === 'empty') continue;
@@ -350,15 +359,16 @@ export default function Home() {
 
   useEffect(() => {
     setIsClient(true);
-    setupGame();
-  }, [setupGame]);
+    setupGame(gameModeKey);
+  }, [setupGame, gameModeKey]);
 
   const checkMatches = useCallback(() => {
     if (gameOver) return;
     let newFightingIds = new Set<string>();
     let newMatchedPairs = new Set(matchedPairs);
     let scoreDelta = 0;
-    const gridWidth = Math.sqrt(GRID_SIZE);
+    const { gridSize } = gameModes[gameModeKey];
+    const gridWidth = Math.sqrt(gridSize);
     const currentlyFightingPairs = new Set<string>();
 
     for (let i = 0; i < cells.length; i++) {
@@ -413,7 +423,7 @@ export default function Home() {
     if (newMatchedPairs.size === gameCouples.length * 2 && !gameOver && gameCouples.length > 0) {
       setGameOver(true);
     }
-  }, [cells, matchedPairs, gameOver, gameCouples]);
+  }, [cells, matchedPairs, gameOver, gameCouples, gameModeKey]);
 
   useEffect(() => {
     const timeoutId = setTimeout(checkMatches, 300);
@@ -421,7 +431,8 @@ export default function Home() {
   }, [cells, checkMatches]);
 
   const areNeighbors = (index1: number, index2: number) => {
-    const gridWidth = Math.sqrt(GRID_SIZE);
+    const { gridSize } = gameModes[gameModeKey];
+    const gridWidth = Math.sqrt(gridSize);
     const row1 = Math.floor(index1 / gridWidth);
     const col1 = index1 % gridWidth;
     const row2 = Math.floor(index2 / gridWidth);
@@ -505,10 +516,22 @@ export default function Home() {
     }
   };
 
+  const handleReset = () => {
+    setupGame(gameModeKey);
+  }
+
+  const { gridSize } = gameModes[gameModeKey];
+  const gridCols = `grid-cols-${Math.sqrt(gridSize)}`;
+
 
   if (!isClient) {
     return null;
   }
+  
+  const gridDynamicStyle = {
+    gridTemplateColumns: `repeat(${Math.sqrt(gridSize)}, minmax(0, 1fr))`
+  };
+
 
   return (
     <SidebarProvider>
@@ -523,7 +546,7 @@ export default function Home() {
       />
       <SidebarInset>
         <main className="min-h-screen w-full bg-background p-4 sm:p-8">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-7xl mx-auto">
             <div className="flex justify-between items-start mb-4">
                <SidebarTrigger>
                  <HelpCircle/>
@@ -533,8 +556,20 @@ export default function Home() {
               </div>
               <div className="w-10"></div> {/* Spacer */}
             </div>
+
+            <div className="flex justify-center gap-4 mb-8">
+              {(Object.keys(gameModes) as GameModeKey[]).map(key => (
+                  <Button 
+                    key={key} 
+                    onClick={() => setupGame(key)}
+                    variant={gameModeKey === key ? 'default' : 'outline'}
+                  >
+                    {gameModes[key].label}
+                  </Button>
+              ))}
+            </div>
             
-            <div className="grid grid-cols-5 gap-2 md:gap-4 mb-8">
+            <div className="grid gap-2 md:gap-4 mb-8" style={gridDynamicStyle}>
               {cells.map((cell, index) => (
                 <CelebrityCard
                   key={cell.id}
@@ -552,7 +587,7 @@ export default function Home() {
             </div>
 
             <div className="flex justify-center items-center gap-4">
-              <Button onClick={setupGame} size="lg">
+              <Button onClick={handleReset} size="lg">
                 <RotateCw className="mr-2 h-4 w-4" /> Reset Game
               </Button>
               <Button onClick={undoMove} size="lg" variant="outline" disabled={history.length <= 1}>
@@ -574,7 +609,7 @@ export default function Home() {
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogAction onClick={setupGame} className="w-full">
+                <AlertDialogAction onClick={handleReset} className="w-full">
                   Play Again
                 </AlertDialogAction>
               </AlertDialogFooter>
@@ -585,3 +620,5 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
+    
