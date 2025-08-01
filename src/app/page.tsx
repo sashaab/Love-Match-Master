@@ -111,7 +111,6 @@ const CelebrityCard = ({
 const HintSidebar = ({ couples, exes }: { couples: Celebrity[], exes: { p1: string, p2: string }[] }) => {
   const { setOpen } = useSidebar();
   useEffect(() => {
-    // Keep sidebar open on desktop by default
     const mediaQuery = window.matchMedia('(min-width: 768px)');
     const initialOpen = mediaQuery.matches;
     setOpen(initialOpen);
@@ -122,43 +121,48 @@ const HintSidebar = ({ couples, exes }: { couples: Celebrity[], exes: { p1: stri
   }, [setOpen]);
   
   return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader className="border-b border-sidebar-border">
-         <div className="flex items-center gap-2 p-2">
-            <Star className="w-8 h-8 text-yellow-400" />
-            <h2 className="text-2xl font-bold font-headline text-sidebar-primary-foreground">Hints</h2>
-        </div>
-      </SidebarHeader>
-      <SidebarContent>
-        <div className="p-4 space-y-6">
-          <div>
-            <h3 className="font-semibold text-lg mb-3 flex items-center gap-2 text-green-300">
-                <Users className="w-5 h-5" />
-                Match these couples!
-            </h3>
-            <ul className="space-y-2">
-              {couples.map((c, i) => (
-                <li key={i} className="text-sm bg-sidebar-accent/50 p-2 rounded-md">{c.name} & {c.partner}</li>
-              ))}
-            </ul>
+    <Sidebar collapsible="icon" variant="sidebar" side="left">
+        <SidebarHeader className="border-b border-sidebar-border bg-sidebar-accent">
+           <div className="flex items-center gap-2 p-2 justify-center">
+              <Star className="w-8 h-8 text-yellow-400" />
+              <h2 className="text-2xl font-bold font-headline text-sidebar-primary-foreground">Hints</h2>
           </div>
-          <Separator className="bg-sidebar-border" />
-          <div>
-            <h3 className="font-semibold text-lg mb-3 flex items-center gap-2 text-red-400">
-                <UserX className="w-5 h-5"/>
-                Don't match these exes!
-            </h3>
-            <ul className="space-y-2">
-              {exes.map((e, i) => (
-                <li key={i} className="text-sm bg-sidebar-accent/50 p-2 rounded-md">{e.p1} & {e.p2}</li>
-              ))}
-            </ul>
+        </SidebarHeader>
+        <SidebarContent className="bg-sidebar">
+          <div className="p-4 space-y-6">
+            <div>
+              <h3 className="font-semibold text-lg mb-3 flex items-center gap-2 text-green-300">
+                  <Users className="w-5 h-5" />
+                  Match these couples!
+              </h3>
+              <ul className="space-y-2">
+                {couples.map((c, i) => (
+                  <li key={i} className="text-sm bg-sidebar-accent/50 p-2 rounded-md">{c.name} & {c.partner}</li>
+                ))}
+              </ul>
+            </div>
+            {exes.length > 0 && (
+              <>
+                <Separator className="bg-sidebar-border" />
+                <div>
+                  <h3 className="font-semibold text-lg mb-3 flex items-center gap-2 text-red-400">
+                      <UserX className="w-5 h-5"/>
+                      Don't match these exes!
+                  </h3>
+                  <ul className="space-y-2">
+                    {exes.map((e, i) => (
+                      <li key={i} className="text-sm bg-sidebar-accent/50 p-2 rounded-md">{e.p1} & {e.p2}</li>
+                    ))}
+                  </ul>
+                </div>
+              </>
+            )}
           </div>
-        </div>
-      </SidebarContent>
-    </Sidebar>
+        </SidebarContent>
+      </Sidebar>
   );
 };
+
 
 export default function Home() {
   const [cells, setCells] = useState<Cell[]>([]);
@@ -174,23 +178,23 @@ export default function Home() {
   const draggedItem = useRef<number | null>(null);
 
   const setupGame = useCallback(() => {
-    const couples = shuffle(celebritiesData.filter(c => c.partner)).slice(0, COUPLES_IN_GAME);
-    setGameCouples(couples);
-
+    const allCelebs = shuffle(celebritiesData);
+    const couples = allCelebs.filter(c => c.partner).slice(0, COUPLES_IN_GAME);
+    
     let gameCelebs: Celebrity[] = [];
     const gameCelebsNames = new Set<string>();
 
     couples.forEach(c => {
-      if (!gameCelebsNames.has(c.name)) {
+      const partner = allCelebs.find(p => p.name === c.partner);
+      if (partner && !gameCelebsNames.has(c.name) && !gameCelebsNames.has(partner.name)) {
         gameCelebs.push(c);
         gameCelebsNames.add(c.name);
-      }
-      const partner = celebritiesData.find(p => p.name === c.partner);
-      if (partner && !gameCelebsNames.has(partner.name)) {
         gameCelebs.push(partner);
         gameCelebsNames.add(partner.name);
       }
     });
+
+    setGameCouples(couples);
     
     const exesInGame: {p1: string, p2: string}[] = [];
     for(const celeb of gameCelebs) {
@@ -206,12 +210,13 @@ export default function Home() {
     }
     setGameExes(exesInGame);
 
-    const fillers = shuffle(celebritiesData.filter(c => !gameCelebsNames.has(c.name))).slice(0, GRID_SIZE - gameCelebs.length);
-    const initialCells = shuffle([...gameCelebs, ...fillers]);
+    const fillers = allCelebs.filter(c => !gameCelebsNames.has(c.name)).slice(0, GRID_SIZE - gameCelebs.length);
+    let initialCells: Cell[] = shuffle([...gameCelebs, ...fillers]);
 
     while(initialCells.length < GRID_SIZE) {
         initialCells.push({type: 'empty', id: `empty-${initialCells.length}`})
     }
+    
     const finalCells = initialCells.slice(0, GRID_SIZE);
 
     setCells(finalCells);
