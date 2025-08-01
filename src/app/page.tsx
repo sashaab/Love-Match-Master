@@ -99,23 +99,23 @@ const CelebrityCard = ({
         <Image
           src={cell.imageUrl}
           alt={cell.name}
-          width={150}
-          height={150}
+          fill={true}
+          sizes="(max-width: 768px) 30vw, (max-width: 1200px) 15vw, 10vw"
           className="w-full h-full object-cover"
           data-ai-hint="celebrity portrait"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-        <p className="absolute bottom-2 left-3 font-bold text-white text-sm md:text-base">
+        <p className="absolute bottom-1 left-2 sm:bottom-2 sm:left-3 font-bold text-white text-[0.5rem] sm:text-sm md:text-base">
           {cell.name}
         </p>
         {isMatched && (
           <div className="absolute inset-0 bg-primary/30 flex items-center justify-center">
-            <Heart className="w-16 h-16 text-white animate-pulse" fill="white" />
+            <Heart className="w-8 h-8 md:w-16 md:h-16 text-white animate-pulse" fill="white" />
           </div>
         )}
         {isFighting && (
           <div className="absolute inset-0 bg-red-500/30 flex items-center justify-center">
-            <ZapOff className="w-16 h-16 text-white animate-ping" fill="white" />
+            <ZapOff className="w-8 h-8 md:w-16 md:h-16 text-white animate-ping" fill="white" />
           </div>
         )}
       </CardContent>
