@@ -24,7 +24,8 @@ import {
   SidebarHeader,
   SidebarProvider,
   SidebarTrigger,
-  SidebarInset
+  SidebarInset,
+  useSidebar
 } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { shuffle } from 'lodash';
@@ -108,8 +109,20 @@ const CelebrityCard = ({
 };
 
 const HintSidebar = ({ couples, exes }: { couples: Celebrity[], exes: { p1: string, p2: string }[] }) => {
+  const { setOpen } = useSidebar();
+  useEffect(() => {
+    // Keep sidebar open on desktop by default
+    const mediaQuery = window.matchMedia('(min-width: 768px)');
+    if (mediaQuery.matches) {
+      setOpen(true);
+    }
+    const handler = (e: MediaQueryListEvent) => setOpen(e.matches);
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, [setOpen]);
+  
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon">
       <SidebarHeader>
         <h2 className="text-2xl font-bold font-headline">Hints</h2>
       </SidebarHeader>
@@ -303,13 +316,13 @@ export default function Home() {
         <main className="min-h-screen w-full bg-background p-4 sm:p-8">
           <div className="max-w-4xl mx-auto">
             <div className="flex justify-between items-start mb-4">
-               <SidebarTrigger className="md:hidden">
+               <SidebarTrigger>
                  <HelpCircle/>
               </SidebarTrigger>
               <div className="flex-grow">
                 <ScoreBoard score={score} />
               </div>
-              <div className="w-10 md:w-0"></div> {/* Spacer */}
+              <div className="w-10"></div> {/* Spacer */}
             </div>
             
             <div className="grid grid-cols-4 gap-2 md:gap-4 mb-8">
@@ -361,5 +374,3 @@ export default function Home() {
     </SidebarProvider>
   );
 }
-
-    
