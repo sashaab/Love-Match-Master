@@ -400,23 +400,31 @@ export default function Home() {
   const handleDrop = (e: React.DragEvent<HTMLDivElement>, index: number) => {
     e.preventDefault();
     if (draggedItem.current === null) return;
-    
+
     const draggedIndex = draggedItem.current;
+    draggedItem.current = null;
+
     if (draggedIndex === index) return;
-    
+
     const draggedCell = cells[draggedIndex];
-    if (matchedPairs.has(draggedCell.id)) return;
-    
     const targetCell = cells[index];
-    if (targetCell.type !== 'empty') return;
-    
+
+    // Prevent swapping with an already matched pair
+    if (matchedPairs.has(draggedCell.id) || matchedPairs.has(targetCell.id)) {
+      return;
+    }
+
     const newCells = [...cells];
     [newCells[draggedIndex], newCells[index]] = [newCells[index], newCells[draggedIndex]];
-    updateCells(newCells);
-    draggedItem.current = null;
     
-    setScore(prev => Math.max(0, prev - 1));
+    updateCells(newCells);
+    
+    // Only deduct score if swapping with another celebrity, not an empty space
+    if(targetCell.type === 'celebrity' && draggedCell.type === 'celebrity') {
+      setScore(prev => Math.max(0, prev - 1));
+    }
   };
+
 
   if (!isClient) {
     return null;
@@ -487,5 +495,3 @@ export default function Home() {
     </SidebarProvider>
   );
 }
-
-    
