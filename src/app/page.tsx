@@ -69,14 +69,14 @@ const CelebrityCard = ({
 
   return (
     <Card
-      draggable
+      draggable={!isMatched}
       onDragStart={(e) => onDragStart(e, index)}
       onDragOver={onDragOver}
       onDrop={(e) => onDrop(e, index)}
       className={cn(
-        "aspect-square transition-all duration-300 ease-in-out cursor-grab active:cursor-grabbing transform hover:scale-105",
+        "aspect-square transition-all duration-300 ease-in-out transform hover:scale-105",
         "relative group overflow-hidden rounded-xl shadow-lg",
-        isMatched && "border-primary border-4 shadow-primary/50",
+        isMatched ? "border-primary border-4 shadow-primary/50 cursor-not-allowed" : "cursor-grab active:cursor-grabbing",
         isFighting && "animate-shake border-red-500 border-4 shadow-red-500/50"
       )}
     >
@@ -232,7 +232,7 @@ export default function Home() {
         gameCelebs.push(...fillers.slice(0, remainingSlots));
     }
     
-    let finalCells: Cell[] = gameCelebs.slice(0, GRID_SIZE);
+    let finalCells: Cell[] = gameCelebs.slice(0, GRID_SIZE).filter(c => c.id);
 
     // 6. Add empty cells if the grid is not full.
     if (finalCells.length < GRID_SIZE) {
@@ -306,13 +306,16 @@ export default function Home() {
       for (const nIndex of neighbors) {
         const neighbor = cells[nIndex];
         if (neighbor.type === 'empty') continue;
+        
+        const isAlreadyMatched = newMatchedPairs.has(cell.id) || newMatchedPairs.has(neighbor.id);
+        if (isAlreadyMatched) continue;
 
         if (cell.exes?.includes(neighbor.name)) {
           newFightingIds.add(cell.id);
           newFightingIds.add(neighbor.id);
         }
 
-        if (cell.partner === neighbor.name && !matchedPairs.has(cell.id) && !newMatchedPairs.has(cell.id)) {
+        if (cell.partner === neighbor.name) {
           newMatchedPairs.add(cell.id);
           newMatchedPairs.add(neighbor.id);
           scoreDelta += 100;
@@ -346,6 +349,10 @@ export default function Home() {
   }, [cells, checkMatches]);
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    if (matchedPairs.has(cells[index].id)) {
+        e.preventDefault();
+        return;
+    }
     draggedItem.current = index;
     e.dataTransfer.effectAllowed = 'move';
   };
@@ -361,11 +368,23 @@ export default function Home() {
     const draggedIndex = draggedItem.current;
     if (draggedIndex === index) return;
     
-    const newCells = [...cells];
-    const draggedCell = newCells[draggedIndex];
-
+    const draggedCell = cells[draggedIndex];
     if (matchedPairs.has(draggedCell.id)) return;
+    
+    const targetCell = cells[index];
+    if (targetCell.type !== 'empty') return;
+    
+    const gridWidth = Math.sqrt(GRID_SIZE);
+    const isAdjacent = 
+        (index === draggedIndex - 1 && draggedIndex % gridWidth !== 0) ||
+        (index === draggedIndex + 1 && draggedIndex % gridWidth !== gridWidth - 1) ||
+        index === draggedIndex - gridWidth ||
+        index === draggedIndex + gridWidth;
 
+    if (!isAdjacent) return;
+
+
+    const newCells = [...cells];
     [newCells[draggedIndex], newCells[index]] = [newCells[index], newCells[draggedIndex]];
     updateCells(newCells);
     draggedItem.current = null;
