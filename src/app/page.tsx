@@ -233,6 +233,11 @@ export default function Home() {
     }
     
     let finalCells: Cell[] = gameCelebs.slice(0, GRID_SIZE).filter(c => c.id);
+    
+    // Ensure no duplicates
+    const uniqueCelebs = Array.from(new Map(finalCells.map(c => [c.id, c])).values());
+    finalCells = uniqueCelebs as Cell[];
+
 
     // 6. Add empty cells if the grid is not full.
     if (finalCells.length < GRID_SIZE) {
@@ -259,7 +264,33 @@ export default function Home() {
     }
     setGameExes(exesInGame);
 
-    const shuffledCells = shuffle(finalCells);
+    const isLayoutInvalid = (layout: Cell[]): boolean => {
+      const gridWidth = Math.sqrt(GRID_SIZE);
+      for (let i = 0; i < layout.length; i++) {
+        const cell = layout[i];
+        if (cell.type === 'empty') continue;
+
+        const neighbors = [i - 1, i + 1, i - gridWidth, i + gridWidth].filter(n =>
+          n >= 0 && n < layout.length &&
+          !((i % gridWidth === 0 && n === i - 1) || ((i + 1) % gridWidth === 0 && n === i + 1))
+        );
+
+        for (const nIndex of neighbors) {
+          const neighbor = layout[nIndex];
+          if (neighbor.type === 'empty') continue;
+          
+          if (cell.partner === neighbor.name) return true; // Invalid if a couple is adjacent
+          if (cell.exes?.includes(neighbor.name)) return true; // Invalid if exes are adjacent
+        }
+      }
+      return false;
+    };
+
+    let shuffledCells;
+    do {
+      shuffledCells = shuffle(finalCells);
+    } while (isLayoutInvalid(shuffledCells));
+    
     setCells(shuffledCells);
     setHistory([shuffledCells]);
     setScore(0);
@@ -460,5 +491,3 @@ export default function Home() {
     </SidebarProvider>
   );
 }
-
-    
