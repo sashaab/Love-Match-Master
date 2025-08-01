@@ -158,17 +158,13 @@ const HintSidebar = ({
               <Users className="w-5 h-5" />
               Match these couples!
             </h3>
-            <ul className="space-y-2 mb-4">
-              {revealedCouples.map((c, i) => (
-                <li key={`couple-${i}`} className="text-sm bg-sidebar-accent/50 p-2 rounded-md">{c.name} & {c.partner}</li>
-              ))}
-              {Array.from({ length: couples.length - unlockedCouplesCount }).map((_, i) => (
-                <li key={`locked-couple-${i}`} className="text-sm bg-sidebar-accent/50 p-2 rounded-md flex items-center justify-center">
-                  <Lock className="w-4 h-4 mr-2" />
-                  <span>Locked</span>
-                </li>
-              ))}
-            </ul>
+            {revealedCouples.length > 0 && (
+                <ul className="space-y-2 mb-4">
+                  {revealedCouples.map((c, i) => (
+                    <li key={`couple-${i}`} className="text-sm bg-sidebar-accent/50 p-2 rounded-md">{c.name} & {c.partner}</li>
+                  ))}
+                </ul>
+            )}
             {unlockedCouplesCount < couples.length && (
               <Button onClick={onUnlockCouple} className="w-full">
                 <Lock className="mr-2" /> Unlock for {COUPLE_HINT_COST} points
@@ -183,17 +179,13 @@ const HintSidebar = ({
               <UserX className="w-5 h-5" />
               Don't match these exes!
             </h3>
-             <ul className="space-y-2 mb-4">
-              {revealedExes.map((e, i) => (
-                <li key={`ex-${i}`} className="text-sm bg-sidebar-accent/50 p-2 rounded-md">{e.p1} & {e.p2}</li>
-              ))}
-              {Array.from({ length: exes.length - unlockedExesCount }).map((_, i) => (
-                 <li key={`locked-ex-${i}`} className="text-sm bg-sidebar-accent/50 p-2 rounded-md flex items-center justify-center">
-                   <Lock className="w-4 h-4 mr-2" />
-                   <span>Locked</span>
-                 </li>
-              ))}
-            </ul>
+            {revealedExes.length > 0 && (
+                 <ul className="space-y-2 mb-4">
+                  {revealedExes.map((e, i) => (
+                    <li key={`ex-${i}`} className="text-sm bg-sidebar-accent/50 p-2 rounded-md">{e.p1} & {e.p2}</li>
+                  ))}
+                </ul>
+            )}
             {unlockedExesCount < exes.length && (
               <Button onClick={onUnlockEx} className="w-full">
                 <Lock className="mr-2" /> Unlock for {EX_HINT_COST} points
@@ -622,6 +614,8 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
+    
 
     
 
