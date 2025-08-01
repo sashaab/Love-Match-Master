@@ -179,7 +179,7 @@ export default function Home() {
 
   const setupGame = useCallback(() => {
     const allCelebs = shuffle(celebritiesData);
-    const couples = allCelebs.filter(c => c.partner).slice(0, COUPLES_IN_GAME);
+    const couples = allCelebs.filter(c => c.partner && allCelebs.find(p => p.name === c.partner)).slice(0, COUPLES_IN_GAME);
     
     let gameCelebs: Celebrity[] = [];
     const gameCelebsNames = new Set<string>();
@@ -196,7 +196,28 @@ export default function Home() {
 
     setGameCouples(couples);
     
+    // Ensure exes are in the game
     const exesInGame: {p1: string, p2: string}[] = [];
+    const celebsWithExes = allCelebs.filter(c => c.exes && c.exes.length > 0);
+
+    for (const celeb of celebsWithExes) {
+        if (!gameCelebsNames.has(celeb.name)) {
+            // Try to add this celeb and one of their exes if there's space
+            if (gameCelebs.length + 2 <= GRID_SIZE) {
+                const exName = celeb.exes![0];
+                const exPartner = allCelebs.find(p => p.name === exName);
+
+                if (exPartner && !gameCelebsNames.has(exName)) {
+                    gameCelebs.push(celeb);
+                    gameCelebsNames.add(celeb.name);
+                    gameCelebs.push(exPartner);
+                    gameCelebsNames.add(exPartner.name);
+                }
+            }
+        }
+    }
+
+
     for(const celeb of gameCelebs) {
       if(celeb.exes) {
         for(const exName of celeb.exes) {
@@ -210,17 +231,21 @@ export default function Home() {
     }
     setGameExes(exesInGame);
 
-    const fillers = allCelebs.filter(c => !gameCelebsNames.has(c.name)).slice(0, GRID_SIZE - gameCelebs.length);
+    const remainingCelebs = allCelebs.filter(c => !gameCelebsNames.has(c.name));
+    const fillers = remainingCelebs.slice(0, GRID_SIZE - gameCelebs.length);
     let initialCells: Cell[] = shuffle([...gameCelebs, ...fillers]);
-
-    while(initialCells.length < GRID_SIZE) {
-        initialCells.push({type: 'empty', id: `empty-${initialCells.length}`})
-    }
     
     const finalCells = initialCells.slice(0, GRID_SIZE);
 
-    setCells(finalCells);
-    setHistory([finalCells]);
+    if (finalCells.length < GRID_SIZE) {
+        const emptyCellsCount = GRID_SIZE - finalCells.length;
+        for (let i = 0; i < emptyCellsCount; i++) {
+            finalCells.push({type: 'empty', id: `empty-${i}`})
+        }
+    }
+    
+    setCells(shuffle(finalCells));
+    setHistory([shuffle(finalCells)]);
     setScore(0);
     setMatchedPairs(new Set());
     setFightingIds(new Set());
@@ -294,10 +319,10 @@ export default function Home() {
         setScore(prev => prev + scoreDelta);
     }
     
-    if (newMatchedPairs.size === COUPLES_IN_GAME * 2 && !gameOver) {
+    if (newMatchedPairs.size === gameCouples.length * 2 && !gameOver && gameCouples.length > 0) {
       setGameOver(true);
     }
-  }, [cells, matchedPairs, fightingIds.size, gameOver]);
+  }, [cells, matchedPairs, fightingIds.size, gameOver, gameCouples]);
 
   useEffect(() => {
     const timeoutId = setTimeout(checkMatches, 300);

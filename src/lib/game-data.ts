@@ -23,7 +23,7 @@ export const celebritiesData: Celebrity[] = [
   { id: '16', type: 'celebrity', name: 'Scarlett Johansson', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
   { id: '17', type: 'celebrity', name: 'Harry Styles', imageUrl: 'https://placehold.co/150x150.png', exes: ['Taylor Swift'] },
   { id: '18', type: 'celebrity', name: 'Rihanna', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
-  { id: '19', type: 'celebrity', name: 'The Weeknd', imageUrl: 'https://placehold.co/150x150.png', exes: ['Selena Gomez'] },
+  { id: '19', type: 'celebrity', name: 'The Weeknd', imageUrl: 'https://placehold.co/150x150.png', exes: ['Selena Gomez', 'Taylor Swift'] },
   { id: '20', type: 'celebrity', name: 'Gigi Hadid', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
   { id: '21', type: 'celebrity', name: 'Dua Lipa', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
   { id: '22', type: 'celebrity', name: 'Chris Evans', imageUrl: 'https://placehold.co/150x150.png', exes: [] },
