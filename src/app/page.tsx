@@ -172,6 +172,7 @@ export default function Home() {
   const [score, setScore] = useState(0);
   const [matchedPairs, setMatchedPairs] = useState<Set<string>>(new Set());
   const [fightingIds, setFightingIds] = useState<Set<string>>(new Set());
+  const [penalizedExPairs, setPenalizedExPairs] = useState<Set<string>>(new Set());
   const [isClient, setIsClient] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [gameCouples, setGameCouples] = useState<Celebrity[]>([]);
@@ -296,6 +297,7 @@ export default function Home() {
     setScore(0);
     setMatchedPairs(new Set());
     setFightingIds(new Set());
+    setPenalizedExPairs(new Set());
     setGameOver(false);
   }, []);
 
@@ -324,6 +326,8 @@ export default function Home() {
     let newMatchedPairs = new Set(matchedPairs);
     let scoreDelta = 0;
     const gridWidth = Math.sqrt(GRID_SIZE);
+    const newPenalizedPairs = new Set(penalizedExPairs);
+    let penalty = 0;
 
     for (let i = 0; i < cells.length; i++) {
       const cell = cells[i];
@@ -344,6 +348,12 @@ export default function Home() {
         if (cell.exes?.includes(neighbor.name)) {
           newFightingIds.add(cell.id);
           newFightingIds.add(neighbor.id);
+          
+          const pairKey = [cell.name, neighbor.name].sort().join('-');
+          if (!penalizedExPairs.has(pairKey)) {
+              penalty -= 25;
+              newPenalizedPairs.add(pairKey);
+          }
         }
 
         if (cell.partner === neighbor.name) {
@@ -353,12 +363,14 @@ export default function Home() {
         }
       }
     }
+    
+    if (penalty !== 0) {
+        setScore(prev => prev + penalty);
+        setPenalizedExPairs(newPenalizedPairs);
+    }
 
     if (newFightingIds.size > 0) {
       setFightingIds(newFightingIds);
-      if(newFightingIds.size !== fightingIds.size){
-         setScore(prev => prev - 10 * newFightingIds.size);
-      }
       setTimeout(() => setFightingIds(new Set()), 1000);
     } else {
       setFightingIds(new Set());
@@ -372,7 +384,7 @@ export default function Home() {
     if (newMatchedPairs.size === gameCouples.length * 2 && !gameOver && gameCouples.length > 0) {
       setGameOver(true);
     }
-  }, [cells, matchedPairs, fightingIds.size, gameOver, gameCouples]);
+  }, [cells, matchedPairs, gameOver, gameCouples, penalizedExPairs]);
 
   useEffect(() => {
     const timeoutId = setTimeout(checkMatches, 300);
@@ -403,15 +415,14 @@ export default function Home() {
     if (matchedPairs.has(draggedCell.id)) return;
     
     const targetCell = cells[index];
+    if (targetCell.type !== 'empty') return;
     
     const newCells = [...cells];
     [newCells[draggedIndex], newCells[index]] = [newCells[index], newCells[draggedIndex]];
     updateCells(newCells);
     draggedItem.current = null;
     
-    if (targetCell.type === 'empty') {
-      setScore(prev => prev - 1);
-    }
+    setScore(prev => prev - 1);
   };
 
   if (!isClient) {
@@ -483,5 +494,3 @@ export default function Home() {
     </SidebarProvider>
   );
 }
-
-    
