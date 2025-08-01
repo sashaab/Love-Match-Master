@@ -228,9 +228,9 @@ export default function Home() {
     const { gridSize, couplesToInclude } = gameModes[modeKey];
     setGameModeKey(modeKey);
 
-    let potentialCouples = celebritiesData.filter(c =>
+    let potentialCouples = shuffle(celebritiesData.filter(c =>
         c.partner && celebritiesData.find(p => p.name === c.partner) && (c.exes && c.exes.length > 0)
-    );
+    ));
     
     let selectedCouples: Celebrity[] = [];
     let celebsForGrid = new Set<string>();
@@ -360,7 +360,7 @@ export default function Home() {
   useEffect(() => {
     setIsClient(true);
     setupGame(gameModeKey);
-  }, [setupGame, gameModeKey]);
+  }, [setupGame]);
 
   const checkMatches = useCallback(() => {
     if (gameOver) return;
@@ -519,11 +519,13 @@ export default function Home() {
   const handleReset = () => {
     setupGame(gameModeKey);
   }
+  
+  const handleGameModeChange = (modeKey: GameModeKey) => {
+    setupGame(modeKey);
+  }
 
   const { gridSize } = gameModes[gameModeKey];
-  const gridCols = `grid-cols-${Math.sqrt(gridSize)}`;
-
-
+  
   if (!isClient) {
     return null;
   }
@@ -561,7 +563,7 @@ export default function Home() {
               {(Object.keys(gameModes) as GameModeKey[]).map(key => (
                   <Button 
                     key={key} 
-                    onClick={() => setupGame(key)}
+                    onClick={() => handleGameModeChange(key)}
                     variant={gameModeKey === key ? 'default' : 'outline'}
                   >
                     {gameModes[key].label}
@@ -620,5 +622,7 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
+    
 
     
