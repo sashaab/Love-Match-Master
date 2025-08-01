@@ -182,7 +182,7 @@ export default function Home() {
   const setupGame = useCallback(() => {
     // 1. Find couples where at least one person has an ex.
     const potentialCouples = shuffle(celebritiesData.filter(c => 
-        c.partner && (c.exes && c.exes.length > 0)
+        c.partner && celebritiesData.find(p => p.name === c.partner) && (c.exes && c.exes.length > 0)
     ));
     
     // 2. Select the required number of couples for the game.
@@ -210,7 +210,8 @@ export default function Home() {
     for (const celeb of gameCelebs) {
         if (celeb.exes) {
             for (const exName of celeb.exes) {
-                if (!gameCelebsNames.has(exName)) {
+                const exCeleb = celebritiesData.find(c => c.name === exName);
+                if (exCeleb && !gameCelebsNames.has(exCeleb.name)) {
                     exesToAdd.add(exName);
                 }
             }
@@ -219,7 +220,7 @@ export default function Home() {
 
     exesToAdd.forEach(exName => {
         const exCeleb = celebritiesData.find(c => c.name === exName);
-        if (exCeleb && !gameCelebsNames.has(exCeleb.name)) {
+        if (exCeleb) { // exCeleb will always be found, but for safety
             gameCelebs.push(exCeleb);
             gameCelebsNames.add(exCeleb.name);
         }
@@ -232,12 +233,11 @@ export default function Home() {
         gameCelebs.push(...fillers.slice(0, remainingSlots));
     }
     
-    let finalCells: Cell[] = gameCelebs.slice(0, GRID_SIZE).filter(c => c.id);
+    let finalCells: Cell[] = gameCelebs.slice(0, GRID_SIZE).map(c => ({...c}));
     
-    // Ensure no duplicates
-    const uniqueCelebs = Array.from(new Map(finalCells.map(c => [c.id, c])).values());
+    // Ensure no duplicates by ID
+    const uniqueCelebs = Array.from(new Map(finalCells.map(c => c.type === 'celebrity' ? [c.id, c] : [c.id, c])).values());
     finalCells = uniqueCelebs as Cell[];
-
 
     // 6. Add empty cells if the grid is not full.
     if (finalCells.length < GRID_SIZE) {
@@ -309,7 +309,7 @@ export default function Home() {
       const lastState = history[history.length - 2];
       setCells(lastState);
       setHistory(prev => prev.slice(0, -1));
-      setScore(prev => prev - 10); // Penalty for undo
+      setScore(prev => prev > 0 ? prev - 10 : 0); // Penalty for undo
     }
   }
 
@@ -324,7 +324,6 @@ export default function Home() {
     let newMatchedPairs = new Set(matchedPairs);
     let scoreDelta = 0;
     const gridWidth = Math.sqrt(GRID_SIZE);
-    let penalty = 0;
     const currentlyFightingPairs = new Set<string>();
 
     for (let i = 0; i < cells.length; i++) {
@@ -341,17 +340,15 @@ export default function Home() {
         if (neighbor.type === 'empty') continue;
         
         const isAlreadyMatched = newMatchedPairs.has(cell.id) || newMatchedPairs.has(neighbor.id);
-        if (isAlreadyMatched) continue;
 
-        if (cell.exes?.includes(neighbor.name)) {
+        if (cell.exes?.includes(neighbor.name) && !isAlreadyMatched) {
           newFightingIds.add(cell.id);
           newFightingIds.add(neighbor.id);
-          
           const pairKey = [cell.name, neighbor.name].sort().join('-');
           currentlyFightingPairs.add(pairKey);
         }
 
-        if (cell.partner === neighbor.name) {
+        if (cell.partner === neighbor.name && !isAlreadyMatched) {
           newMatchedPairs.add(cell.id);
           newMatchedPairs.add(neighbor.id);
           scoreDelta += 100;
@@ -360,10 +357,14 @@ export default function Home() {
     }
     
     if (currentlyFightingPairs.size > 0) {
-      penalty = -25 * currentlyFightingPairs.size;
-      setScore(prev => prev + penalty);
+      const penalty = -25 * currentlyFightingPairs.size;
+      scoreDelta += penalty
     }
     
+    if (scoreDelta !== 0) {
+      setScore(prev => prev + scoreDelta);
+    }
+
     setFightingIds(newFightingIds);
     if (newFightingIds.size > 0) {
       setTimeout(() => setFightingIds(new Set()), 1000);
@@ -371,7 +372,6 @@ export default function Home() {
 
     if(newMatchedPairs.size > matchedPairs.size) {
         setMatchedPairs(newMatchedPairs);
-        setScore(prev => prev + scoreDelta);
     }
     
     if (newMatchedPairs.size === gameCouples.length * 2 && !gameOver && gameCouples.length > 0) {
@@ -415,7 +415,7 @@ export default function Home() {
     updateCells(newCells);
     draggedItem.current = null;
     
-    setScore(prev => prev - 1);
+    setScore(prev => Math.max(0, prev - 1));
   };
 
   if (!isClient) {
@@ -487,3 +487,5 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
+    
