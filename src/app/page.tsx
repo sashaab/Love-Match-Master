@@ -98,7 +98,7 @@ const CelebrityCard = ({
         "aspect-square transition-all duration-300 ease-in-out transform hover:scale-105",
         "relative group overflow-hidden rounded-full shadow-lg",
         isMatched ? "border-accent border-4 shadow-accent/50 cursor-not-allowed" : "cursor-grab active:cursor-grabbing",
-        isFighting && "animate-shake border-red-500 border-4 shadow-red-500/50",
+        isFighting && "animate-shake border-destructive border-4 shadow-destructive/50",
         isSelected && !isMatched && "ring-4 ring-blue-500 ring-offset-2"
       )}
     >
@@ -122,7 +122,7 @@ const CelebrityCard = ({
           </div>
         )}
         {isFighting && (
-          <div className="absolute inset-0 bg-red-500/30 flex items-center justify-center">
+          <div className="absolute inset-0 bg-destructive/30 flex items-center justify-center">
             <ZapOff className="w-8 h-8 md:w-16 md:h-16 text-white" fill="white" />
           </div>
         )}
