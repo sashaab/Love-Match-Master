@@ -104,7 +104,7 @@ const CelebrityCard = ({
           className="w-full h-full object-cover"
           data-ai-hint="celebrity portrait"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-center justify-center" />
         <p className="absolute bottom-2 left-0 right-0 text-center font-bold text-white text-[0.5rem] sm:text-sm md:text-base px-1">
           {cell.name}
         </p>
@@ -443,12 +443,15 @@ export default function Home() {
       clearTimeout(fightTimeoutRef.current);
       fightTimeoutRef.current = null;
     }
-    setFightingIds(newFightingIds);
+
     if (newFightingIds.size > 0) {
-      fightTimeoutRef.current = setTimeout(() => {
+        setFightingIds(newFightingIds);
+        fightTimeoutRef.current = setTimeout(() => {
+            setFightingIds(new Set());
+            fightTimeoutRef.current = null;
+        }, 1000);
+    } else {
         setFightingIds(new Set());
-        fightTimeoutRef.current = null;
-      }, 1000);
     }
 
     if(localMatchedPairs.size > matchedPairs.size) {
@@ -592,13 +595,16 @@ export default function Home() {
       <SidebarInset>
         <main className="min-h-screen w-full bg-background p-4 sm:p-8">
           <div className="max-w-7xl mx-auto">
-             <div className="flex flex-col sm:flex-row justify-center items-center mb-4 gap-4">
-               <div className="flex-grow">
+             <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
+                <div className="sm:w-1/3">
+                    <SidebarTrigger variant="outline" size="lg">
+                        <Menu className="h-6 w-6" /> Hints
+                    </SidebarTrigger>
+                </div>
+               <div className="sm:w-1/3">
                  <ScoreBoard score={score} />
                </div>
-               <SidebarTrigger variant="outline" size="lg">
-                  <Menu className="h-6 w-6" /> Hints
-               </SidebarTrigger>
+               <div className="sm:w-1/3"></div>
              </div>
 
             <div className="flex justify-center gap-4 mb-8">
@@ -684,3 +690,5 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
+    
