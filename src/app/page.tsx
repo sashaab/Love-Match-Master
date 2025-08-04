@@ -43,7 +43,7 @@ type GameModeKey = keyof typeof gameModes;
 
 const ScoreBoard = ({ score }: { score: number }) => (
   <div className="text-center">
-    <h1 className="font-headline text-5xl md:text-6xl font-bold text-gray-800">Love Match Mania</h1>
+    <h1 className="font-headline text-4xl md:text-5xl font-bold text-gray-800">Love Match Mania</h1>
     <p className="mt-2 text-2xl font-semibold text-primary">Score: {score}</p>
   </div>
 );
@@ -618,7 +618,7 @@ export default function Home() {
               ))}
             </div>
             
-            <div className="w-full max-w-4xl mx-auto">
+            <div className="w-full max-w-3xl mx-auto">
               <div className="grid gap-2 md:gap-4 mb-8" style={gridDynamicStyle}>
                 {cells.map((cell, index) => (
                   <CelebrityCard
