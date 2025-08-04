@@ -8,7 +8,7 @@ import type { Celebrity, Cell } from "@/lib/types";
 import { celebritiesData } from "@/lib/game-data";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Heart, ZapOff, RotateCw, Trophy, Undo, Lock, Ban, Menu, HeartCrack, Share2 } from "lucide-react";
+import { Heart, ZapOff, RotateCw, Trophy, Undo, Lock, Ban, Menu, HeartCrack, Share2, Info } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -254,7 +254,7 @@ export default function Home() {
   const [gameModeKey, setGameModeKey] = useState<GameModeKey>('medium');
   const [lang, setLang] = useState<Language>('ru');
   const { toast } = useToast();
-  const [showWelcomePopup, setShowWelcomePopup] = useState(false);
+  const [showInstructionsPopup, setShowInstructionsPopup] = useState(false);
 
   const draggedItem = useRef<number | null>(null);
   const fightTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -430,7 +430,7 @@ export default function Home() {
     setIsClient(true);
     const visited = localStorage.getItem('loveMatchManiaVisited');
     if (!visited) {
-      setShowWelcomePopup(true);
+      setShowInstructionsPopup(true);
       localStorage.setItem('loveMatchManiaVisited', 'true');
     }
     setupGame(gameModeKey, lang);
@@ -686,15 +686,18 @@ export default function Home() {
         <main className="min-h-screen w-full bg-background p-4 sm:p-8">
           <div className="max-w-7xl mx-auto">
              <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
-                <div className="flex-none sm:w-[136px] order-2 sm:order-1">
+                <div className="flex-none sm:w-[250px] order-2 sm:order-1 flex gap-2">
                   <SidebarTrigger variant="outline" size="lg">
                       <Menu className="h-6 w-6" /> {i18n[lang].hints}
                   </SidebarTrigger>
+                   <Button variant="outline" size="lg" onClick={() => setShowInstructionsPopup(true)}>
+                      <Info className="h-6 w-6" /> {i18n[lang].instructions}
+                   </Button>
                 </div>
                <div className="flex-grow order-1 sm:order-2 text-center">
                  <ScoreBoard score={score} moves={moves} lang={lang} />
                </div>
-               <div className="flex-none sm:w-[136px] flex justify-end gap-2 order-3">
+               <div className="flex-none sm:w-[250px] flex justify-end gap-2 order-3">
                  <Button onClick={() => setLang('en')} variant={lang === 'en' ? 'default' : 'outline'} size="sm">EN</Button>
                  <Button onClick={() => setLang('ru')} variant={lang === 'ru' ? 'default' : 'outline'} size="sm">RU</Button>
                </div>
@@ -741,7 +744,7 @@ export default function Home() {
               </Button>
             </div>
           </div>
-          <AlertDialog open={showWelcomePopup} onOpenChange={setShowWelcomePopup}>
+          <AlertDialog open={showInstructionsPopup} onOpenChange={setShowInstructionsPopup}>
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle className="text-center text-2xl font-headline">
@@ -749,13 +752,13 @@ export default function Home() {
                 </AlertDialogTitle>
                 <div className="text-sm text-muted-foreground space-y-2 py-4 text-left">
                   <p><strong>{i18n[lang].rulesTitle}</strong></p>
-                  <p>{i18n[lang].rule1}</p>
-                  <p>{i18n[lang].rule2}</p>
-                  <p>{i18n[lang].rule3}</p>
+                  <AlertDialogDescription>{i18n[lang].rule1}</AlertDialogDescription>
+                  <AlertDialogDescription>{i18n[lang].rule2}</AlertDialogDescription>
+                  <AlertDialogDescription>{i18n[lang].rule3}</AlertDialogDescription>
                   <p><strong>{i18n[lang].levelsTitle}</strong></p>
-                  <p>{i18n[lang].levelEasy}</p>
-                  <p>{i18n[lang].levelMedium}</p>
-                  <p>{i18n[lang].levelHard}</p>
+                  <AlertDialogDescription>{i18n[lang].levelEasy}</AlertDialogDescription>
+                  <AlertDialogDescription>{i18n[lang].levelMedium}</AlertDialogDescription>
+                  <AlertDialogDescription>{i18n[lang].levelHard}</AlertDialogDescription>
                 </div>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -765,7 +768,7 @@ export default function Home() {
                       {i18n[lang].becomeCelebricy}
                     </a>
                   </Button>
-                  <AlertDialogAction onClick={() => setShowWelcomePopup(false)} className="w-full flex-1">
+                  <AlertDialogAction onClick={() => setShowInstructionsPopup(false)} className="w-full flex-1">
                     {i18n[lang].letsPlay}
                   </AlertDialogAction>
               </AlertDialogFooter>
@@ -778,15 +781,15 @@ export default function Home() {
                   <Trophy className="mr-4 h-10 w-10 text-yellow-500" />
                   {i18n[lang].congratulations}
                 </AlertDialogTitle>
-                <AlertDialogDescription className="text-center text-lg pt-4">
+                <AlertDialogDescription>
                   {i18n[lang].gameOverText
                     .replace('{moves}', moves.toString())
                     .replace('{score}', score.toString())}
                 </AlertDialogDescription>
-                <AlertDialogDescription className="text-center text-lg pt-4">
+                <AlertDialogDescription>
                   {i18n[lang].gameOverInviteLine1}
                 </AlertDialogDescription>
-                <AlertDialogDescription className="text-center text-lg pt-4">
+                <AlertDialogDescription>
                   {i18n[lang].gameOverInviteLine2}
                 </AlertDialogDescription>
               </AlertDialogHeader>
@@ -816,10 +819,10 @@ export default function Home() {
                   <Ban className="mr-4 h-10 w-10 text-destructive" />
                   {i18n[lang].noMoreMoves}
                 </AlertDialogTitle>
-                <AlertDialogDescription className="text-center text-lg pt-4">
+                <AlertDialogDescription>
                   {i18n[lang].noMoreSwaps}
                 </AlertDialogDescription>
-                <AlertDialogDescription className="text-center text-lg pt-4">
+                <AlertDialogDescription>
                   {i18n[lang].yourFinalScore}
                   <span className="font-bold text-primary">{score}</span>
                 </AlertDialogDescription>
@@ -836,4 +839,3 @@ export default function Home() {
     </SidebarProvider>
   );
 }
-
