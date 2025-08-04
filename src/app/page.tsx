@@ -8,7 +8,7 @@ import type { Celebrity, Cell } from "@/lib/types";
 import { celebritiesData } from "@/lib/game-data";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Heart, ZapOff, RotateCw, Trophy, Undo, Lock, Ban, Menu, HeartCrack } from "lucide-react";
+import { Heart, ZapOff, RotateCw, Trophy, Undo, Lock, Ban, Menu, HeartCrack, Share2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,6 +28,8 @@ import {
 } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { shuffle } from 'lodash';
+import { useToast } from "@/hooks/use-toast";
+
 
 const COUPLE_HINT_COST = 100;
 const EX_HINT_COST = 50;
@@ -151,7 +153,8 @@ const HintSidebar = ({
 
   const matchedOnBoard = couples.filter(couple => {
     const p1 = allCells.find(c => c.type === 'celebrity' && c.name === couple.name);
-    return p1 && matchedPairs.has(p1.id);
+    const p2 = allCells.find(c => c.type === 'celebrity' && c.name === couple.partner);
+    return p1 && p2 && matchedPairs.has(p1.id) && matchedPairs.has(p2.id);
   });
   
   const revealedCouples = [...new Map([...unlockedByPoints, ...matchedOnBoard].map(item => [item.name, item])).values()];
@@ -239,6 +242,7 @@ export default function Home() {
   const [unlockedCouplesCount, setUnlockedCouplesCount] = useState(0);
   const [unlockedExesCount, setUnlockedExesCount] = useState(0);
   const [gameModeKey, setGameModeKey] = useState<GameModeKey>('medium');
+  const { toast } = useToast();
 
   const draggedItem = useRef<number | null>(null);
   const fightTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -587,6 +591,14 @@ export default function Home() {
     setupGame(modeKey);
   }
 
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast({
+      title: "Link Copied!",
+      description: "You can now share the game with your friends.",
+    });
+  };
+
   const { gridSize } = gameModes[gameModeKey];
   
   if (!isClient) {
@@ -613,8 +625,8 @@ export default function Home() {
       <SidebarInset>
         <main className="min-h-screen w-full bg-background p-4 sm:p-8">
           <div className="max-w-7xl mx-auto">
-             <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
-                <div className="flex-none">
+             <div className="flex flex-col-reverse sm:flex-row justify-between items-center mb-4 gap-4">
+                <div className="flex-none sm:w-[136px]">
                     <SidebarTrigger variant="outline" size="lg">
                         <Menu className="h-6 w-6" /> Hints
                     </SidebarTrigger>
@@ -679,7 +691,11 @@ export default function Home() {
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogAction onClick={handleReset} className="w-full">
+                <Button onClick={handleShare} variant="outline" className="w-full sm:w-auto">
+                  <Share2 className="mr-2 h-4 w-4" />
+                  Share with Friend
+                </Button>
+                <AlertDialogAction onClick={handleReset} className="w-full sm:w-auto">
                   Play Again
                 </AlertDialogAction>
               </AlertDialogFooter>
@@ -710,5 +726,3 @@ export default function Home() {
     </SidebarProvider>
   );
 }
-
-    
