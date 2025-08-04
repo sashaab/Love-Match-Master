@@ -35,7 +35,7 @@ const EX_HINT_COST = 50;
 const gameModes = {
   easy: { gridSize: 9, couplesToInclude: 1, label: '3x3 (Easy)' },
   medium: { gridSize: 25, couplesToInclude: 3, label: '5x5 (Medium)' },
-  hard: { gridSize: 64, couplesToInclude: 4, label: '8x8 (Hard)' },
+  hard: { gridSize: 36, couplesToInclude: 3, label: '6x6 (Hard)' },
 };
 
 type GameModeKey = keyof typeof gameModes;
