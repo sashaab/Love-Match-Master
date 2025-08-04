@@ -177,7 +177,7 @@ const HintSidebar = ({
   return (
     <Sidebar collapsible="offcanvas" variant="sidebar" side="left">
       <SidebarHeader className="border-b border-sidebar-border bg-sidebar-accent p-4">
-        <h2 className="text-2xl font-bold font-headline text-sidebar-primary-foreground text-center">{i18n[lang].gameHints}</h2>
+        <h3 className="text-2xl font-bold font-headline text-sidebar-primary-foreground text-center">{i18n[lang].gameHints}</h3>
       </SidebarHeader>
       <SidebarContent className="bg-sidebar p-4">
         <div className="space-y-6">
@@ -743,12 +743,16 @@ export default function Home() {
                 <AlertDialogTitle className="text-center text-2xl font-headline">
                   {i18n[lang].welcomeTitle}
                 </AlertDialogTitle>
-                <AlertDialogDescription className="text-center text-lg pt-4">
-                  {i18n[lang].appDescription1}
-                </AlertDialogDescription>
-                <AlertDialogDescription className="text-center text-lg pt-2">
-                  {i18n[lang].appDescription2}
-                </AlertDialogDescription>
+                <div className="text-sm text-muted-foreground space-y-2 py-4 text-left">
+                  <p><strong>{i18n[lang].rulesTitle}</strong></p>
+                  <p>{i18n[lang].rule1}</p>
+                  <p>{i18n[lang].rule2}</p>
+                  <p>{i18n[lang].rule3}</p>
+                  <p><strong>{i18n[lang].levelsTitle}</strong></p>
+                  <p>{i18n[lang].levelEasy}</p>
+                  <p>{i18n[lang].levelMedium}</p>
+                  <p>{i18n[lang].levelHard}</p>
+                </div>
               </AlertDialogHeader>
               <AlertDialogFooter>
                  <Button asChild className="bg-black hover:bg-gray-800 text-white">
@@ -783,7 +787,7 @@ export default function Home() {
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                 <Button asChild className="bg-black hover:bg-gray-800 text-white">
+                 <Button asChild className="bg-black hover:bg-gray-800 text-white mt-4">
                     <a href="https://t.me/celebricy_bot/startttt?startapp=fOYOCKlN" target="_blank">
                       <TelegramIcon className="mr-2" />
                       {i18n[lang].becomeCelebricy}
@@ -812,7 +816,7 @@ export default function Home() {
                   {i18n[lang].noMoreSwaps}
                 </AlertDialogDescription>
                 <AlertDialogDescription className="text-center text-lg pt-4">
-                  {i18n[lang].yourFinalScore}{' '}
+                  {i18n[lang].yourFinalScore}
                   <span className="font-bold text-primary">{score}</span>
                 </AlertDialogDescription>
               </AlertDialogHeader>
