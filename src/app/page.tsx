@@ -135,17 +135,26 @@ const HintSidebar = ({
   onUnlockEx,
   unlockedCouplesCount,
   unlockedExesCount,
-  score,
+  matchedPairs,
+  allCells,
 }: {
-  couples: Celebrity[],
-  exes: { p1: string, p2: string }[],
-  onUnlockCouple: () => void,
-  onUnlockEx: () => void,
-  unlockedCouplesCount: number,
-  unlockedExesCount: number,
-  score: number
+  couples: Celebrity[];
+  exes: { p1: string; p2: string }[];
+  onUnlockCouple: () => void;
+  onUnlockEx: () => void;
+  unlockedCouplesCount: number;
+  unlockedExesCount: number;
+  matchedPairs: Set<string>;
+  allCells: Cell[];
 }) => {
-  const revealedCouples = couples.slice(0, unlockedCouplesCount);
+  const unlockedByPoints = couples.slice(0, unlockedCouplesCount);
+
+  const matchedOnBoard = couples.filter(couple => {
+    const p1 = allCells.find(c => c.type === 'celebrity' && c.name === couple.name);
+    return p1 && matchedPairs.has(p1.id);
+  });
+  
+  const revealedCouples = [...new Map([...unlockedByPoints, ...matchedOnBoard].map(item => [item.name, item])).values()];
   const revealedExes = exes.slice(0, unlockedExesCount);
 
   return (
@@ -598,7 +607,8 @@ export default function Home() {
         onUnlockEx={handleUnlockEx}
         unlockedCouplesCount={unlockedCouplesCount}
         unlockedExesCount={unlockedExesCount}
-        score={score}
+        matchedPairs={matchedPairs}
+        allCells={cells}
       />
       <SidebarInset>
         <main className="min-h-screen w-full bg-background p-4 sm:p-8">
@@ -700,3 +710,5 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
+    
