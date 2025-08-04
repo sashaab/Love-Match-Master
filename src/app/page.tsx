@@ -661,7 +661,7 @@ export default function Home() {
                  <div className="mt-4 text-sm text-gray-600 max-w-none mx-auto">
                     <p>{i18n[lang].appDescription1}</p>
                     <p>{i18n[lang].appDescription2}</p>
-                  <Button asChild className="mt-4 bg-black text-white hover:bg-gray-800">
+                  <Button asChild className="mt-4">
                     <a href="https://t.me/celebricy_bot/startttt?startapp=fOYOCKlN" target="_blank">
                       <TelegramIcon className="mr-2" />
                       {i18n[lang].sendToExpertButton}
@@ -731,7 +731,7 @@ export default function Home() {
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                 <Button asChild className="w-full bg-black text-white hover:bg-gray-800">
+                 <Button asChild className="w-full">
                     <a href="https://t.me/celebricy_bot/startttt?startapp=fOYOCKlN" target="_blank">
                       <TelegramIcon className="mr-2" />
                       {i18n[lang].joinProject}
@@ -774,5 +774,3 @@ export default function Home() {
     </SidebarProvider>
   );
 }
-
-    
