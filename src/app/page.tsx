@@ -603,16 +603,16 @@ export default function Home() {
       <SidebarInset>
         <main className="min-h-screen w-full bg-background p-4 sm:p-8">
           <div className="max-w-7xl mx-auto">
-             <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
-                <div className="sm:w-1/3">
+             <div className="flex flex-col-reverse sm:flex-row justify-between items-center mb-4 gap-4">
+                <div className="flex-none">
                     <SidebarTrigger variant="outline" size="lg">
                         <Menu className="h-6 w-6" /> Hints
                     </SidebarTrigger>
                 </div>
-               <div className="sm:w-1/3 flex-grow">
+               <div className="flex-grow">
                  <ScoreBoard score={score} moves={moves} />
                </div>
-               <div className="sm:w-1/3"></div>
+               <div className="flex-none w-0 sm:w-[136px]"></div>
              </div>
 
             <div className="flex justify-center gap-4 mb-8">
@@ -700,3 +700,5 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
+    
