@@ -5,6 +5,7 @@ export const i18n = {
   en: {
     score: 'Score',
     moves: 'Moves',
+    pts: 'pts',
     hints: 'Hints',
     gameHints: 'Game Hints',
     findTheCouples: 'Find the Couples',
@@ -29,11 +30,12 @@ export const i18n = {
     gameOverText: 'You found all the pairs in {moves} moves and earned {score} points!',
     gameOverInviteLine1: "You've earned the right to become a Celebricy and participate in the big game!",
     gameOverInviteLine2: "Come in to find out your influence and get a special bonus⚡️",
-    becomeCelebrity: 'Become a Celebricy'
+    becomeCelebricy: 'Become a Celebricy'
   },
   ru: {
     score: 'Счет',
     moves: 'Ходы',
+    pts: 'очков',
     hints: 'Подсказки',
     gameHints: 'Подсказки',
     findTheCouples: 'Найдите пары',
@@ -58,6 +60,6 @@ export const i18n = {
     gameOverText: 'Ты нашел все пары за {moves} ходов и заработал {score} очков!',
     gameOverInviteLine1: 'Ты заслужил право стать Селебриси и участвовать в большой игре!',
     gameOverInviteLine2: 'Заходи, чтобы узнать свое влияние и получить специальный бонус⚡️',
-    becomeCelebrity: 'Стать Селебриси'
+    becomeCelebricy: 'Стать Селебриси'
   },
 };

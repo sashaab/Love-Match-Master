@@ -189,7 +189,7 @@ const HintSidebar = ({
                   </ul>
               )}
               <Button onClick={onUnlockCouple} className="w-full bg-accent hover:bg-accent/90 text-accent-foreground" disabled={allCouplesRevealed}>
-                <Lock className="mr-2" /> {i18n[lang].unlock} ({COUPLE_HINT_COST} pts)
+                <Lock className="mr-2" /> {i18n[lang].unlock} ({COUPLE_HINT_COST} {i18n[lang].pts})
               </Button>
               {allCouplesRevealed && totalCouplesToFind > 0 && (
                 <p className="text-sm text-center text-accent/80">{i18n[lang].allCoupleHintsUnlocked}</p>
@@ -213,7 +213,7 @@ const HintSidebar = ({
                   </ul>
               )}
                <Button onClick={onUnlockEx} variant="destructive" className="w-full" disabled={unlockedExesCount === exes.length}>
-                  <Lock className="mr-2" /> {i18n[lang].unlock} ({EX_HINT_COST} pts)
+                  <Lock className="mr-2" /> {i18n[lang].unlock} ({EX_HINT_COST} {i18n[lang].pts})
                 </Button>
                {unlockedExesCount === exes.length && exes.length > 0 && (
                 <p className="text-sm text-center text-destructive/80">{i18n[lang].allExHintsUnlocked}</p>
