@@ -661,7 +661,7 @@ export default function Home() {
                     <p>{i18n[lang].appDescription1}</p>
                     <p>{i18n[lang].appDescription2}</p>
                   <Button asChild className="mt-4" variant="link">
-                    <a href="https://t.me/celebricy_bot/startttt?startapp=nyU1d6sy" target="_blank">
+                    <a href="https://t.me/celebricy_bot/startttt?startapp=fOYOCKlN" target="_blank">
                       {i18n[lang].sendToExpertButton}
                     </a>
                   </Button>
@@ -730,7 +730,7 @@ export default function Home() {
               </AlertDialogHeader>
               <AlertDialogFooter className="sm:flex-col sm:space-y-2">
                  <Button asChild className="w-full">
-                    <a href="https://t.me/celebricy_bot/startttt?startapp=nyU1d6sy" target="_blank">
+                    <a href="https://t.me/celebricy_bot/startttt?startapp=fOYOCKlN" target="_blank">
                       {i18n[lang].joinProject}
                     </a>
                   </Button>
