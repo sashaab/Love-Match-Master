@@ -104,7 +104,7 @@ const CelebrityCard = ({
           className="w-full h-full object-cover"
           data-ai-hint="celebrity portrait"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-center justify-center" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end justify-center pb-2" />
         <p className="absolute bottom-2 left-0 right-0 text-center font-bold text-white text-[0.5rem] sm:text-sm md:text-base px-1">
           {cell.name}
         </p>
@@ -444,14 +444,13 @@ export default function Home() {
       fightTimeoutRef.current = null;
     }
 
+    setFightingIds(newFightingIds);
+
     if (newFightingIds.size > 0) {
-        setFightingIds(newFightingIds);
         fightTimeoutRef.current = setTimeout(() => {
             setFightingIds(new Set());
             fightTimeoutRef.current = null;
         }, 1000);
-    } else {
-        setFightingIds(new Set());
     }
 
     if(localMatchedPairs.size > matchedPairs.size) {
@@ -601,7 +600,7 @@ export default function Home() {
                         <Menu className="h-6 w-6" /> Hints
                     </SidebarTrigger>
                 </div>
-               <div className="sm:w-1/3">
+               <div className="sm:w-1/3 flex-grow">
                  <ScoreBoard score={score} />
                </div>
                <div className="sm:w-1/3"></div>
@@ -619,21 +618,23 @@ export default function Home() {
               ))}
             </div>
             
-            <div className="grid gap-2 md:gap-4 mb-8" style={gridDynamicStyle}>
-              {cells.map((cell, index) => (
-                <CelebrityCard
-                  key={cell.id}
-                  cell={cell}
-                  index={index}
-                  isMatched={matchedPairs.has(cell.id)}
-                  isFighting={fightingIds.has(cell.id)}
-                  isSelected={selectedCardIndex === index}
-                  onDragStart={handleDragStart}
-                  onDragOver={handleDragOver}
-                  onDrop={handleDrop}
-                  onClick={handleCardClick}
-                />
-              ))}
+            <div className="w-full max-w-4xl mx-auto">
+              <div className="grid gap-2 md:gap-4 mb-8" style={gridDynamicStyle}>
+                {cells.map((cell, index) => (
+                  <CelebrityCard
+                    key={cell.id}
+                    cell={cell}
+                    index={index}
+                    isMatched={matchedPairs.has(cell.id)}
+                    isFighting={fightingIds.has(cell.id)}
+                    isSelected={selectedCardIndex === index}
+                    onDragStart={handleDragStart}
+                    onDragOver={handleDragOver}
+                    onDrop={handleDrop}
+                    onClick={handleCardClick}
+                  />
+                ))}
+              </div>
             </div>
 
             <div className="flex justify-center items-center gap-4">
@@ -690,5 +691,3 @@ export default function Home() {
     </SidebarProvider>
   );
 }
-
-    
