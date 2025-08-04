@@ -658,29 +658,25 @@ export default function Home() {
 
   return (
     <SidebarProvider>
-      {gameModeKey !== 'easy' && (
-        <HintSidebar
-          couples={gameCouples}
-          exes={gameExes}
-          onUnlockCouple={handleUnlockCouple}
-          onUnlockEx={handleUnlockEx}
-          unlockedCoupleNames={unlockedCoupleNames}
-          unlockedExesCount={unlockedExesCount}
-          matchedPairs={matchedPairs}
-          allCells={cells}
-          lang={lang}
-        />
-      )}
+      <HintSidebar
+        couples={gameCouples}
+        exes={gameExes}
+        onUnlockCouple={handleUnlockCouple}
+        onUnlockEx={handleUnlockEx}
+        unlockedCoupleNames={unlockedCoupleNames}
+        unlockedExesCount={unlockedExesCount}
+        matchedPairs={matchedPairs}
+        allCells={cells}
+        lang={lang}
+      />
       <SidebarInset>
         <main className="min-h-screen w-full bg-background p-4 sm:p-8">
           <div className="max-w-7xl mx-auto">
              <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
                 <div className="flex-none sm:w-[136px] order-2 sm:order-1">
-                  {gameModeKey !== 'easy' && (
-                    <SidebarTrigger variant="outline" size="lg">
-                        <Menu className="h-6 w-6" /> {i18n[lang].hints}
-                    </SidebarTrigger>
-                  )}
+                  <SidebarTrigger variant="outline" size="lg">
+                      <Menu className="h-6 w-6" /> {i18n[lang].hints}
+                  </SidebarTrigger>
                 </div>
                <div className="flex-grow order-1 sm:order-2 text-center">
                  <ScoreBoard score={score} moves={moves} lang={lang} />
@@ -762,7 +758,7 @@ export default function Home() {
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                 <Button asChild className="w-full bg-black hover:bg-gray-800 text-white">
+                 <Button asChild className="bg-black hover:bg-gray-800 text-white">
                     <a href="https://t.me/celebricy_bot/startttt?startapp=fOYOCKlN" target="_blank">
                       <TelegramIcon className="mr-2" />
                       {i18n[lang].becomeCelebricy}
@@ -789,7 +785,8 @@ export default function Home() {
                 </AlertDialogTitle>
                 <AlertDialogDescription className="text-center text-lg pt-4">
                   {i18n[lang].noMoreSwaps}
-                  <br />
+                </AlertDialogDescription>
+                <AlertDialogDescription className="text-center text-lg pt-4">
                   {i18n[lang].yourFinalScore}{' '}
                   <span className="font-bold text-primary">{score}</span>
                 </AlertDialogDescription>
