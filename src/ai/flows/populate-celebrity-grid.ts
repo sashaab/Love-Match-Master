@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -23,7 +24,7 @@ const PopulateCelebrityGridOutputSchema = z.object({
   celebrityFaces: z.array(
     z.object({
       name: z.string().describe('The name of the celebrity.'),
-      imageUrl: z.string().describe('The URL of the celebrity face image.'),
+      imageUrl: z.string().url().describe('The URL of the celebrity face image.'),
     })
   ).describe('An array of celebrity faces with names and image URLs.'),
 });
@@ -39,7 +40,7 @@ const prompt = ai.definePrompt({
   output: {schema: PopulateCelebrityGridOutputSchema},
   prompt: `You are a tool that provides a list of celebrity faces for a game.
 
-  Based on the topic: "{{topic}}", generate a list of {{gridSize}} celebrities. For each celebrity, include their name and a direct URL to their face image. Use reliable image sources.
+  Based on the topic: "{{topic}}", generate a list of {{gridSize}} celebrities. For each celebrity, include their name and a direct URL to a publicly available face image. Use reliable image sources like Wikipedia, Wikimedia Commons, or official social media.
 
   Ensure that the celebrities are well-known and have readily available face images online. Focus on diversity and relevance to the specified topic.
 
