@@ -72,7 +72,7 @@ const CelebrityCard = ({
   if (cell.type === 'empty') {
     return (
       <div
-        className="aspect-square rounded-lg bg-background/50 border-2 border-dashed border-gray-300"
+        className="aspect-square rounded-full bg-background/50 border-2 border-dashed border-gray-300"
         onDragOver={onDragOver}
         onDrop={(e) => onDrop(e, index)}
         onClick={() => onClick(index)}
@@ -89,7 +89,7 @@ const CelebrityCard = ({
       onClick={() => onClick(index)}
       className={cn(
         "aspect-square transition-all duration-300 ease-in-out transform hover:scale-105",
-        "relative group overflow-hidden rounded-xl shadow-lg",
+        "relative group overflow-hidden rounded-full shadow-lg",
         isMatched ? "border-primary border-4 shadow-primary/50 cursor-not-allowed" : "cursor-grab active:cursor-grabbing",
         isFighting && "animate-shake border-red-500 border-4 shadow-red-500/50",
         isSelected && !isMatched && "ring-4 ring-blue-500 ring-offset-2"
@@ -316,7 +316,7 @@ export default function Home() {
         const cell = layout[i];
         if (cell.type === 'empty') continue;
 
-        const neighbors = [i - 1, i + 1, i - gridWidth, i + gridWidth].filter(n =>
+        const neighbors = [i - 1, i + 1, i - gridWidth, i - gridWidth].filter(n =>
           n >= 0 && n < layout.length &&
           !((i % gridWidth === 0 && n === i - 1) || ((i + 1) % gridWidth === 0 && n === i + 1))
         );
