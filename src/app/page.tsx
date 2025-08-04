@@ -660,7 +660,7 @@ export default function Home() {
                  <div className="mt-4 text-sm text-gray-600 max-w-none mx-auto">
                     <p>{i18n[lang].appDescription1}</p>
                     <p>{i18n[lang].appDescription2}</p>
-                  <Button asChild className="mt-4" variant="link">
+                  <Button asChild className="mt-4" variant="default">
                     <a href="https://t.me/celebricy_bot/startttt?startapp=fOYOCKlN" target="_blank">
                       {i18n[lang].sendToExpertButton}
                     </a>
