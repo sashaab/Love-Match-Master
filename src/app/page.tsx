@@ -107,6 +107,7 @@ const CelebrityCard = ({
           sizes="(max-width: 768px) 30vw, (max-width: 1200px) 15vw, 10vw"
           className="w-full h-full object-cover"
           data-ai-hint="celebrity portrait"
+          unoptimized
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end justify-center pb-2" />
         <p className="absolute bottom-2 left-0 right-0 text-center font-bold text-white text-[0.5rem] sm:text-sm md:text-base px-1 leading-tight">
