@@ -105,7 +105,7 @@ const CelebrityCard = ({
           data-ai-hint="celebrity portrait"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-        <p className="absolute bottom-1 left-2 sm:bottom-2 sm:left-3 font-bold text-white text-[0.5rem] sm:text-sm md:text-base">
+        <p className="absolute bottom-2 left-0 right-0 text-center font-bold text-white text-[0.5rem] sm:text-sm md:text-base px-1">
           {cell.name}
         </p>
         {isMatched && (
@@ -687,3 +687,5 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
+    
