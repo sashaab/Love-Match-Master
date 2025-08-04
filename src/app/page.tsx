@@ -274,7 +274,7 @@ export default function Home() {
       const name = typeof c.name === 'object' ? c.name[lang] : c.name;
       const partner = c.partner && (typeof c.partner === 'object' ? c.partner[lang] : c.partner);
       const exes = c.exes?.map(e => typeof e === 'object' ? e[lang] : e);
-      return { ...c, name, partner, exes };
+      return { ...c, name, partner, exes, revealed: false };
     });
   }, []);
 
@@ -686,7 +686,7 @@ export default function Home() {
                   <Button asChild className="bg-black hover:bg-gray-800 text-white mt-4">
                     <a href="https://t.me/celebricy_bot/startttt?startapp=fOYOCKlN" target="_blank">
                       <TelegramIcon className="mr-2" />
-                      {i18n[lang].sendToExpertButton}
+                      {i18n[lang].becomeCelebricy}
                     </a>
                   </Button>
                 </div>
