@@ -27,6 +27,9 @@ if [ -n "$DOMAIN" ]; then
     # Используем простую конфигурацию nginx для начального запуска
     cp nginx-init.conf nginx.conf
     
+    # Останавливаем существующие контейнеры
+    docker-compose down
+    
     # Запускаем сервисы
     docker-compose up -d
     
