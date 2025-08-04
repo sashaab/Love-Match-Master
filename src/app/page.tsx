@@ -80,6 +80,10 @@ const CelebrityCard = ({
     );
   }
 
+  const nameParts = cell.name.split(' ');
+  const firstName = nameParts[0];
+  const lastName = nameParts.slice(1).join(' ');
+
   return (
     <Card
       draggable={!isMatched}
@@ -105,8 +109,8 @@ const CelebrityCard = ({
           data-ai-hint="celebrity portrait"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end justify-center pb-2" />
-        <p className="absolute bottom-2 left-0 right-0 text-center font-bold text-white text-[0.5rem] sm:text-sm md:text-base px-1">
-          {cell.name}
+        <p className="absolute bottom-2 left-0 right-0 text-center font-bold text-white text-[0.5rem] sm:text-sm md:text-base px-1 leading-tight">
+          {firstName}<br/>{lastName}
         </p>
         {isMatched && (
           <div className="absolute inset-0 bg-primary/30 flex items-center justify-center">
