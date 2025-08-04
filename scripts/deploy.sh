@@ -32,11 +32,28 @@ if [ -n "$DOMAIN" ]; then
     
     # Ждем запуска nginx
     echo "⏳ Ждем запуска nginx..."
-    sleep 10
+    sleep 15
     
-    # Получаем SSL сертификат
-    echo "🔐 Получаем SSL сертификат..."
-    docker-compose run --rm certbot certonly --webroot --webroot-path=/var/www/certbot --email $CERTBOT_EMAIL --agree-tos --no-eff-email -d $DOMAIN
+    # Получаем SSL сертификат (сначала staging для тестирования)
+    echo "🔐 Получаем SSL сертификат (staging)..."
+    docker-compose run --rm certbot certonly --webroot --webroot-path=/var/www/certbot --email $CERTBOT_EMAIL --agree-tos --no-eff-email --staging -d $DOMAIN
+    
+    if [ $? -eq 0 ]; then
+        echo "✅ Staging сертификат получен успешно"
+        
+        # Получаем production сертификат
+        echo "🔐 Получаем production SSL сертификат..."
+        docker-compose run --rm certbot certonly --webroot --webroot-path=/var/www/certbot --email $CERTBOT_EMAIL --agree-tos --no-eff-email -d $DOMAIN
+        
+        if [ $? -eq 0 ]; then
+            echo "✅ Production сертификат получен успешно"
+        else
+            echo "⚠️  Не удалось получить production сертификат, используем staging"
+        fi
+    else
+        echo "❌ Не удалось получить SSL сертификат"
+        echo "Проверьте, что домен $DOMAIN указывает на этот сервер и порт 80 открыт"
+    fi
     
     # Перезапускаем nginx для применения сертификата
     echo "🔄 Перезапускаем nginx..."

@@ -22,6 +22,7 @@ services:
       - ./ssl:/etc/nginx/ssl
       - certbot-etc:/etc/letsencrypt
       - certbot-var:/var/lib/letsencrypt
+      - certbot-webroot:/var/www/certbot
     networks:
       - app-network
     depends_on:
@@ -34,13 +35,15 @@ services:
     volumes:
       - certbot-etc:/etc/letsencrypt
       - certbot-var:/var/lib/letsencrypt
+      - certbot-webroot:/var/www/certbot
     networks:
       - app-network
-    command: certonly --webroot --webroot-path=/var/www/certbot --email ${CERTBOT_EMAIL:-admin@example.com} --agree-tos --no-eff-email --staging -d ${DOMAIN} || true
+    command: certonly --webroot --webroot-path=/var/www/certbot --email ${CERTBOT_EMAIL:-admin@example.com} --agree-tos --no-eff-email -d ${DOMAIN} || true
 
 volumes:
   certbot-etc:
   certbot-var:
+  certbot-webroot:
 
 networks:
   app-network:
