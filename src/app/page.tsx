@@ -97,7 +97,7 @@ const CelebrityCard = ({
       className={cn(
         "aspect-square transition-all duration-300 ease-in-out transform hover:scale-105",
         "relative group overflow-hidden rounded-full shadow-lg",
-        isMatched ? "border-primary border-4 shadow-primary/50 cursor-not-allowed" : "cursor-grab active:cursor-grabbing",
+        isMatched ? "border-accent border-4 shadow-accent/50 cursor-not-allowed" : "cursor-grab active:cursor-grabbing",
         isFighting && "animate-shake border-red-500 border-4 shadow-red-500/50",
         isSelected && !isMatched && "ring-4 ring-blue-500 ring-offset-2"
       )}
@@ -117,7 +117,7 @@ const CelebrityCard = ({
           {firstName}<br/>{lastName}
         </p>
         {isMatched && (
-          <div className="absolute inset-0 bg-primary/30 flex items-center justify-center">
+          <div className="absolute inset-0 bg-accent/30 flex items-center justify-center">
             <Heart className="w-8 h-8 md:w-16 md:h-16 text-white animate-pulse" fill="white" />
           </div>
         )}
@@ -172,10 +172,10 @@ const HintSidebar = ({
       </SidebarHeader>
       <SidebarContent className="bg-sidebar p-4">
         <div className="space-y-6">
-          <Card className="bg-sidebar-accent border-primary/50 text-sidebar-foreground">
+          <Card className="bg-sidebar-accent border-accent/50 text-sidebar-foreground">
             <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-primary font-headline">
-                <Heart className="text-primary" />
+              <CardTitle className="flex items-center gap-3 text-accent font-headline">
+                <Heart className="text-accent" />
                 {i18n[lang].findTheCouples}
               </CardTitle>
             </CardHeader>
@@ -187,11 +187,11 @@ const HintSidebar = ({
                     ))}
                   </ul>
               )}
-              <Button onClick={onUnlockCouple} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" disabled={allCouplesRevealed}>
+              <Button onClick={onUnlockCouple} className="w-full bg-accent hover:bg-accent/90 text-accent-foreground" disabled={allCouplesRevealed}>
                 <Lock className="mr-2" /> {i18n[lang].unlock} ({COUPLE_HINT_COST} pts)
               </Button>
               {allCouplesRevealed && totalCouplesToFind > 0 && (
-                <p className="text-sm text-center text-primary/80">{i18n[lang].allCoupleHintsUnlocked}</p>
+                <p className="text-sm text-center text-accent/80">{i18n[lang].allCoupleHintsUnlocked}</p>
               )}
             </CardContent>
           </Card>
