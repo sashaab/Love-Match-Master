@@ -35,7 +35,7 @@ const EX_HINT_COST = 50;
 const gameModes = {
   easy: { gridSize: 9, couplesToInclude: 1, label: '3x3 (Easy)' },
   medium: { gridSize: 25, couplesToInclude: 3, label: '5x5 (Medium)' },
-  hard: { gridSize: 100, couplesToInclude: 5, label: '10x10 (Hard)' },
+  hard: { gridSize: 64, couplesToInclude: 4, label: '8x8 (Hard)' },
 };
 
 type GameModeKey = keyof typeof gameModes;
@@ -326,7 +326,7 @@ export default function Home() {
         const cell = layout[i];
         if (cell.type === 'empty') continue;
 
-        const neighbors = [i - 1, i + 1, i - gridWidth, i - gridWidth].filter(n =>
+        const neighbors = [i - 1, i + 1, i - gridWidth, i + gridWidth].filter(n =>
           n >= 0 && n < layout.length &&
           !((i % gridWidth === 0 && n === i - 1) || ((i + 1) % gridWidth === 0 && n === i + 1))
         );
