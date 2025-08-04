@@ -439,8 +439,8 @@ export default function Home() {
       setScore(prev => prev + scoreDelta);
     }
     
-    setFightingIds(newFightingIds);
     if (newFightingIds.size > 0) {
+        setFightingIds(newFightingIds);
         if (fightTimeoutRef.current) {
             clearTimeout(fightTimeoutRef.current);
         }
@@ -448,6 +448,8 @@ export default function Home() {
             setFightingIds(new Set());
             fightTimeoutRef.current = null;
         }, 1000);
+    } else {
+        setFightingIds(new Set());
     }
 
     if(localMatchedPairs.size > matchedPairs.size) {
@@ -681,6 +683,3 @@ export default function Home() {
     </SidebarProvider>
   );
 }
-
-
-    
