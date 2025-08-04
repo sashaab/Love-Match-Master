@@ -460,7 +460,7 @@ export default function Home() {
     if (!hasMoves && gameCouples.length > 0) {
       setIsStuck(true);
     }
-  }, [cells, matchedPairs, gameOver, isStuck, gameCouples, gameModeKey, penalizedExPairs, fightingIds]);
+  }, [cells, matchedPairs, gameOver, isStuck, gameCouples, gameModeKey, penalizedExPairs, fightingIds.size]);
 
   useEffect(() => {
     const checkTimeout = setTimeout(runChecks, 300);
@@ -582,14 +582,14 @@ export default function Home() {
         <main className="min-h-screen w-full bg-background p-4 sm:p-8">
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
-              <SidebarTrigger variant="outline" size="lg">
-                <Menu className="h-6 w-6" /> Hints
-              </SidebarTrigger>
-
-              <div className="flex-grow">
+              <div className="flex-grow order-1 sm:order-2">
                 <ScoreBoard score={score} />
               </div>
-              <div className="w-auto sm:w-[120px]"></div> {/* Spacer for symmetry */}
+              <div className="order-2 sm:order-1">
+                <SidebarTrigger variant="outline" size="lg">
+                  <Menu className="h-6 w-6" /> Hints
+                </SidebarTrigger>
+              </div>
             </div>
 
             <div className="flex justify-center gap-4 mb-8">
