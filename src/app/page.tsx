@@ -739,7 +739,7 @@ export default function Home() {
                       {i18n[lang].becomeCelebrity}
                     </a>
                   </Button>
-                <div className="flex flex-col sm:flex-row sm:justify-end sm:space-x-2 w-full gap-2 sm:gap-0 mt-2">
+                <div className="flex flex-col sm:flex-row sm:justify-center sm:space-x-2 w-full gap-2 sm:gap-0 mt-2">
                   <Button onClick={handleShare} variant="outline" className="w-full sm:w-auto">
                     <Share2 className="mr-2 h-4 w-4" />
                     {i18n[lang].shareWithFriend}
