@@ -7,10 +7,12 @@ export const metadata: Metadata = {
   description: 'Find and match celebrity couples!',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
+  params,
 }: Readonly<{
   children: React.ReactNode;
+  params: {};
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
