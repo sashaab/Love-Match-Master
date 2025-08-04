@@ -254,6 +254,7 @@ export default function Home() {
   const [gameModeKey, setGameModeKey] = useState<GameModeKey>('medium');
   const [lang, setLang] = useState<Language>('ru');
   const { toast } = useToast();
+  const [showWelcomePopup, setShowWelcomePopup] = useState(false);
 
   const draggedItem = useRef<number | null>(null);
   const fightTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -427,6 +428,11 @@ export default function Home() {
 
   useEffect(() => {
     setIsClient(true);
+    const visited = localStorage.getItem('loveMatchManiaVisited');
+    if (!visited) {
+      setShowWelcomePopup(true);
+      localStorage.setItem('loveMatchManiaVisited', 'true');
+    }
     setupGame(gameModeKey, lang);
   }, [setupGame, gameModeKey, lang]);
 
@@ -683,16 +689,6 @@ export default function Home() {
                 </div>
                <div className="flex-grow order-1 sm:order-2 text-center">
                  <ScoreBoard score={score} moves={moves} lang={lang} />
-                 <div className="mt-4 text-sm text-gray-600 max-w-none mx-auto">
-                    <p>{i18n[lang].appDescription1}</p>
-                    <p>{i18n[lang].appDescription2}</p>
-                  <Button asChild className="bg-black hover:bg-gray-800 text-white mt-4">
-                    <a href="https://t.me/celebricy_bot/startttt?startapp=fOYOCKlN" target="_blank">
-                      <TelegramIcon className="mr-2" />
-                      {i18n[lang].becomeCelebricy}
-                    </a>
-                  </Button>
-                </div>
                </div>
                <div className="flex-none sm:w-[136px] flex justify-end gap-2 order-3">
                  <Button onClick={() => setLang('en')} variant={lang === 'en' ? 'default' : 'outline'} size="sm">EN</Button>
@@ -741,6 +737,32 @@ export default function Home() {
               </Button>
             </div>
           </div>
+          <AlertDialog open={showWelcomePopup} onOpenChange={setShowWelcomePopup}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-center text-2xl font-headline">
+                  {i18n[lang].welcomeTitle}
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-center text-lg pt-4">
+                  {i18n[lang].appDescription1}
+                </AlertDialogDescription>
+                <AlertDialogDescription className="text-center text-lg pt-2">
+                  {i18n[lang].appDescription2}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                 <Button asChild className="bg-black hover:bg-gray-800 text-white">
+                    <a href="https://t.me/celebricy_bot/startttt?startapp=fOYOCKlN" target="_blank">
+                      <TelegramIcon className="mr-2" />
+                      {i18n[lang].becomeCelebricy}
+                    </a>
+                  </Button>
+                  <AlertDialogAction onClick={() => setShowWelcomePopup(false)} className="w-full flex-1">
+                    {i18n[lang].letsPlay}
+                  </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
           <AlertDialog open={gameOver}>
             <AlertDialogContent>
               <AlertDialogHeader>

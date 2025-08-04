@@ -33,6 +33,8 @@ export const i18n = {
     easy: 'Easy',
     medium: 'Medium',
     hard: 'Hard',
+    welcomeTitle: 'Welcome to the Game!',
+    letsPlay: "Let's Play!",
   },
   ru: {
     score: 'Счет',
@@ -65,5 +67,7 @@ export const i18n = {
     easy: 'Легкий',
     medium: 'Средний',
     hard: 'Сложный',
+    welcomeTitle: 'Добро пожаловать в игру!',
+    letsPlay: 'Начать игру!',
   },
 };
