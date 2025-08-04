@@ -585,14 +585,15 @@ export default function Home() {
       <SidebarInset>
         <main className="min-h-screen w-full bg-background p-4 sm:p-8">
           <div className="max-w-7xl mx-auto">
-            <div className="flex justify-between items-start mb-4">
-               <SidebarTrigger size="lg">
-                 Hints
+            <div className="flex justify-between items-center mb-4">
+              <SidebarTrigger variant="outline" size="lg">
+                <Menu className="h-6 w-6" /> Hints
               </SidebarTrigger>
+
               <div className="flex-grow">
                 <ScoreBoard score={score} />
               </div>
-              <div className="w-10"></div> {/* Spacer */}
+              <div className="w-[120px] hidden sm:block"></div> {/* Spacer for symmetry */}
             </div>
 
             <div className="flex justify-center gap-4 mb-8">
@@ -678,3 +679,5 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
+    
