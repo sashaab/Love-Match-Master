@@ -8,7 +8,7 @@ import type { Celebrity, Cell } from "@/lib/types";
 import { celebritiesData } from "@/lib/game-data";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart, ZapOff, RotateCw, Trophy, Undo, HelpCircle, Users, UserX, Star, Lock, Ban, Menu } from "lucide-react";
+import { Heart, ZapOff, RotateCw, Trophy, Undo, Lock, Ban, Menu } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -115,7 +115,7 @@ const CelebrityCard = ({
         )}
         {isFighting && (
           <div className="absolute inset-0 bg-red-500/30 flex items-center justify-center">
-            <ZapOff className="w-8 h-8 md:w-16 md:h-16 text-white animate-ping" fill="white" />
+            <ZapOff className="w-8 h-8 md:w-16 md:h-16 text-white" fill="white" />
           </div>
         )}
       </CardContent>
@@ -147,7 +147,6 @@ const HintSidebar = ({
     <Sidebar collapsible="icon" variant="sidebar" side="left">
       <SidebarHeader className="border-b border-sidebar-border bg-sidebar-accent">
         <div className="flex items-center gap-2 p-2 justify-center">
-          <Star className="w-8 h-8 text-yellow-400" />
           <h2 className="text-2xl font-bold font-headline text-sidebar-primary-foreground">Hints</h2>
         </div>
       </SidebarHeader>
@@ -155,7 +154,6 @@ const HintSidebar = ({
         <div className="p-4 space-y-6">
           <div>
             <h3 className="font-semibold text-lg mb-3 flex items-center gap-2 text-green-300">
-              <Users className="w-5 h-5" />
               Match these couples!
             </h3>
             {revealedCouples.length > 0 && (
@@ -166,7 +164,7 @@ const HintSidebar = ({
                 </ul>
             )}
             {unlockedCouplesCount < couples.length && (
-              <Button onClick={onUnlockCouple} className="w-full">
+              <Button onClick={onUnlockCouple} className="w-full" disabled={score < COUPLE_HINT_COST}>
                 <Lock className="mr-2" /> Unlock for {COUPLE_HINT_COST} points
               </Button>
             )}
@@ -176,7 +174,6 @@ const HintSidebar = ({
 
           <div>
             <h3 className="font-semibold text-lg mb-3 flex items-center gap-2 text-red-400">
-              <UserX className="w-5 h-5" />
               Don't match these exes!
             </h3>
             {revealedExes.length > 0 && (
@@ -187,7 +184,7 @@ const HintSidebar = ({
                 </ul>
             )}
             {unlockedExesCount < exes.length && (
-              <Button onClick={onUnlockEx} className="w-full">
+              <Button onClick={onUnlockEx} className="w-full" disabled={score < EX_HINT_COST}>
                 <Lock className="mr-2" /> Unlock for {EX_HINT_COST} points
               </Button>
             )}
@@ -372,7 +369,7 @@ export default function Home() {
 
   const runChecks = useCallback(() => {
     if (gameOver || isStuck) return;
-    
+
     let newFightingIds = new Set<string>();
     let localMatchedPairs = new Set(matchedPairs);
     let scoreDelta = 0;
@@ -382,7 +379,6 @@ export default function Home() {
     const currentlyFightingPairs = new Set<string>();
     const newPenalizedPairs = new Set(penalizedExPairs);
 
-    // 1. Check for matches and fights, update score
     for (let i = 0; i < cells.length; i++) {
       const cell = cells[i];
       if (cell.type === 'empty') continue;
@@ -420,35 +416,32 @@ export default function Home() {
       }
     }
 
-    // Clean up penalized pairs that are no longer fighting
     penalizedExPairs.forEach(pairKey => {
       if (!currentlyFightingPairs.has(pairKey)) {
         newPenalizedPairs.delete(pairKey);
       }
     });
-
     setPenalizedExPairs(newPenalizedPairs);
     
     if (scoreDelta !== 0) {
       setScore(prev => prev + scoreDelta);
     }
     
-    setFightingIds(newFightingIds);
-
-    if (newFightingIds.size > 0) {
-      if (fightTimeoutRef.current) {
-        clearTimeout(fightTimeoutRef.current);
-      }
-      fightTimeoutRef.current = setTimeout(() => {
+    if (newFightingIds.size > 0 && newFightingIds.size !== fightingIds.size) {
+        setFightingIds(newFightingIds);
+        if (fightTimeoutRef.current) {
+            clearTimeout(fightTimeoutRef.current);
+        }
+        fightTimeoutRef.current = setTimeout(() => {
+            setFightingIds(new Set());
+            fightTimeoutRef.current = null;
+        }, 1000);
+    } else if (newFightingIds.size === 0 && fightingIds.size > 0) {
         setFightingIds(new Set());
-        fightTimeoutRef.current = null;
-      }, 1000);
-    } else {
         if(fightTimeoutRef.current) {
             clearTimeout(fightTimeoutRef.current);
             fightTimeoutRef.current = null;
         }
-        setFightingIds(new Set());
     }
 
     if(localMatchedPairs.size > matchedPairs.size) {
@@ -457,40 +450,21 @@ export default function Home() {
     
     if (gameCouples.length > 0 && localMatchedPairs.size === gameCouples.length * 2) {
       setGameOver(true);
-      return; // Game is won, no need to check for stuck state
+      return;
     }
     
-    // 2. Check for no more moves AFTER updating matches
     let hasMoves = false;
     const nonMatchedCelebs = cells.filter(c => c.type === 'celebrity' && !localMatchedPairs.has(c.id));
+    const emptyCells = cells.filter(c => c.type === 'empty');
 
-    // No moves if all remaining celebs are on the board and there are no empty spaces to swap with.
-    if (nonMatchedCelebs.length > 1) {
-        for (let i = 0; i < cells.length; i++) {
-            if (hasMoves) break;
-            const cell = cells[i];
-            if (localMatchedPairs.has(cell.id)) continue;
-    
-            const neighbors = [i - 1, i + 1, i - gridWidth, i + gridWidth].filter(n =>
-              n >= 0 && n < cells.length &&
-              !((i % gridWidth === 0 && n === i - 1) || ((i + 1) % gridWidth === 0 && n === i + 1))
-            );
-          
-            for (const nIndex of neighbors) {
-                const neighbor = cells[nIndex];
-                if (!localMatchedPairs.has(neighbor.id)) {
-                    hasMoves = true;
-                    break;
-                }
-            }
-        }
+    if (emptyCells.length > 0 || nonMatchedCelebs.length > 1) {
+       hasMoves = true;
     }
-
-
+    
     if (!hasMoves && gameCouples.length > 0) {
       setIsStuck(true);
     }
-  }, [cells, matchedPairs, gameOver, isStuck, gameCouples, gameModeKey, penalizedExPairs]);
+  }, [cells, matchedPairs, gameOver, isStuck, gameCouples, gameModeKey, penalizedExPairs, fightingIds]);
 
   useEffect(() => {
     const checkTimeout = setTimeout(runChecks, 300);
@@ -515,7 +489,7 @@ export default function Home() {
 
     updateCells(newCells);
 
-  }, [cells, matchedPairs, updateCells]);
+  }, [cells, matchedPairs]);
 
   const handleCardClick = (index: number) => {
     if (gameOver || isStuck) return;
@@ -612,8 +586,8 @@ export default function Home() {
         <main className="min-h-screen w-full bg-background p-4 sm:p-8">
           <div className="max-w-7xl mx-auto">
             <div className="flex justify-between items-start mb-4">
-               <SidebarTrigger className="h-10 w-10">
-                 <Menu className="h-6 w-6"/>
+               <SidebarTrigger size="lg">
+                 Hints
               </SidebarTrigger>
               <div className="flex-grow">
                 <ScoreBoard score={score} />
