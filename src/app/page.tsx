@@ -728,13 +728,13 @@ export default function Home() {
                   {i18n[lang].wantMoreGames}
                 </AlertDialogDescription>
               </AlertDialogHeader>
-              <AlertDialogFooter className="sm:flex-col sm:space-y-2">
+              <AlertDialogFooter>
                  <Button asChild className="w-full">
                     <a href="https://t.me/celebricy_bot/startttt?startapp=fOYOCKlN" target="_blank">
                       {i18n[lang].joinProject}
                     </a>
                   </Button>
-                <div className="flex flex-col sm:flex-row sm:justify-end sm:space-x-2 w-full gap-2 sm:gap-0">
+                <div className="flex flex-col sm:flex-row sm:justify-end sm:space-x-2 w-full gap-2 sm:gap-0 mt-2">
                   <Button onClick={handleShare} variant="outline" className="w-full sm:w-auto">
                     <Share2 className="mr-2 h-4 w-4" />
                     {i18n[lang].shareWithFriend}
