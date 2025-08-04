@@ -171,7 +171,7 @@ const HintSidebar = ({
                   </ul>
               )}
               {unlockedCouplesCount < couples.length && (
-                <Button onClick={onUnlockCouple} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" disabled={score < COUPLE_HINT_COST}>
+                <Button onClick={onUnlockCouple} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
                   <Lock className="mr-2" /> Unlock ({COUPLE_HINT_COST} pts)
                 </Button>
               )}
@@ -197,7 +197,7 @@ const HintSidebar = ({
                   </ul>
               )}
               {unlockedExesCount < exes.length && (
-                <Button onClick={onUnlockEx} variant="destructive" className="w-full" disabled={score < EX_HINT_COST}>
+                <Button onClick={onUnlockEx} variant="destructive" className="w-full">
                   <Lock className="mr-2" /> Unlock ({EX_HINT_COST} pts)
                 </Button>
               )}
@@ -603,7 +603,7 @@ export default function Home() {
       <SidebarInset>
         <main className="min-h-screen w-full bg-background p-4 sm:p-8">
           <div className="max-w-7xl mx-auto">
-             <div className="flex flex-col-reverse sm:flex-row justify-between items-center mb-4 gap-4">
+             <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
                 <div className="flex-none">
                     <SidebarTrigger variant="outline" size="lg">
                         <Menu className="h-6 w-6" /> Hints
@@ -612,7 +612,7 @@ export default function Home() {
                <div className="flex-grow">
                  <ScoreBoard score={score} moves={moves} />
                </div>
-               <div className="flex-none w-0 sm:w-[136px]"></div>
+               <div className="flex-none sm:w-[136px]"></div>
              </div>
 
             <div className="flex justify-center gap-4 mb-8">
@@ -700,5 +700,3 @@ export default function Home() {
     </SidebarProvider>
   );
 }
-
-    
