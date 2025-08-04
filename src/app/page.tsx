@@ -41,10 +41,10 @@ const gameModes = {
 type GameModeKey = keyof typeof gameModes;
 
 
-const ScoreBoard = ({ score }: { score: number }) => (
+const ScoreBoard = ({ score, moves }: { score: number, moves: number }) => (
   <div className="text-center">
     <h1 className="font-headline text-4xl md:text-5xl font-bold text-gray-800">Love Match Mania</h1>
-    <p className="mt-2 text-2xl font-semibold text-primary">Score: {score}</p>
+    <p className="mt-2 text-2xl font-semibold text-primary">Score: {score} | Moves: {moves}</p>
   </div>
 );
 
@@ -212,6 +212,7 @@ export default function Home() {
   const [cells, setCells] = useState<Cell[]>([]);
   const [history, setHistory] = useState<Cell[][]>([]);
   const [score, setScore] = useState(0);
+  const [moves, setMoves] = useState(0);
   const [matchedPairs, setMatchedPairs] = useState<Set<string>>(new Set());
   const [fightingIds, setFightingIds] = useState<Set<string>>(new Set());
   const [penalizedExPairs, setPenalizedExPairs] = useState<Set<string>>(new Set());
@@ -350,6 +351,7 @@ export default function Home() {
     setCells(shuffledCells);
     setHistory([shuffledCells]);
     setScore(0);
+    setMoves(0);
     setMatchedPairs(new Set());
     setFightingIds(new Set());
     setPenalizedExPairs(new Set());
@@ -367,6 +369,7 @@ export default function Home() {
 
   const undoMove = () => {
     if (history.length > 1) {
+      setMoves(m => m - 1);
       const lastState = history[history.length - 2];
       setCells(lastState);
       setHistory(prev => prev.slice(0, -1));
@@ -496,6 +499,7 @@ export default function Home() {
     const newCells = [...cells];
     [newCells[index1], newCells[index2]] = [newCells[index2], newCells[index1]];
 
+    setMoves(m => m + 1);
     updateCells(newCells);
 
   }, [cells, matchedPairs]);
@@ -601,7 +605,7 @@ export default function Home() {
                     </SidebarTrigger>
                 </div>
                <div className="sm:w-1/3 flex-grow">
-                 <ScoreBoard score={score} />
+                 <ScoreBoard score={score} moves={moves} />
                </div>
                <div className="sm:w-1/3"></div>
              </div>
