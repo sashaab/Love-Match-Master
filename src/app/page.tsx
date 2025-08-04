@@ -715,16 +715,25 @@ export default function Home() {
                   {i18n[lang].youMatchedAllCouples}
                   <br />
                   {i18n[lang].yourFinalScore} <span className="font-bold text-primary">{score}</span>
+                  <br /><br />
+                  {i18n[lang].wantMoreGames}
                 </AlertDialogDescription>
               </AlertDialogHeader>
-              <AlertDialogFooter>
-                <Button onClick={handleShare} variant="outline" className="w-full sm:w-auto">
-                  <Share2 className="mr-2 h-4 w-4" />
-                  {i18n[lang].shareWithFriend}
-                </Button>
-                <AlertDialogAction onClick={handleReset} className="w-full sm:w-auto">
-                  {i18n[lang].playAgain}
-                </AlertDialogAction>
+              <AlertDialogFooter className="sm:flex-col sm:space-y-2">
+                 <Button asChild className="w-full">
+                    <a href="https://t.me/celebricy_bot/startttt?startapp=mUr6B4p6" target="_blank">
+                      {i18n[lang].joinProject}
+                    </a>
+                  </Button>
+                <div className="flex flex-col sm:flex-row sm:justify-end sm:space-x-2 w-full gap-2 sm:gap-0">
+                  <Button onClick={handleShare} variant="outline" className="w-full sm:w-auto">
+                    <Share2 className="mr-2 h-4 w-4" />
+                    {i18n[lang].shareWithFriend}
+                  </Button>
+                  <AlertDialogAction onClick={handleReset} className="w-full sm:w-auto">
+                    {i18n[lang].playAgain}
+                  </AlertDialogAction>
+                </div>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>

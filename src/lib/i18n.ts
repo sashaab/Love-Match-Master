@@ -23,6 +23,8 @@ export const i18n = {
     tryAgain: 'Try Again',
     linkCopiedTitle: 'Link Copied!',
     linkCopiedDescription: 'You can now share the game with your friends.',
+    wantMoreGames: 'Want more games and to become a celebrity?',
+    joinProject: 'Join our main project!',
   },
   ru: {
     score: 'Счет',
@@ -46,5 +48,7 @@ export const i18n = {
     tryAgain: 'Попробовать снова',
     linkCopiedTitle: 'Ссылка скопирована!',
     linkCopiedDescription: 'Теперь вы можете поделиться игрой с друзьями.',
+    wantMoreGames: 'Хочешь больше игр и тоже стать знаменитым?',
+    joinProject: 'Присоединяйся к нашему основному проекту!',
   },
 };
