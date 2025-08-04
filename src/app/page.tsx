@@ -37,9 +37,9 @@ const COUPLE_HINT_COST = 100;
 const EX_HINT_COST = 50;
 
 const gameModes = (lang: Language) => ({
-  easy: { couplesToInclude: 4, label: i18n[lang].easy, hintsUnlocked: true, namesVisible: true },
-  medium: { couplesToInclude: 4, label: i18n[lang].medium, hintsUnlocked: false, namesVisible: true },
-  hard: { couplesToInclude: 4, label: i18n[lang].hard, hintsUnlocked: false, namesVisible: false },
+  easy: { label: i18n[lang].easy, hintsUnlocked: true, namesVisible: true },
+  medium: { label: i18n[lang].medium, hintsUnlocked: false, namesVisible: true },
+  hard: { label: i18n[lang].hard, hintsUnlocked: false, namesVisible: false },
 });
 
 type GameModeKey = keyof ReturnType<typeof gameModes>;
@@ -280,8 +280,9 @@ export default function Home() {
 
   const setupGame = useCallback((modeKey: GameModeKey, language: Language) => {
     const currentModes = gameModes(language);
-    const { couplesToInclude, hintsUnlocked } = currentModes[modeKey];
+    const { hintsUnlocked } = currentModes[modeKey];
     setGameModeKey(modeKey);
+    const couplesToInclude = Math.floor(Math.random() * 2) + 4; // Randomly 4 or 5
     
     const localizedCelebrities = getCelebrityDataByLang(language);
 
