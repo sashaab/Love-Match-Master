@@ -723,12 +723,9 @@ export default function Home() {
                   {i18n[lang].congratulations}
                 </AlertDialogTitle>
                 <AlertDialogDescription className="text-center text-lg pt-4">
-                  <p>
-                    {i18n[lang].gameOverText
-                      .replace('{moves}', moves.toString())
-                      .replace('{score}', score.toString())
-                    }
-                  </p>
+                  {i18n[lang].gameOverText
+                    .replace('{moves}', moves.toString())
+                    .replace('{score}', score.toString())}
                   <p className="mt-4">{i18n[lang].gameOverInviteLine1}</p>
                   <p>{i18n[lang].gameOverInviteLine2}</p>
                 </AlertDialogDescription>
@@ -737,7 +734,7 @@ export default function Home() {
                  <Button asChild className="w-full bg-black hover:bg-gray-800 text-white">
                     <a href="https://t.me/celebricy_bot/startttt?startapp=fOYOCKlN" target="_blank">
                       <TelegramIcon className="mr-2" />
-                      {i18n[lang].becomeCelebrity}
+                      {i18n[lang].becomeCelebricy}
                     </a>
                   </Button>
                 <div className="flex flex-col sm:flex-row sm:justify-center sm:space-x-2 w-full gap-2 sm:gap-0 mt-2">
@@ -777,3 +774,4 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
