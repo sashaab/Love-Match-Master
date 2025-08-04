@@ -14,7 +14,6 @@ export const i18n = {
     resetGame: 'Reset Game',
     undo: 'Undo',
     congratulations: 'Congratulations!',
-    youMatchedAllCouples: "You've matched all the couples!",
     yourFinalScore: 'Your final score is:',
     shareWithFriend: 'Share with Friend',
     playAgain: 'Play Again',
@@ -23,11 +22,12 @@ export const i18n = {
     tryAgain: 'Try Again',
     linkCopiedTitle: 'Link Copied!',
     linkCopiedDescription: 'You can now share the game with your friends.',
-    wantMoreGames: 'Want more games and to become a celebrity?',
-    joinProject: 'Join our main project!',
     appDescription1: 'Untangle this web of love - connect celebs into current couples and prove you know show business!',
     appDescription2: 'But beware of bringing exes together - they will bite 🤬 (and you will lose points 👀)',
     sendToExpertButton: 'Send to someone who knows',
+    gameOverText: 'You found all the pairs in {moves} moves and earned {score} points!',
+    gameOverInvite: "You've earned the right to become a Celebricy and participate in the big game! Come in to find out your influence and get a special bonus⚡️",
+    becomeCelebrity: 'Become a Celebrity'
   },
   ru: {
     score: 'Счет',
@@ -42,7 +42,6 @@ export const i18n = {
     resetGame: 'Начать заново',
     undo: 'Отменить',
     congratulations: 'Поздравляем!',
-    youMatchedAllCouples: 'Вы сопоставили все пары!',
     yourFinalScore: 'Ваш итоговый счет:',
     shareWithFriend: 'Поделиться с другом',
     playAgain: 'Играть снова',
@@ -51,12 +50,11 @@ export const i18n = {
     tryAgain: 'Попробовать снова',
     linkCopiedTitle: 'Ссылка скопирована!',
     linkCopiedDescription: 'Теперь вы можете поделиться игрой с друзьями.',
-    wantMoreGames: 'Хочешь больше игр и тоже стать знаменитым?',
-    joinProject: 'Присоединяйся к нашему основному проекту!',
     appDescription1: 'Распутай эту любовную паутину - соедини селеб в актуальные пары и докажи, что ты разбираешься в шоу бизнесе!',
     appDescription2: 'Но остерегайся сближать бывших - они будут кусаться 🤬(а ты потеряешь очки👀)',
     sendToExpertButton: 'Отправить тому кто разбирается',
+    gameOverText: 'Ты нашел все пары за {moves} ходов и заработал {score} очков!',
+    gameOverInvite: 'Ты заслужил право стать Селебриси и участвовать в большой игре! Заходи, чтобы узнать свое влияние и получить специальный бонус⚡️',
+    becomeCelebrity: 'Стать Селебриси'
   },
 };
-
-    

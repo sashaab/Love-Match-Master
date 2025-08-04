@@ -244,7 +244,7 @@ export default function Home() {
   const [unlockedCoupleNames, setUnlockedCoupleNames] = useState<Set<string>>(new Set());
   const [unlockedExesCount, setUnlockedExesCount] = useState(0);
   const [gameModeKey, setGameModeKey] = useState<GameModeKey>('medium');
-  const [lang, setLang] = useState<Language>('en');
+  const [lang, setLang] = useState<Language>('ru');
   const { toast } = useToast();
 
   const draggedItem = useRef<number | null>(null);
@@ -661,7 +661,7 @@ export default function Home() {
                  <div className="mt-4 text-sm text-gray-600 max-w-none mx-auto">
                     <p>{i18n[lang].appDescription1}</p>
                     <p>{i18n[lang].appDescription2}</p>
-                  <Button asChild className="mt-4">
+                  <Button asChild className="bg-primary mt-4">
                     <a href="https://t.me/celebricy_bot/startttt?startapp=fOYOCKlN" target="_blank">
                       <TelegramIcon className="mr-2" />
                       {i18n[lang].sendToExpertButton}
@@ -723,18 +723,20 @@ export default function Home() {
                   {i18n[lang].congratulations}
                 </AlertDialogTitle>
                 <AlertDialogDescription className="text-center text-lg pt-4">
-                  {i18n[lang].youMatchedAllCouples}
-                  <br />
-                  {i18n[lang].yourFinalScore} <span className="font-bold text-primary">{score}</span>
-                  <br /><br />
-                  {i18n[lang].wantMoreGames}
+                  <p>
+                    {i18n[lang].gameOverText
+                      .replace('{moves}', moves.toString())
+                      .replace('{score}', score.toString())
+                    }
+                  </p>
+                  <p className="mt-4">{i18n[lang].gameOverInvite}</p>
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                  <Button asChild className="w-full">
                     <a href="https://t.me/celebricy_bot/startttt?startapp=fOYOCKlN" target="_blank">
                       <TelegramIcon className="mr-2" />
-                      {i18n[lang].joinProject}
+                      {i18n[lang].becomeCelebrity}
                     </a>
                   </Button>
                 <div className="flex flex-col sm:flex-row sm:justify-end sm:space-x-2 w-full gap-2 sm:gap-0 mt-2">
