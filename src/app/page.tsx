@@ -37,9 +37,9 @@ const COUPLE_HINT_COST = 100;
 const EX_HINT_COST = 50;
 
 const gameModes = {
-  easy: { gridSize: 9, couplesToInclude: 1, label: '3x3 (Easy)' },
-  medium: { gridSize: 25, couplesToInclude: 3, label: '5x5 (Medium)' },
-  hard: { gridSize: 36, couplesToInclude: 3, label: '6x6 (Hard)' },
+  easy: { couplesToInclude: 3, label: 'Easy', hintsUnlocked: true, namesVisible: true },
+  medium: { couplesToInclude: 3, label: 'Medium', hintsUnlocked: false, namesVisible: true },
+  hard: { couplesToInclude: 3, label: 'Hard', hintsUnlocked: false, namesVisible: false },
 };
 
 type GameModeKey = keyof typeof gameModes;
@@ -62,6 +62,7 @@ const CelebrityCard = ({
   onDragOver,
   onDrop,
   onClick,
+  namesVisible,
 }: {
   cell: Cell;
   index: number;
@@ -72,6 +73,7 @@ const CelebrityCard = ({
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
   onDrop: (e: React.DragEvent<HTMLDivElement>, index: number) => void;
   onClick: (index: number) => void;
+  namesVisible: boolean;
 }) => {
   if (cell.type === 'empty') {
     return (
@@ -87,6 +89,8 @@ const CelebrityCard = ({
   const nameParts = cell.name.split(' ');
   const firstName = nameParts[0];
   const lastName = nameParts.slice(1).join(' ');
+
+  const showName = namesVisible || cell.revealed;
 
   return (
     <Card
@@ -113,10 +117,14 @@ const CelebrityCard = ({
           data-ai-hint="celebrity portrait"
           unoptimized
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end justify-center pb-2" />
-        <p className="absolute bottom-2 left-0 right-0 text-center font-bold text-white text-[0.5rem] sm:text-sm md:text-base px-1 leading-tight">
-          {firstName}<br/>{lastName}
-        </p>
+        {(showName || isMatched) && (
+          <>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end justify-center pb-2" />
+            <p className="absolute bottom-2 left-0 right-0 text-center font-bold text-white text-[0.5rem] sm:text-sm md:text-base px-1 leading-tight">
+              {firstName}<br/>{lastName}
+            </p>
+          </>
+        )}
         {isMatched && (
           <div className="absolute inset-0 bg-accent/30 flex items-center justify-center">
             <Heart className="w-8 h-8 md:w-16 md:h-16 text-white animate-pulse" fill="white" />
@@ -249,10 +257,10 @@ export default function Home() {
 
   const draggedItem = useRef<number | null>(null);
   const fightTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const GRID_SIZE = 36;
 
   const areNeighbors = (index1: number, index2: number) => {
-    const { gridSize } = gameModes[gameModeKey];
-    const gridWidth = Math.sqrt(gridSize);
+    const gridWidth = Math.sqrt(GRID_SIZE);
     const row1 = Math.floor(index1 / gridWidth);
     const col1 = index1 % gridWidth;
     const row2 = Math.floor(index2 / gridWidth);
@@ -271,7 +279,7 @@ export default function Home() {
   }, []);
 
   const setupGame = useCallback((modeKey: GameModeKey, language: Language) => {
-    const { gridSize, couplesToInclude } = gameModes[modeKey];
+    const { couplesToInclude, hintsUnlocked } = gameModes[modeKey];
     setGameModeKey(modeKey);
     
     const localizedCelebrities = getCelebrityDataByLang(language);
@@ -294,7 +302,7 @@ export default function Home() {
         const exCelebsInGame = allExesForPair.map(name => localizedCelebrities.find(c => c.name === name)).filter(Boolean) as Celebrity[];
 
         const tempCelebs = new Set([coupleCandidate.name, partner.name, ...exCelebsInGame.map(c => c.name)]);
-        if (celebsForGrid.size + tempCelebs.size > gridSize) {
+        if (celebsForGrid.size + tempCelebs.size > GRID_SIZE) {
             continue;
         }
 
@@ -320,18 +328,18 @@ export default function Home() {
     setGameCouples(selectedCouples);
     
     const fillers = shuffle(localizedCelebrities.filter(c => !celebsForGrid.has(c.name)));
-    const remainingSlots = gridSize - celebsForGrid.size;
+    const remainingSlots = GRID_SIZE - celebsForGrid.size;
     if (remainingSlots > 0) {
         fillers.slice(0, remainingSlots).forEach(f => celebsForGrid.add(f.name));
     }
     
     let finalCells: Cell[] = Array.from(celebsForGrid).map(name => {
         const celeb = localizedCelebrities.find(c => c.name === name)!;
-        return {...celeb, type: 'celebrity' as const};
+        return {...celeb, type: 'celebrity' as const, revealed: false};
     });
     
-    if (finalCells.length < gridSize) {
-        const emptyCellsCount = gridSize - finalCells.length;
+    if (finalCells.length < GRID_SIZE) {
+        const emptyCellsCount = GRID_SIZE - finalCells.length;
         for (let i = 0; i < emptyCellsCount; i++) {
             finalCells.push({ type: 'empty', id: `empty-${Date.now()}-${i}` });
         }
@@ -353,8 +361,16 @@ export default function Home() {
     }
     setGameExes(exesInGame);
 
+    if (hintsUnlocked) {
+      setUnlockedCoupleNames(new Set(selectedCouples.map(c => c.name)));
+      setUnlockedExesCount(exesInGame.length);
+    } else {
+      setUnlockedCoupleNames(new Set());
+      setUnlockedExesCount(0);
+    }
+
     const isLayoutInvalid = (layout: Cell[]): boolean => {
-      const gridWidth = Math.sqrt(gridSize);
+      const gridWidth = Math.sqrt(GRID_SIZE);
       for (let i = 0; i < layout.length; i++) {
         const cell = layout[i];
         if (cell.type === 'empty') continue;
@@ -390,8 +406,6 @@ export default function Home() {
     setGameOver(false);
     setIsStuck(false);
     setSelectedCardIndex(null);
-    setUnlockedCoupleNames(new Set());
-    setUnlockedExesCount(0);
   }, [getCelebrityDataByLang]);
 
   const updateCells = (newCells: Cell[]) => {
@@ -420,11 +434,11 @@ export default function Home() {
     let newFightingIds = new Set<string>();
     let localMatchedPairs = new Set(matchedPairs);
     let scoreDelta = 0;
-    const { gridSize } = gameModes[gameModeKey];
-    const gridWidth = Math.sqrt(gridSize);
+    const gridWidth = Math.sqrt(GRID_SIZE);
     
     const currentlyFightingPairs = new Set<string>();
     const newPenalizedPairs = new Set(penalizedExPairs);
+    const newCells = [...cells];
 
     for (let i = 0; i < cells.length; i++) {
       const cell = cells[i];
@@ -459,8 +473,17 @@ export default function Home() {
           localMatchedPairs.add(cell.id);
           localMatchedPairs.add(neighbor.id);
           scoreDelta += 100;
+
+          const cellInNew = newCells.find(c => c.id === cell.id);
+          const neighborInNew = newCells.find(c => c.id === neighbor.id);
+          if (cellInNew?.type === 'celebrity') cellInNew.revealed = true;
+          if (neighborInNew?.type === 'celebrity') neighborInNew.revealed = true;
         }
       }
+    }
+
+    if (newCells.some((c, i) => c.type === 'celebrity' && c.revealed !== (cells[i] as any).revealed)) {
+      setCells(newCells);
     }
 
     penalizedExPairs.forEach(pairKey => {
@@ -508,7 +531,7 @@ export default function Home() {
     if (!hasMoves && gameCouples.length > 0) {
       setIsStuck(true);
     }
-  }, [cells, matchedPairs, gameOver, isStuck, gameCouples, gameModeKey, penalizedExPairs]);
+  }, [cells, matchedPairs, gameOver, isStuck, gameCouples, penalizedExPairs]);
 
   useEffect(() => {
     const checkTimeout = setTimeout(runChecks, 300);
@@ -623,38 +646,41 @@ export default function Home() {
     });
   };
 
-  const { gridSize } = gameModes[gameModeKey];
   
   if (!isClient) {
     return null;
   }
   
   const gridDynamicStyle = {
-    gridTemplateColumns: `repeat(${Math.sqrt(gridSize)}, minmax(0, 1fr))`
+    gridTemplateColumns: `repeat(${Math.sqrt(GRID_SIZE)}, minmax(0, 1fr))`
   };
 
 
   return (
     <SidebarProvider>
-      <HintSidebar
-        couples={gameCouples}
-        exes={gameExes}
-        onUnlockCouple={handleUnlockCouple}
-        onUnlockEx={handleUnlockEx}
-        unlockedCoupleNames={unlockedCoupleNames}
-        unlockedExesCount={unlockedExesCount}
-        matchedPairs={matchedPairs}
-        allCells={cells}
-        lang={lang}
-      />
+      {gameModeKey !== 'easy' && (
+        <HintSidebar
+          couples={gameCouples}
+          exes={gameExes}
+          onUnlockCouple={handleUnlockCouple}
+          onUnlockEx={handleUnlockEx}
+          unlockedCoupleNames={unlockedCoupleNames}
+          unlockedExesCount={unlockedExesCount}
+          matchedPairs={matchedPairs}
+          allCells={cells}
+          lang={lang}
+        />
+      )}
       <SidebarInset>
         <main className="min-h-screen w-full bg-background p-4 sm:p-8">
           <div className="max-w-7xl mx-auto">
              <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
                 <div className="flex-none sm:w-[136px] order-2 sm:order-1">
+                  {gameModeKey !== 'easy' && (
                     <SidebarTrigger variant="outline" size="lg">
                         <Menu className="h-6 w-6" /> {i18n[lang].hints}
                     </SidebarTrigger>
+                  )}
                 </div>
                <div className="flex-grow order-1 sm:order-2 text-center">
                  <ScoreBoard score={score} moves={moves} lang={lang} />
@@ -701,6 +727,7 @@ export default function Home() {
                     onDragOver={handleDragOver}
                     onDrop={handleDrop}
                     onClick={handleCardClick}
+                    namesVisible={gameModes[gameModeKey].namesVisible}
                   />
                 ))}
               </div>

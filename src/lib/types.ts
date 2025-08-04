@@ -5,6 +5,7 @@ export interface Celebrity {
   imageUrl: string;
   partner?: string | { en: string; ru: string };
   exes?: (string | { en: string; ru: string })[];
+  revealed?: boolean;
 }
 
 export interface EmptyCell {
@@ -16,4 +17,5 @@ export type Cell = (Omit<Celebrity, 'name' | 'partner' | 'exes'> & {
     name: string;
     partner?: string;
     exes?: string[];
+    revealed: boolean;
 }) | EmptyCell;
