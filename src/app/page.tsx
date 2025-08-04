@@ -217,6 +217,7 @@ export default function Home() {
   const [gameModeKey, setGameModeKey] = useState<GameModeKey>('medium');
 
   const draggedItem = useRef<number | null>(null);
+  const fightTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const areNeighbors = (index1: number, index2: number) => {
     const { gridSize } = gameModes[gameModeKey];
@@ -432,9 +433,15 @@ export default function Home() {
       setScore(prev => prev + scoreDelta);
     }
 
-    setFightingIds(newFightingIds);
     if (newFightingIds.size > 0) {
-      setTimeout(() => setFightingIds(new Set()), 1000);
+      setFightingIds(newFightingIds);
+      if (fightTimeoutRef.current) {
+        clearTimeout(fightTimeoutRef.current);
+      }
+      fightTimeoutRef.current = setTimeout(() => {
+        setFightingIds(new Set());
+        fightTimeoutRef.current = null;
+      }, 1000);
     }
 
     if(localMatchedPairs.size > matchedPairs.size) {
@@ -482,6 +489,9 @@ export default function Home() {
     const checkTimeout = setTimeout(runChecks, 300);
     return () => {
       clearTimeout(checkTimeout);
+      if (fightTimeoutRef.current) {
+        clearTimeout(fightTimeoutRef.current);
+      }
     };
   }, [cells, runChecks]);
 
