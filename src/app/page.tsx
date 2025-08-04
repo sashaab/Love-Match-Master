@@ -655,8 +655,19 @@ export default function Home() {
                         <Menu className="h-6 w-6" /> {i18n[lang].hints}
                     </SidebarTrigger>
                 </div>
-               <div className="flex-grow order-1 sm:order-2">
+               <div className="flex-grow order-1 sm:order-2 text-center">
                  <ScoreBoard score={score} moves={moves} lang={lang} />
+                 <div className="mt-4 text-sm text-gray-600 max-w-md mx-auto">
+                  <ul className="space-y-2 list-disc list-inside">
+                    <li>{i18n[lang].appDescription1}</li>
+                    <li>{i18n[lang].appDescription2}</li>
+                  </ul>
+                  <Button asChild className="mt-4" variant="link">
+                    <a href="https://t.me/celebricy_bot/startttt?startapp=mUr6B4p6" target="_blank">
+                      {i18n[lang].sendToExpertButton}
+                    </a>
+                  </Button>
+                </div>
                </div>
                <div className="flex-none sm:w-[136px] flex justify-end gap-2 order-3">
                  <Button onClick={() => setLang('en')} variant={lang === 'en' ? 'default' : 'outline'} size="sm">EN</Button>
@@ -762,3 +773,5 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
+    
