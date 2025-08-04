@@ -175,10 +175,10 @@ const HintSidebar = ({
         <div className="space-y-6">
           <Card className="bg-sidebar-accent border-accent/50 text-sidebar-foreground">
             <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-accent font-headline">
+              <h3 className="flex items-center gap-3 text-accent font-headline text-2xl font-semibold leading-none tracking-tight">
                 <Heart className="text-accent" />
                 {i18n[lang].findTheCouples}
-              </CardTitle>
+              </h3>
             </CardHeader>
             <CardContent className="space-y-3">
               {revealedCouples.length > 0 && (
@@ -199,10 +199,10 @@ const HintSidebar = ({
 
           <Card className="bg-sidebar-accent border-destructive/50 text-sidebar-foreground">
             <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-destructive font-headline">
+              <h3 className="flex items-center gap-3 text-destructive font-headline text-2xl font-semibold leading-none tracking-tight">
                 <HeartCrack className="text-destructive" />
                 {i18n[lang].avoidTheExes}
-              </CardTitle>
+              </h3>
             </CardHeader>
             <CardContent className="space-y-3">
               {revealedExes.length > 0 && (
@@ -726,8 +726,12 @@ export default function Home() {
                   {i18n[lang].gameOverText
                     .replace('{moves}', moves.toString())
                     .replace('{score}', score.toString())}
-                  <p className="mt-4">{i18n[lang].gameOverInviteLine1}</p>
-                  <p>{i18n[lang].gameOverInviteLine2}</p>
+                </AlertDialogDescription>
+                <AlertDialogDescription className="text-center text-lg pt-4">
+                  {i18n[lang].gameOverInviteLine1}
+                </AlertDialogDescription>
+                <AlertDialogDescription className="text-center text-lg pt-4">
+                  {i18n[lang].gameOverInviteLine2}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -738,11 +742,11 @@ export default function Home() {
                     </a>
                   </Button>
                 <div className="flex flex-col sm:flex-row sm:justify-center sm:space-x-2 w-full gap-2 sm:gap-0 mt-2">
-                  <Button onClick={handleShare} variant="outline" className="w-full sm:flex-1">
+                  <Button onClick={handleShare} variant="outline" className="w-full flex-1">
                     <Share2 className="mr-2 h-4 w-4" />
                     {i18n[lang].shareWithFriend}
                   </Button>
-                  <AlertDialogAction onClick={handleReset} className="w-full sm:flex-1">
+                  <AlertDialogAction onClick={handleReset} className="w-full flex-1">
                     {i18n[lang].playAgain}
                   </AlertDialogAction>
                 </div>
@@ -759,7 +763,8 @@ export default function Home() {
                 <AlertDialogDescription className="text-center text-lg pt-4">
                   {i18n[lang].noMoreSwaps}
                   <br />
-                  {i18n[lang].yourFinalScore} <span className="font-bold text-primary">{score}</span>
+                  {i18n[lang].yourFinalScore}{' '}
+                  <span className="font-bold text-primary">{score}</span>
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -774,4 +779,3 @@ export default function Home() {
     </SidebarProvider>
   );
 }
-
