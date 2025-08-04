@@ -40,16 +40,16 @@ const prompt = ai.definePrompt({
   output: {schema: PopulateCelebrityGridOutputSchema},
   prompt: `You are a tool that provides a list of celebrity faces for a game.
 
-  Based on the topic: "{{topic}}", generate a list of {{gridSize}} celebrities. For each celebrity, include their name and a direct URL to a publicly available face image. Use reliable image sources like Wikipedia, Wikimedia Commons, or official social media.
+  Based on the topic: "{{topic}}", generate a list of {{gridSize}} celebrities. For each celebrity, include their name and a local image path.
 
-  Ensure that the celebrities are well-known and have readily available face images online. Focus on diversity and relevance to the specified topic.
+  Ensure that the celebrities are well-known.
 
   Output the celebrity faces in JSON format.
   {
     "celebrityFaces": [
       {
         "name": "Celebrity Name",
-        "imageUrl": "URL to Celebrity Face Image"
+        "imageUrl": "./images/celebrities/Celebrity Name.png"
       }
     ]
   }`,
