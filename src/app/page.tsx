@@ -144,7 +144,7 @@ const HintSidebar = ({
   const revealedExes = exes.slice(0, unlockedExesCount);
 
   return (
-    <Sidebar collapsible="icon" variant="sidebar" side="left">
+    <Sidebar collapsible="offcanvas" variant="sidebar" side="left">
       <SidebarHeader className="border-b border-sidebar-border bg-sidebar-accent">
         <div className="flex items-center gap-2 p-2 justify-center">
           <h2 className="text-2xl font-bold font-headline text-sidebar-primary-foreground">Hints</h2>
@@ -427,21 +427,17 @@ export default function Home() {
       setScore(prev => prev + scoreDelta);
     }
     
-    if (newFightingIds.size > 0 && newFightingIds.size !== fightingIds.size) {
-        setFightingIds(newFightingIds);
+    if (newFightingIds.size > 0) {
         if (fightTimeoutRef.current) {
             clearTimeout(fightTimeoutRef.current);
         }
+        setFightingIds(newFightingIds);
         fightTimeoutRef.current = setTimeout(() => {
             setFightingIds(new Set());
             fightTimeoutRef.current = null;
         }, 1000);
-    } else if (newFightingIds.size === 0 && fightingIds.size > 0) {
+    } else if (fightingIds.size > 0) {
         setFightingIds(new Set());
-        if(fightTimeoutRef.current) {
-            clearTimeout(fightTimeoutRef.current);
-            fightTimeoutRef.current = null;
-        }
     }
 
     if(localMatchedPairs.size > matchedPairs.size) {
@@ -679,5 +675,3 @@ export default function Home() {
     </SidebarProvider>
   );
 }
-
-    
