@@ -729,7 +729,8 @@ export default function Home() {
                       .replace('{score}', score.toString())
                     }
                   </p>
-                  <p className="mt-4">{i18n[lang].gameOverInvite}</p>
+                  <p className="mt-4">{i18n[lang].gameOverInviteLine1}</p>
+                  <p>{i18n[lang].gameOverInviteLine2}</p>
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -776,5 +777,3 @@ export default function Home() {
     </SidebarProvider>
   );
 }
-
-    

@@ -1,3 +1,4 @@
+
 export type Language = 'en' | 'ru';
 
 export const i18n = {
@@ -26,7 +27,8 @@ export const i18n = {
     appDescription2: 'But beware of bringing exes together - they will bite 🤬 (and you will lose points 👀)',
     sendToExpertButton: 'Send to someone who knows',
     gameOverText: 'You found all the pairs in {moves} moves and earned {score} points!',
-    gameOverInvite: "You've earned the right to become a Celebricy and participate in the big game! Come in to find out your influence and get a special bonus⚡️",
+    gameOverInviteLine1: "You've earned the right to become a Celebricy and participate in the big game!",
+    gameOverInviteLine2: "Come in to find out your influence and get a special bonus⚡️",
     becomeCelebrity: 'Become a Celebrity'
   },
   ru: {
@@ -54,7 +56,8 @@ export const i18n = {
     appDescription2: 'Но остерегайся сближать бывших - они будут кусаться 🤬(а ты потеряешь очки👀)',
     sendToExpertButton: 'Отправить тому кто разбирается',
     gameOverText: 'Ты нашел все пары за {moves} ходов и заработал {score} очков!',
-    gameOverInvite: 'Ты заслужил право стать Селебриси и участвовать в большой игре! Заходи, чтобы узнать свое влияние и получить специальный бонус⚡️',
+    gameOverInviteLine1: 'Ты заслужил право стать Селебриси и участвовать в большой игре!',
+    gameOverInviteLine2: 'Заходи, чтобы узнать свое влияние и получить специальный бонус⚡️',
     becomeCelebrity: 'Стать Селебриси'
   },
 };
