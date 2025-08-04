@@ -368,7 +368,7 @@ export default function Home() {
   useEffect(() => {
     setIsClient(true);
     setupGame(gameModeKey);
-  }, [setupGame]);
+  }, [setupGame, gameModeKey]);
 
   const runChecks = useCallback(() => {
     if (gameOver || isStuck) return;
@@ -432,9 +432,10 @@ export default function Home() {
     if (scoreDelta !== 0) {
       setScore(prev => prev + scoreDelta);
     }
+    
+    setFightingIds(newFightingIds);
 
     if (newFightingIds.size > 0) {
-      setFightingIds(newFightingIds);
       if (fightTimeoutRef.current) {
         clearTimeout(fightTimeoutRef.current);
       }
@@ -442,6 +443,12 @@ export default function Home() {
         setFightingIds(new Set());
         fightTimeoutRef.current = null;
       }, 1000);
+    } else {
+        if(fightTimeoutRef.current) {
+            clearTimeout(fightTimeoutRef.current);
+            fightTimeoutRef.current = null;
+        }
+        setFightingIds(new Set());
     }
 
     if(localMatchedPairs.size > matchedPairs.size) {
@@ -508,7 +515,7 @@ export default function Home() {
 
     updateCells(newCells);
 
-  }, [cells, matchedPairs]);
+  }, [cells, matchedPairs, updateCells]);
 
   const handleCardClick = (index: number) => {
     if (gameOver || isStuck) return;
@@ -697,5 +704,3 @@ export default function Home() {
     </SidebarProvider>
   );
 }
-
-    
