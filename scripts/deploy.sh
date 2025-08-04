@@ -34,6 +34,27 @@ if [ -n "$DOMAIN" ]; then
     echo "⏳ Ждем запуска nginx..."
     sleep 15
     
+    # Проверяем, что nginx запустился
+    echo "🔍 Проверяем статус nginx..."
+    if ! docker-compose ps nginx | grep -q "Up"; then
+        echo "❌ Nginx не запустился. Проверяем логи..."
+        docker-compose logs nginx
+        echo "🔄 Перезапускаем nginx..."
+        docker-compose restart nginx
+        sleep 10
+    fi
+    
+    # Проверяем доступность порта 80
+    echo "🔌 Проверяем доступность порта 80..."
+    if curl -s --connect-timeout 5 -I http://localhost:80 > /dev/null 2>&1; then
+        echo "✅ Порт 80 доступен"
+    else
+        echo "❌ Порт 80 недоступен. Проверяем логи..."
+        docker-compose logs nginx
+        echo "Попробуйте запустить тестовое развертывание: ./scripts/test-deploy.sh"
+        exit 1
+    fi
+    
     # Получаем SSL сертификат (сначала staging для тестирования)
     echo "🔐 Получаем SSL сертификат (staging)..."
     docker-compose run --rm certbot certonly --webroot --webroot-path=/var/www/certbot --email $CERTBOT_EMAIL --agree-tos --no-eff-email --staging -d $DOMAIN
@@ -53,6 +74,8 @@ if [ -n "$DOMAIN" ]; then
     else
         echo "❌ Не удалось получить SSL сертификат"
         echo "Проверьте, что домен $DOMAIN указывает на этот сервер и порт 80 открыт"
+        echo "Логи certbot:"
+        docker-compose logs certbot
     fi
     
     # Перезапускаем nginx для применения сертификата
