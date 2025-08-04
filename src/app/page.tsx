@@ -626,15 +626,19 @@ export default function Home() {
     const nextUnrevealedCouple = gameCouples.find(c => !revealedCoupleNames.has(c.name));
 
     if (nextUnrevealedCouple) {
-        setScore(s => s - COUPLE_HINT_COST);
-        setUnlockedCoupleNames(prev => new Set(prev).add(nextUnrevealedCouple.name));
+        if(score >= COUPLE_HINT_COST) {
+            setScore(s => s - COUPLE_HINT_COST);
+            setUnlockedCoupleNames(prev => new Set(prev).add(nextUnrevealedCouple.name));
+        }
     }
   };
 
   const handleUnlockEx = () => {
     if (unlockedExesCount < gameExes.length) {
-      setScore(s => s - EX_HINT_COST);
-      setUnlockedExesCount(e => e + 1);
+       if (score >= EX_HINT_COST) {
+        setScore(s => s - EX_HINT_COST);
+        setUnlockedExesCount(e => e + 1);
+       }
     }
   };
 
@@ -832,3 +836,4 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
