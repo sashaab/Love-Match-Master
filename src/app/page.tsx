@@ -740,11 +740,11 @@ export default function Home() {
                     </a>
                   </Button>
                 <div className="flex flex-col sm:flex-row sm:justify-center sm:space-x-2 w-full gap-2 sm:gap-0 mt-2">
-                  <Button onClick={handleShare} variant="outline" className="w-full sm:w-auto">
+                  <Button onClick={handleShare} variant="outline" className="w-full sm:flex-1">
                     <Share2 className="mr-2 h-4 w-4" />
                     {i18n[lang].shareWithFriend}
                   </Button>
-                  <AlertDialogAction onClick={handleReset} className="w-full sm:w-auto">
+                  <AlertDialogAction onClick={handleReset} className="w-full sm:flex-1">
                     {i18n[lang].playAgain}
                   </AlertDialogAction>
                 </div>
@@ -776,3 +776,5 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
+    
