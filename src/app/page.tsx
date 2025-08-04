@@ -7,8 +7,8 @@ import { cn } from "@/lib/utils";
 import type { Celebrity, Cell } from "@/lib/types";
 import { celebritiesData } from "@/lib/game-data";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Heart, ZapOff, RotateCw, Trophy, Undo, Lock, Ban, Menu } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Heart, ZapOff, RotateCw, Trophy, Undo, Lock, Ban, Menu, HeartCrack } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,7 +42,7 @@ type GameModeKey = keyof typeof gameModes;
 
 
 const ScoreBoard = ({ score }: { score: number }) => (
-  <div className="text-center mb-4">
+  <div className="text-center">
     <h1 className="font-headline text-5xl md:text-6xl font-bold text-gray-800">Love Match Mania</h1>
     <p className="mt-2 text-2xl font-semibold text-primary">Score: {score}</p>
   </div>
@@ -145,50 +145,62 @@ const HintSidebar = ({
 
   return (
     <Sidebar collapsible="offcanvas" variant="sidebar" side="left">
-      <SidebarHeader className="border-b border-sidebar-border bg-sidebar-accent">
-        <div className="flex items-center gap-2 p-2 justify-center">
-          <h2 className="text-2xl font-bold font-headline text-sidebar-primary-foreground">Hints</h2>
-        </div>
+      <SidebarHeader className="border-b border-sidebar-border bg-sidebar-accent p-4">
+        <h2 className="text-2xl font-bold font-headline text-sidebar-primary-foreground text-center">Game Hints</h2>
       </SidebarHeader>
-      <SidebarContent className="bg-sidebar">
-        <div className="p-4 space-y-6">
-          <div>
-            <h3 className="font-semibold text-lg mb-3 flex items-center gap-2 text-green-300">
-              Match these couples!
-            </h3>
-            {revealedCouples.length > 0 && (
-                <ul className="space-y-2 mb-4">
-                  {revealedCouples.map((c, i) => (
-                    <li key={`couple-${i}`} className="text-sm bg-sidebar-accent/50 p-2 rounded-md">{c.name} & {c.partner}</li>
-                  ))}
-                </ul>
-            )}
-            {unlockedCouplesCount < couples.length && (
-              <Button onClick={onUnlockCouple} className="w-full" disabled={score < COUPLE_HINT_COST}>
-                <Lock className="mr-2" /> Unlock for {COUPLE_HINT_COST} points
-              </Button>
-            )}
-          </div>
+      <SidebarContent className="bg-sidebar p-4">
+        <div className="space-y-6">
+          <Card className="bg-sidebar-accent border-primary/50 text-sidebar-foreground">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3 text-primary font-headline">
+                <Heart className="text-primary" />
+                Find the Couples
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {revealedCouples.length > 0 && (
+                  <ul className="space-y-2 text-sm">
+                    {revealedCouples.map((c, i) => (
+                      <li key={`couple-${i}`} className="bg-background/10 p-2 rounded-md font-medium">{c.name} & {c.partner}</li>
+                    ))}
+                  </ul>
+              )}
+              {unlockedCouplesCount < couples.length && (
+                <Button onClick={onUnlockCouple} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" disabled={score < COUPLE_HINT_COST}>
+                  <Lock className="mr-2" /> Unlock ({COUPLE_HINT_COST} pts)
+                </Button>
+              )}
+              {unlockedCouplesCount === couples.length && revealedCouples.length > 0 &&(
+                <p className="text-sm text-center text-primary/80">All couple hints unlocked!</p>
+              )}
+            </CardContent>
+          </Card>
 
-          <Separator className="bg-sidebar-border" />
-
-          <div>
-            <h3 className="font-semibold text-lg mb-3 flex items-center gap-2 text-red-400">
-              Don't match these exes!
-            </h3>
-            {revealedExes.length > 0 && (
-                 <ul className="space-y-2 mb-4">
-                  {revealedExes.map((e, i) => (
-                    <li key={`ex-${i}`} className="text-sm bg-sidebar-accent/50 p-2 rounded-md">{e.p1} & {e.p2}</li>
-                  ))}
-                </ul>
-            )}
-            {unlockedExesCount < exes.length && (
-              <Button onClick={onUnlockEx} className="w-full" disabled={score < EX_HINT_COST}>
-                <Lock className="mr-2" /> Unlock for {EX_HINT_COST} points
-              </Button>
-            )}
-          </div>
+          <Card className="bg-sidebar-accent border-destructive/50 text-sidebar-foreground">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3 text-destructive font-headline">
+                <HeartCrack className="text-destructive" />
+                Avoid the Exes
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {revealedExes.length > 0 && (
+                   <ul className="space-y-2 text-sm">
+                    {revealedExes.map((e, i) => (
+                      <li key={`ex-${i}`} className="bg-background/10 p-2 rounded-md font-medium">{e.p1} & {e.p2}</li>
+                    ))}
+                  </ul>
+              )}
+              {unlockedExesCount < exes.length && (
+                <Button onClick={onUnlockEx} variant="destructive" className="w-full" disabled={score < EX_HINT_COST}>
+                  <Lock className="mr-2" /> Unlock ({EX_HINT_COST} pts)
+                </Button>
+              )}
+               {unlockedExesCount === exes.length && revealedExes.length > 0 && (
+                <p className="text-sm text-center text-destructive/80">All ex-hints unlocked!</p>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </SidebarContent>
     </Sidebar>
@@ -427,17 +439,15 @@ export default function Home() {
       setScore(prev => prev + scoreDelta);
     }
     
+    setFightingIds(newFightingIds);
     if (newFightingIds.size > 0) {
         if (fightTimeoutRef.current) {
             clearTimeout(fightTimeoutRef.current);
         }
-        setFightingIds(newFightingIds);
         fightTimeoutRef.current = setTimeout(() => {
             setFightingIds(new Set());
             fightTimeoutRef.current = null;
         }, 1000);
-    } else if (fightingIds.size > 0) {
-        setFightingIds(new Set());
     }
 
     if(localMatchedPairs.size > matchedPairs.size) {
@@ -460,7 +470,7 @@ export default function Home() {
     if (!hasMoves && gameCouples.length > 0) {
       setIsStuck(true);
     }
-  }, [cells, matchedPairs, gameOver, isStuck, gameCouples, gameModeKey, penalizedExPairs, fightingIds.size]);
+  }, [cells, matchedPairs, gameOver, isStuck, gameCouples, gameModeKey, penalizedExPairs]);
 
   useEffect(() => {
     const checkTimeout = setTimeout(runChecks, 300);
@@ -581,16 +591,12 @@ export default function Home() {
       <SidebarInset>
         <main className="min-h-screen w-full bg-background p-4 sm:p-8">
           <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
-              <div className="flex-grow order-1 sm:order-2">
-                <ScoreBoard score={score} />
-              </div>
-              <div className="order-2 sm:order-1">
-                <SidebarTrigger variant="outline" size="lg">
+             <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
+               <ScoreBoard score={score} />
+               <SidebarTrigger variant="outline" size="lg">
                   <Menu className="h-6 w-6" /> Hints
-                </SidebarTrigger>
-              </div>
-            </div>
+               </SidebarTrigger>
+             </div>
 
             <div className="flex justify-center gap-4 mb-8">
               {(Object.keys(gameModes) as GameModeKey[]).map(key => (
@@ -675,3 +681,6 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
+
+    
