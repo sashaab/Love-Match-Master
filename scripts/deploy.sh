@@ -24,8 +24,8 @@ if [ -n "$DOMAIN" ]; then
     # Создаем директорию для SSL сертификатов
     mkdir -p ssl
     
-    # Копируем HTTPS конфигурацию nginx
-    cp nginx-https.conf nginx.conf
+    # Генерируем HTTPS конфигурацию nginx с подстановкой домена
+    ./scripts/generate-nginx-config.sh
     
     # Запускаем сервисы
     docker-compose up -d
