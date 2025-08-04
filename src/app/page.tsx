@@ -439,17 +439,16 @@ export default function Home() {
       setScore(prev => prev + scoreDelta);
     }
     
+    if (fightTimeoutRef.current) {
+      clearTimeout(fightTimeoutRef.current);
+      fightTimeoutRef.current = null;
+    }
+    setFightingIds(newFightingIds);
     if (newFightingIds.size > 0) {
-        setFightingIds(newFightingIds);
-        if (fightTimeoutRef.current) {
-            clearTimeout(fightTimeoutRef.current);
-        }
-        fightTimeoutRef.current = setTimeout(() => {
-            setFightingIds(new Set());
-            fightTimeoutRef.current = null;
-        }, 1000);
-    } else {
+      fightTimeoutRef.current = setTimeout(() => {
         setFightingIds(new Set());
+        fightTimeoutRef.current = null;
+      }, 1000);
     }
 
     if(localMatchedPairs.size > matchedPairs.size) {
@@ -593,8 +592,10 @@ export default function Home() {
       <SidebarInset>
         <main className="min-h-screen w-full bg-background p-4 sm:p-8">
           <div className="max-w-7xl mx-auto">
-             <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
-               <ScoreBoard score={score} />
+             <div className="flex flex-col sm:flex-row justify-center items-center mb-4 gap-4">
+               <div className="flex-grow">
+                 <ScoreBoard score={score} />
+               </div>
                <SidebarTrigger variant="outline" size="lg">
                   <Menu className="h-6 w-6" /> Hints
                </SidebarTrigger>
