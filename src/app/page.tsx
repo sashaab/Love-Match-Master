@@ -136,7 +136,7 @@ const HintSidebar = ({
   exes,
   onUnlockCouple,
   onUnlockEx,
-  unlockedCouplesCount,
+  unlockedCoupleNames,
   unlockedExesCount,
   matchedPairs,
   allCells,
@@ -146,13 +146,13 @@ const HintSidebar = ({
   exes: { p1: string; p2: string }[];
   onUnlockCouple: () => void;
   onUnlockEx: () => void;
-  unlockedCouplesCount: number;
+  unlockedCoupleNames: Set<string>;
   unlockedExesCount: number;
   matchedPairs: Set<string>;
   allCells: Cell[];
   lang: Language;
 }) => {
-  const unlockedByPoints = couples.slice(0, unlockedCouplesCount);
+  const unlockedByPoints = couples.filter(c => unlockedCoupleNames.has(c.name));
 
   const matchedOnBoard = couples.filter(couple => {
     const p1 = allCells.find(c => c.type === 'celebrity' && c.name === couple.name);
@@ -162,6 +162,8 @@ const HintSidebar = ({
   
   const revealedCouples = [...new Map([...unlockedByPoints, ...matchedOnBoard].map(item => [item.name, item])).values()];
   const revealedExes = exes.slice(0, unlockedExesCount);
+  const totalCouplesToFind = couples.length;
+  const allCouplesRevealed = revealedCouples.length === totalCouplesToFind;
 
   return (
     <Sidebar collapsible="offcanvas" variant="sidebar" side="left">
@@ -185,10 +187,10 @@ const HintSidebar = ({
                     ))}
                   </ul>
               )}
-              <Button onClick={onUnlockCouple} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
+              <Button onClick={onUnlockCouple} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" disabled={allCouplesRevealed}>
                 <Lock className="mr-2" /> {i18n[lang].unlock} ({COUPLE_HINT_COST} pts)
               </Button>
-              {unlockedCouplesCount === couples.length && revealedCouples.length > 0 &&(
+              {allCouplesRevealed && totalCouplesToFind > 0 && (
                 <p className="text-sm text-center text-primary/80">{i18n[lang].allCoupleHintsUnlocked}</p>
               )}
             </CardContent>
@@ -209,10 +211,10 @@ const HintSidebar = ({
                     ))}
                   </ul>
               )}
-               <Button onClick={onUnlockEx} variant="destructive" className="w-full">
+               <Button onClick={onUnlockEx} variant="destructive" className="w-full" disabled={unlockedExesCount === exes.length}>
                   <Lock className="mr-2" /> {i18n[lang].unlock} ({EX_HINT_COST} pts)
                 </Button>
-               {unlockedExesCount === exes.length && revealedExes.length > 0 && (
+               {unlockedExesCount === exes.length && exes.length > 0 && (
                 <p className="text-sm text-center text-destructive/80">{i18n[lang].allExHintsUnlocked}</p>
               )}
             </CardContent>
@@ -238,7 +240,7 @@ export default function Home() {
   const [gameCouples, setGameCouples] = useState<Celebrity[]>([]);
   const [gameExes, setGameExes] = useState<{p1: string, p2: string}[]>([]);
   const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
-  const [unlockedCouplesCount, setUnlockedCouplesCount] = useState(0);
+  const [unlockedCoupleNames, setUnlockedCoupleNames] = useState<Set<string>>(new Set());
   const [unlockedExesCount, setUnlockedExesCount] = useState(0);
   const [gameModeKey, setGameModeKey] = useState<GameModeKey>('medium');
   const [lang, setLang] = useState<Language>('en');
@@ -387,7 +389,7 @@ export default function Home() {
     setGameOver(false);
     setIsStuck(false);
     setSelectedCardIndex(null);
-    setUnlockedCouplesCount(0);
+    setUnlockedCoupleNames(new Set());
     setUnlockedExesCount(0);
   }, [getCelebrityDataByLang]);
 
@@ -581,9 +583,19 @@ export default function Home() {
   };
 
   const handleUnlockCouple = () => {
-    if (unlockedCouplesCount < gameCouples.length) {
-      setScore(s => s - COUPLE_HINT_COST);
-      setUnlockedCouplesCount(c => c + 1);
+    const matchedOnBoard = gameCouples.filter(couple => {
+      const p1 = cells.find(c => c.type === 'celebrity' && c.name === couple.name);
+      const p2 = cells.find(c => c.type === 'celebrity' && c.name === couple.partner);
+      return p1 && p2 && matchedPairs.has(p1.id) && matchedPairs.has(p2.id);
+    });
+
+    const revealedCoupleNames = new Set([...unlockedCoupleNames, ...matchedOnBoard.map(c => c.name)]);
+
+    const nextUnrevealedCouple = gameCouples.find(c => !revealedCoupleNames.has(c.name));
+
+    if (nextUnrevealedCouple) {
+        setScore(s => s - COUPLE_HINT_COST);
+        setUnlockedCoupleNames(prev => new Set(prev).add(nextUnrevealedCouple.name));
     }
   };
 
@@ -628,7 +640,7 @@ export default function Home() {
         exes={gameExes}
         onUnlockCouple={handleUnlockCouple}
         onUnlockEx={handleUnlockEx}
-        unlockedCouplesCount={unlockedCouplesCount}
+        unlockedCoupleNames={unlockedCoupleNames}
         unlockedExesCount={unlockedExesCount}
         matchedPairs={matchedPairs}
         allCells={cells}
@@ -637,16 +649,16 @@ export default function Home() {
       <SidebarInset>
         <main className="min-h-screen w-full bg-background p-4 sm:p-8">
           <div className="max-w-7xl mx-auto">
-             <div className="flex flex-col-reverse sm:flex-row justify-between items-center mb-4 gap-4">
-                <div className="flex-none sm:w-[136px]">
+             <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
+                <div className="flex-none sm:w-[136px] order-2 sm:order-1">
                     <SidebarTrigger variant="outline" size="lg">
                         <Menu className="h-6 w-6" /> {i18n[lang].hints}
                     </SidebarTrigger>
                 </div>
-               <div className="flex-grow">
+               <div className="flex-grow order-1 sm:order-2">
                  <ScoreBoard score={score} moves={moves} lang={lang} />
                </div>
-               <div className="flex-none sm:w-[136px] flex justify-end gap-2">
+               <div className="flex-none sm:w-[136px] flex justify-end gap-2 order-3">
                  <Button onClick={() => setLang('en')} variant={lang === 'en' ? 'default' : 'outline'} size="sm">EN</Button>
                  <Button onClick={() => setLang('ru')} variant={lang === 'ru' ? 'default' : 'outline'} size="sm">RU</Button>
                </div>
