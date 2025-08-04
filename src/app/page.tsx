@@ -433,8 +433,14 @@ export default function Home() {
       setShowInstructionsPopup(true);
       localStorage.setItem('loveMatchManiaVisited', 'true');
     }
-    setupGame(gameModeKey, lang);
-  }, [setupGame, gameModeKey, lang]);
+  }, []);
+
+  useEffect(() => {
+    if (isClient) {
+      setupGame(gameModeKey, lang);
+    }
+  }, [setupGame, gameModeKey, lang, isClient]);
+  
 
   const runChecks = useCallback(() => {
     if (gameOver || isStuck) return;
@@ -686,7 +692,7 @@ export default function Home() {
         <main className="min-h-screen w-full bg-background p-4 sm:p-8">
           <div className="max-w-7xl mx-auto">
              <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
-                <div className="flex-none sm:w-[250px] order-2 sm:order-1 flex gap-2">
+                <div className="flex-none sm:w-[250px] order-2 sm:order-1 flex flex-col gap-2">
                   <SidebarTrigger variant="outline" size="lg">
                       <Menu className="h-6 w-6" /> {i18n[lang].hints}
                   </SidebarTrigger>
@@ -750,15 +756,41 @@ export default function Home() {
                 <AlertDialogTitle className="text-center text-2xl font-headline">
                   {i18n[lang].welcomeTitle}
                 </AlertDialogTitle>
-                <div className="text-sm text-muted-foreground space-y-2 py-4 text-left">
-                  <p><strong>{i18n[lang].rulesTitle}</strong></p>
-                  <AlertDialogDescription>{i18n[lang].rule1}</AlertDialogDescription>
-                  <AlertDialogDescription>{i18n[lang].rule2}</AlertDialogDescription>
-                  <AlertDialogDescription>{i18n[lang].rule3}</AlertDialogDescription>
-                  <p><strong>{i18n[lang].levelsTitle}</strong></p>
-                  <AlertDialogDescription>{i18n[lang].levelEasy}</AlertDialogDescription>
-                  <AlertDialogDescription>{i18n[lang].levelMedium}</AlertDialogDescription>
-                  <AlertDialogDescription>{i18n[lang].levelHard}</AlertDialogDescription>
+                <div className="text-sm text-muted-foreground space-y-4 py-4 text-left">
+                  <div>
+                    <p className="font-bold mb-2">{i18n[lang].rulesTitle}</p>
+                    <p>{i18n[lang].rule1}</p>
+                    <div className="flex items-center justify-center gap-2 my-2 p-2 rounded-md bg-green-100/50">
+                        <div className="relative w-16 h-16">
+                            <Image src="/images/celebrities/Justin Bieber.png" alt="Justin Bieber" layout="fill" className="rounded-full object-cover" unoptimized/>
+                        </div>
+                        <Heart className="w-6 h-6 text-green-500" />
+                        <div className="relative w-16 h-16">
+                            <Image src="/images/celebrities/Hailey Bieber.png" alt="Hailey Bieber" layout="fill" className="rounded-full object-cover" unoptimized/>
+                        </div>
+                    </div>
+                     <p className='text-center text-xs'>{i18n[lang].rule1_example}</p>
+
+                    <p className='mt-2'>{i18n[lang].rule2}</p>
+                     <div className="flex items-center justify-center gap-2 my-2 p-2 rounded-md bg-red-100/50">
+                        <div className="relative w-16 h-16">
+                            <Image src="/images/celebrities/Justin Bieber.png" alt="Justin Bieber" layout="fill" className="rounded-full object-cover" unoptimized/>
+                        </div>
+                        <HeartCrack className="w-6 h-6 text-red-500" />
+                        <div className="relative w-16 h-16">
+                            <Image src="/images/celebrities/Selena Gomez.png" alt="Selena Gomez" layout="fill" className="rounded-full object-cover" unoptimized/>
+                        </div>
+                    </div>
+                    <p className='text-center text-xs'>{i18n[lang].rule2_example}</p>
+                    <p className='mt-2'>{i18n[lang].rule3}</p>
+                  </div>
+                  <Separator />
+                  <div>
+                    <p className="font-bold mb-2">{i18n[lang].levelsTitle}</p>
+                    <p><strong>{i18n[lang].easy}:</strong> {i18n[lang].levelEasy}</p>
+                    <p><strong>{i18n[lang].medium}:</strong> {i18n[lang].levelMedium}</p>
+                    <p><strong>{i18n[lang].hard}:</strong> {i18n[lang].levelHard}</p>
+                  </div>
                 </div>
               </AlertDialogHeader>
               <AlertDialogFooter>
