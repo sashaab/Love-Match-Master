@@ -26,11 +26,13 @@ export const i18n = {
     linkCopiedDescription: 'You can now share the game with your friends.',
     appDescription1: 'Untangle this web of love - connect celebs into current couples and prove you know show business!',
     appDescription2: 'But beware of bringing exes together - they will bite 🤬 (and you will lose points 👀)',
-    sendToExpertButton: 'Send to someone who knows',
     gameOverText: 'You found all the pairs in {moves} moves and earned {score} points!',
     gameOverInviteLine1: "You've earned the right to become a Celebricy and participate in the big game!",
     gameOverInviteLine2: "Come in to find out your influence and get a special bonus⚡️",
-    becomeCelebricy: 'Become a Celebricy'
+    becomeCelebricy: 'Become a Celebricy',
+    easy: 'Easy',
+    medium: 'Medium',
+    hard: 'Hard',
   },
   ru: {
     score: 'Счет',
@@ -56,10 +58,12 @@ export const i18n = {
     linkCopiedDescription: 'Теперь вы можете поделиться игрой с друзьями.',
     appDescription1: 'Распутай эту любовную паутину - соедини селеб в актуальные пары и докажи, что ты разбираешься в шоу бизнесе!',
     appDescription2: 'Но остерегайся сближать бывших - они будут кусаться 🤬(а ты потеряешь очки👀)',
-    sendToExpertButton: 'Отправить тому кто разбирается',
     gameOverText: 'Ты нашел все пары за {moves} ходов и заработал {score} очков!',
     gameOverInviteLine1: 'Ты заслужил право стать Селебриси и участвовать в большой игре!',
     gameOverInviteLine2: 'Заходи, чтобы узнать свое влияние и получить специальный бонус⚡️',
-    becomeCelebricy: 'Стать Селебриси'
+    becomeCelebricy: 'Стать Селебриси',
+    easy: 'Легкий',
+    medium: 'Средний',
+    hard: 'Сложный',
   },
 };

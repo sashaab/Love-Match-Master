@@ -36,13 +36,13 @@ import { TelegramIcon } from '@/components/ui/telegram-icon';
 const COUPLE_HINT_COST = 100;
 const EX_HINT_COST = 50;
 
-const gameModes = {
-  easy: { couplesToInclude: 3, label: 'Easy', hintsUnlocked: true, namesVisible: true },
-  medium: { couplesToInclude: 3, label: 'Medium', hintsUnlocked: false, namesVisible: true },
-  hard: { couplesToInclude: 3, label: 'Hard', hintsUnlocked: false, namesVisible: false },
-};
+const gameModes = (lang: Language) => ({
+  easy: { couplesToInclude: 4, label: i18n[lang].easy, hintsUnlocked: true, namesVisible: true },
+  medium: { couplesToInclude: 4, label: i18n[lang].medium, hintsUnlocked: false, namesVisible: true },
+  hard: { couplesToInclude: 4, label: i18n[lang].hard, hintsUnlocked: false, namesVisible: false },
+});
 
-type GameModeKey = keyof typeof gameModes;
+type GameModeKey = keyof ReturnType<typeof gameModes>;
 
 
 const ScoreBoard = ({ score, moves, lang }: { score: number, moves: number, lang: Language }) => (
@@ -279,7 +279,8 @@ export default function Home() {
   }, []);
 
   const setupGame = useCallback((modeKey: GameModeKey, language: Language) => {
-    const { couplesToInclude, hintsUnlocked } = gameModes[modeKey];
+    const currentModes = gameModes(language);
+    const { couplesToInclude, hintsUnlocked } = currentModes[modeKey];
     setGameModeKey(modeKey);
     
     const localizedCelebrities = getCelebrityDataByLang(language);
@@ -655,6 +656,7 @@ export default function Home() {
     gridTemplateColumns: `repeat(${Math.sqrt(GRID_SIZE)}, minmax(0, 1fr))`
   };
 
+  const currentModes = gameModes(lang);
 
   return (
     <SidebarProvider>
@@ -698,13 +700,13 @@ export default function Home() {
              </div>
 
             <div className="flex justify-center gap-4 mb-8">
-              {(Object.keys(gameModes) as GameModeKey[]).map(key => (
+              {(Object.keys(currentModes) as GameModeKey[]).map(key => (
                   <Button 
                     key={key} 
                     onClick={() => handleGameModeChange(key)}
                     variant={gameModeKey === key ? 'default' : 'outline'}
                   >
-                    {gameModes[key].label}
+                    {currentModes[key].label}
                   </Button>
               ))}
             </div>
@@ -723,7 +725,7 @@ export default function Home() {
                     onDragOver={handleDragOver}
                     onDrop={handleDrop}
                     onClick={handleCardClick}
-                    namesVisible={gameModes[gameModeKey].namesVisible}
+                    namesVisible={currentModes[gameModeKey].namesVisible}
                   />
                 ))}
               </div>
