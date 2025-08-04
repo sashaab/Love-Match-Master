@@ -8,7 +8,7 @@ import type { Celebrity, Cell } from "@/lib/types";
 import { celebritiesData } from "@/lib/game-data";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Heart, ZapOff, RotateCw, Trophy, Undo, Lock, Ban, Menu, HeartCrack, Share2, Send } from "lucide-react";
+import { Heart, ZapOff, RotateCw, Trophy, Undo, Lock, Ban, Menu, HeartCrack, Share2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +30,7 @@ import { Separator } from "@/components/ui/separator";
 import { shuffle } from 'lodash';
 import { useToast } from "@/hooks/use-toast";
 import { i18n, Language } from '@/lib/i18n';
+import { TelegramIcon } from '@/components/ui/telegram-icon';
 
 
 const COUPLE_HINT_COST = 100;
@@ -662,7 +663,7 @@ export default function Home() {
                     <p>{i18n[lang].appDescription2}</p>
                   <Button asChild className="mt-4 bg-black text-white hover:bg-gray-800">
                     <a href="https://t.me/celebricy_bot/startttt?startapp=fOYOCKlN" target="_blank">
-                      <Send className="mr-2" />
+                      <TelegramIcon className="mr-2" />
                       {i18n[lang].sendToExpertButton}
                     </a>
                   </Button>
@@ -732,7 +733,7 @@ export default function Home() {
               <AlertDialogFooter>
                  <Button asChild className="w-full bg-black text-white hover:bg-gray-800">
                     <a href="https://t.me/celebricy_bot/startttt?startapp=fOYOCKlN" target="_blank">
-                      <Send className="mr-2" />
+                      <TelegramIcon className="mr-2" />
                       {i18n[lang].joinProject}
                     </a>
                   </Button>
