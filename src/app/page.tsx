@@ -759,7 +759,7 @@ export default function Home() {
                 <div className="text-sm text-muted-foreground space-y-4 py-4 text-left">
                   <div>
                     <p className="font-bold mb-2">{i18n[lang].rulesTitle}</p>
-                    <p>{i18n[lang].rule1}</p>
+                    <p className='mb-2'>{i18n[lang].rule1}</p>
                     <div className="flex items-center justify-center gap-2 my-2 p-2 rounded-md bg-green-100/50">
                         <div className="relative w-16 h-16">
                             <Image src="/images/celebrities/Justin Bieber.png" alt="Justin Bieber" layout="fill" className="rounded-full object-cover" unoptimized/>
@@ -783,6 +783,7 @@ export default function Home() {
                     </div>
                     <p className='text-center text-xs'>{i18n[lang].rule2_example}</p>
                     <p className='mt-2'>{i18n[lang].rule3}</p>
+                    <p className='mt-2'>{i18n[lang].rule4}</p>
                   </div>
                   <Separator />
                   <div>
