@@ -658,7 +658,8 @@ export default function Home() {
                <div className="flex-grow order-1 sm:order-2 text-center">
                  <ScoreBoard score={score} moves={moves} lang={lang} />
                  <div className="mt-4 text-sm text-gray-600 max-w-md mx-auto">
-                   <p>{i18n[lang].appDescription}</p>
+                    <p>{i18n[lang].appDescription1}</p>
+                    <p>{i18n[lang].appDescription2}</p>
                   <Button asChild className="mt-4" variant="link">
                     <a href="https://t.me/celebricy_bot/startttt?startapp=nyU1d6sy" target="_blank">
                       {i18n[lang].sendToExpertButton}
