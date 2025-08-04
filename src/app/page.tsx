@@ -663,7 +663,7 @@ export default function Home() {
                     <li>{i18n[lang].appDescription2}</li>
                   </ul>
                   <Button asChild className="mt-4" variant="link">
-                    <a href="https://t.me/celebricy_bot/startttt?startapp=mUr6B4p6" target="_blank">
+                    <a href="https://t.me/celebricy_bot/startttt?startapp=nyU1d6sy" target="_blank">
                       {i18n[lang].sendToExpertButton}
                     </a>
                   </Button>
@@ -732,7 +732,7 @@ export default function Home() {
               </AlertDialogHeader>
               <AlertDialogFooter className="sm:flex-col sm:space-y-2">
                  <Button asChild className="w-full">
-                    <a href="https://t.me/celebricy_bot/startttt?startapp=mUr6B4p6" target="_blank">
+                    <a href="https://t.me/celebricy_bot/startttt?startapp=nyU1d6sy" target="_blank">
                       {i18n[lang].joinProject}
                     </a>
                   </Button>
@@ -773,5 +773,7 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
+    
 
     
