@@ -685,7 +685,7 @@ export default function Home() {
               ))}
             </div>
             
-            <div className="w-full max-w-3xl mx-auto">
+            <div className="w-full max-w-2xl mx-auto">
               <div className="grid gap-2 md:gap-4 mb-8" style={gridDynamicStyle}>
                 {cells.map((cell, index) => (
                   <CelebrityCard
