@@ -29,6 +29,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { shuffle } from 'lodash';
 import { useToast } from "@/hooks/use-toast";
+import { i18n, Language } from '@/lib/i18n';
 
 
 const COUPLE_HINT_COST = 100;
@@ -43,10 +44,10 @@ const gameModes = {
 type GameModeKey = keyof typeof gameModes;
 
 
-const ScoreBoard = ({ score, moves }: { score: number, moves: number }) => (
+const ScoreBoard = ({ score, moves, lang }: { score: number, moves: number, lang: Language }) => (
   <div className="text-center">
     <h1 className="font-headline text-4xl md:text-5xl font-bold text-gray-800">Love Match Mania</h1>
-    <p className="mt-2 text-2xl font-semibold text-primary">Score: {score} | Moves: {moves}</p>
+    <p className="mt-2 text-2xl font-semibold text-primary">{i18n[lang].score}: {score} | {i18n[lang].moves}: {moves}</p>
   </div>
 );
 
@@ -139,6 +140,7 @@ const HintSidebar = ({
   unlockedExesCount,
   matchedPairs,
   allCells,
+  lang,
 }: {
   couples: Celebrity[];
   exes: { p1: string; p2: string }[];
@@ -148,6 +150,7 @@ const HintSidebar = ({
   unlockedExesCount: number;
   matchedPairs: Set<string>;
   allCells: Cell[];
+  lang: Language;
 }) => {
   const unlockedByPoints = couples.slice(0, unlockedCouplesCount);
 
@@ -163,7 +166,7 @@ const HintSidebar = ({
   return (
     <Sidebar collapsible="offcanvas" variant="sidebar" side="left">
       <SidebarHeader className="border-b border-sidebar-border bg-sidebar-accent p-4">
-        <h2 className="text-2xl font-bold font-headline text-sidebar-primary-foreground text-center">Game Hints</h2>
+        <h2 className="text-2xl font-bold font-headline text-sidebar-primary-foreground text-center">{i18n[lang].gameHints}</h2>
       </SidebarHeader>
       <SidebarContent className="bg-sidebar p-4">
         <div className="space-y-6">
@@ -171,7 +174,7 @@ const HintSidebar = ({
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-primary font-headline">
                 <Heart className="text-primary" />
-                Find the Couples
+                {i18n[lang].findTheCouples}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -182,13 +185,11 @@ const HintSidebar = ({
                     ))}
                   </ul>
               )}
-              {unlockedCouplesCount < couples.length && (
-                <Button onClick={onUnlockCouple} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-                  <Lock className="mr-2" /> Unlock ({COUPLE_HINT_COST} pts)
-                </Button>
-              )}
+              <Button onClick={onUnlockCouple} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
+                <Lock className="mr-2" /> {i18n[lang].unlock} ({COUPLE_HINT_COST} pts)
+              </Button>
               {unlockedCouplesCount === couples.length && revealedCouples.length > 0 &&(
-                <p className="text-sm text-center text-primary/80">All couple hints unlocked!</p>
+                <p className="text-sm text-center text-primary/80">{i18n[lang].allCoupleHintsUnlocked}</p>
               )}
             </CardContent>
           </Card>
@@ -197,7 +198,7 @@ const HintSidebar = ({
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-destructive font-headline">
                 <HeartCrack className="text-destructive" />
-                Avoid the Exes
+                {i18n[lang].avoidTheExes}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -208,13 +209,11 @@ const HintSidebar = ({
                     ))}
                   </ul>
               )}
-              {unlockedExesCount < exes.length && (
-                <Button onClick={onUnlockEx} variant="destructive" className="w-full">
-                  <Lock className="mr-2" /> Unlock ({EX_HINT_COST} pts)
+               <Button onClick={onUnlockEx} variant="destructive" className="w-full">
+                  <Lock className="mr-2" /> {i18n[lang].unlock} ({EX_HINT_COST} pts)
                 </Button>
-              )}
                {unlockedExesCount === exes.length && revealedExes.length > 0 && (
-                <p className="text-sm text-center text-destructive/80">All ex-hints unlocked!</p>
+                <p className="text-sm text-center text-destructive/80">{i18n[lang].allExHintsUnlocked}</p>
               )}
             </CardContent>
           </Card>
@@ -242,6 +241,7 @@ export default function Home() {
   const [unlockedCouplesCount, setUnlockedCouplesCount] = useState(0);
   const [unlockedExesCount, setUnlockedExesCount] = useState(0);
   const [gameModeKey, setGameModeKey] = useState<GameModeKey>('medium');
+  const [lang, setLang] = useState<Language>('en');
   const { toast } = useToast();
 
   const draggedItem = useRef<number | null>(null);
@@ -257,13 +257,24 @@ export default function Home() {
 
     return (row1 === row2 && Math.abs(col1 - col2) === 1) || (col1 === col2 && Math.abs(row1 - row2) === 1);
   };
+  
+  const getCelebrityDataByLang = useCallback((lang: Language) => {
+    return celebritiesData.map(c => {
+      const name = typeof c.name === 'object' ? c.name[lang] : c.name;
+      const partner = c.partner && (typeof c.partner === 'object' ? c.partner[lang] : c.partner);
+      const exes = c.exes?.map(e => typeof e === 'object' ? e[lang] : e);
+      return { ...c, name, partner, exes };
+    });
+  }, []);
 
-  const setupGame = useCallback((modeKey: GameModeKey) => {
+  const setupGame = useCallback((modeKey: GameModeKey, language: Language) => {
     const { gridSize, couplesToInclude } = gameModes[modeKey];
     setGameModeKey(modeKey);
+    
+    const localizedCelebrities = getCelebrityDataByLang(language);
 
-    let potentialCouples = shuffle(celebritiesData.filter(c =>
-        c.partner && celebritiesData.find(p => p.name === c.partner) && (c.exes && c.exes.length > 0)
+    let potentialCouples = shuffle(localizedCelebrities.filter(c =>
+        c.partner && localizedCelebrities.find(p => p.name === c.partner) && (c.exes && c.exes.length > 0)
     ));
     
     let selectedCouples: Celebrity[] = [];
@@ -271,13 +282,13 @@ export default function Home() {
 
     while (selectedCouples.length < couplesToInclude && potentialCouples.length > 0) {
         const coupleCandidate = potentialCouples.pop()!;
-        const partner = celebritiesData.find(p => p.name === coupleCandidate.partner)!;
+        const partner = localizedCelebrities.find(p => p.name === coupleCandidate.partner)!;
         
         const exesOfCandidate = coupleCandidate.exes || [];
         const exesOfPartner = partner.exes || [];
         const allExesForPair = [...new Set([...exesOfCandidate, ...exesOfPartner])];
 
-        const exCelebsInGame = allExesForPair.map(name => celebritiesData.find(c => c.name === name)).filter(Boolean) as Celebrity[];
+        const exCelebsInGame = allExesForPair.map(name => localizedCelebrities.find(c => c.name === name)).filter(Boolean) as Celebrity[];
 
         const tempCelebs = new Set([coupleCandidate.name, partner.name, ...exCelebsInGame.map(c => c.name)]);
         if (celebsForGrid.size + tempCelebs.size > gridSize) {
@@ -305,14 +316,14 @@ export default function Home() {
     
     setGameCouples(selectedCouples);
     
-    const fillers = shuffle(celebritiesData.filter(c => !celebsForGrid.has(c.name)));
+    const fillers = shuffle(localizedCelebrities.filter(c => !celebsForGrid.has(c.name)));
     const remainingSlots = gridSize - celebsForGrid.size;
     if (remainingSlots > 0) {
         fillers.slice(0, remainingSlots).forEach(f => celebsForGrid.add(f.name));
     }
     
     let finalCells: Cell[] = Array.from(celebsForGrid).map(name => {
-        const celeb = celebritiesData.find(c => c.name === name)!;
+        const celeb = localizedCelebrities.find(c => c.name === name)!;
         return {...celeb, type: 'celebrity' as const};
     });
     
@@ -378,7 +389,7 @@ export default function Home() {
     setSelectedCardIndex(null);
     setUnlockedCouplesCount(0);
     setUnlockedExesCount(0);
-  }, []);
+  }, [getCelebrityDataByLang]);
 
   const updateCells = (newCells: Cell[]) => {
     setHistory(prev => [...prev, newCells]);
@@ -397,8 +408,8 @@ export default function Home() {
 
   useEffect(() => {
     setIsClient(true);
-    setupGame(gameModeKey);
-  }, [setupGame, gameModeKey]);
+    setupGame(gameModeKey, lang);
+  }, [setupGame, gameModeKey, lang]);
 
   const runChecks = useCallback(() => {
     if (gameOver || isStuck) return;
@@ -584,18 +595,18 @@ export default function Home() {
   };
 
   const handleReset = () => {
-    setupGame(gameModeKey);
+    setupGame(gameModeKey, lang);
   }
   
   const handleGameModeChange = (modeKey: GameModeKey) => {
-    setupGame(modeKey);
+    setupGame(modeKey, lang);
   }
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
     toast({
-      title: "Link Copied!",
-      description: "You can now share the game with your friends.",
+      title: i18n[lang].linkCopiedTitle,
+      description: i18n[lang].linkCopiedDescription,
     });
   };
 
@@ -621,6 +632,7 @@ export default function Home() {
         unlockedExesCount={unlockedExesCount}
         matchedPairs={matchedPairs}
         allCells={cells}
+        lang={lang}
       />
       <SidebarInset>
         <main className="min-h-screen w-full bg-background p-4 sm:p-8">
@@ -628,13 +640,16 @@ export default function Home() {
              <div className="flex flex-col-reverse sm:flex-row justify-between items-center mb-4 gap-4">
                 <div className="flex-none sm:w-[136px]">
                     <SidebarTrigger variant="outline" size="lg">
-                        <Menu className="h-6 w-6" /> Hints
+                        <Menu className="h-6 w-6" /> {i18n[lang].hints}
                     </SidebarTrigger>
                 </div>
                <div className="flex-grow">
-                 <ScoreBoard score={score} moves={moves} />
+                 <ScoreBoard score={score} moves={moves} lang={lang} />
                </div>
-               <div className="flex-none sm:w-[136px]"></div>
+               <div className="flex-none sm:w-[136px] flex justify-end gap-2">
+                 <Button onClick={() => setLang('en')} variant={lang === 'en' ? 'default' : 'outline'} size="sm">EN</Button>
+                 <Button onClick={() => setLang('ru')} variant={lang === 'ru' ? 'default' : 'outline'} size="sm">RU</Button>
+               </div>
              </div>
 
             <div className="flex justify-center gap-4 mb-8">
@@ -670,10 +685,10 @@ export default function Home() {
 
             <div className="flex justify-center items-center gap-4">
               <Button onClick={handleReset} size="lg">
-                <RotateCw className="mr-2 h-4 w-4" /> Reset Game
+                <RotateCw className="mr-2 h-4 w-4" /> {i18n[lang].resetGame}
               </Button>
               <Button onClick={undoMove} size="lg" variant="outline" disabled={history.length <= 1}>
-                <Undo className="mr-2 h-4 w-4" /> Undo
+                <Undo className="mr-2 h-4 w-4" /> {i18n[lang].undo}
               </Button>
             </div>
           </div>
@@ -682,21 +697,21 @@ export default function Home() {
               <AlertDialogHeader>
                 <AlertDialogTitle className="flex items-center justify-center text-2xl font-headline">
                   <Trophy className="mr-4 h-10 w-10 text-yellow-500" />
-                  Congratulations!
+                  {i18n[lang].congratulations}
                 </AlertDialogTitle>
                 <AlertDialogDescription className="text-center text-lg pt-4">
-                  You've matched all the couples!
+                  {i18n[lang].youMatchedAllCouples}
                   <br />
-                  Your final score is: <span className="font-bold text-primary">{score}</span>
+                  {i18n[lang].yourFinalScore} <span className="font-bold text-primary">{score}</span>
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <Button onClick={handleShare} variant="outline" className="w-full sm:w-auto">
                   <Share2 className="mr-2 h-4 w-4" />
-                  Share with Friend
+                  {i18n[lang].shareWithFriend}
                 </Button>
                 <AlertDialogAction onClick={handleReset} className="w-full sm:w-auto">
-                  Play Again
+                  {i18n[lang].playAgain}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -706,17 +721,17 @@ export default function Home() {
               <AlertDialogHeader>
                 <AlertDialogTitle className="flex items-center justify-center text-2xl font-headline">
                   <Ban className="mr-4 h-10 w-10 text-destructive" />
-                  No More Moves!
+                  {i18n[lang].noMoreMoves}
                 </AlertDialogTitle>
                 <AlertDialogDescription className="text-center text-lg pt-4">
-                  You've run out of available swaps. The game is over.
+                  {i18n[lang].noMoreSwaps}
                   <br />
-                  Your final score is: <span className="font-bold text-primary">{score}</span>
+                  {i18n[lang].yourFinalScore} <span className="font-bold text-primary">{score}</span>
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogAction onClick={handleReset} className="w-full">
-                  Try Again
+                  {i18n[lang].tryAgain}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>

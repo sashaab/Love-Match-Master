@@ -1,10 +1,10 @@
 export interface Celebrity {
   type: 'celebrity';
   id: string;
-  name: string;
+  name: string | { en: string; ru: string };
   imageUrl: string;
-  partner?: string;
-  exes?: string[];
+  partner?: string | { en: string; ru: string };
+  exes?: (string | { en: string; ru: string })[];
 }
 
 export interface EmptyCell {
@@ -12,4 +12,8 @@ export interface EmptyCell {
   id: string;
 }
 
-export type Cell = Celebrity | EmptyCell;
+export type Cell = (Omit<Celebrity, 'name' | 'partner' | 'exes'> & {
+    name: string;
+    partner?: string;
+    exes?: string[];
+}) | EmptyCell;
