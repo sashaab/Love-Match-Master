@@ -29,7 +29,7 @@ export const i18n = {
     gameOverText: 'You found all the pairs in {moves} moves and earned {score} points!',
     gameOverInviteLine1: "You've earned the right to become a Celebricy and participate in the big game!",
     gameOverInviteLine2: "Come in to find out your influence and get a special bonus⚡️",
-    becomeCelebrity: 'Become a Celebrity'
+    becomeCelebrity: 'Become a Celebricy'
   },
   ru: {
     score: 'Счет',
