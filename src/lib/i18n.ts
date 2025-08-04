@@ -25,8 +25,7 @@ export const i18n = {
     linkCopiedDescription: 'You can now share the game with your friends.',
     wantMoreGames: 'Want more games and to become a celebrity?',
     joinProject: 'Join our main project!',
-    appDescription1: 'Untangle this web of love - connect celebs into current couples and prove you know show business!',
-    appDescription2: 'But beware of bringing exes together - they will bite 🤬 (and you will lose points 👀)',
+    appDescription: 'Untangle this web of love - connect celebs into current couples and prove you know show business! But beware of bringing exes together - they will bite 🤬 (and you will lose points 👀)',
     sendToExpertButton: 'Send to someone who knows',
   },
   ru: {
@@ -53,8 +52,7 @@ export const i18n = {
     linkCopiedDescription: 'Теперь вы можете поделиться игрой с друзьями.',
     wantMoreGames: 'Хочешь больше игр и тоже стать знаменитым?',
     joinProject: 'Присоединяйся к нашему основному проекту!',
-    appDescription1: 'Распутай эту любовную паутину - соедини селеб в актуальные пары и докажи, что ты разбираешься в шоу бизнесе!',
-    appDescription2: 'Но остерегайся сближать бывших - они будут кусаться 🤬(а ты потеряешь очки👀)',
+    appDescription: 'Распутай эту любовную паутину - соедини селеб в актуальные пары и докажи, что ты разбираешься в шоу бизнесе! Но остерегайся сближать бывших - они будут кусаться 🤬(а ты потеряешь очки👀)',
     sendToExpertButton: 'Отправить тому кто разбирается',
   },
 };
