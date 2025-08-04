@@ -1,0 +1,47 @@
+services:
+  app:
+    build: .
+    container_name: promo-celeb-app
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    networks:
+      - app-network
+    ports:
+      - "3000:3000"
+
+  nginx:
+    image: nginx:alpine
+    container_name: promo-celeb-nginx
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+    networks:
+      - app-network
+    depends_on:
+      - app
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+
+  certbot:
+    image: certbot/certbot
+    container_name: promo-celeb-certbot
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+    networks:
+      - app-network
+    command: certonly --webroot --webroot-path=/var/www/certbot --email ${CERTBOT_EMAIL:-admin@example.com} --agree-tos --no-eff-email --staging -d ${DOMAIN} || true
+
+volumes:
+  certbot-etc:
+  certbot-var:
+
+networks:
+  app-network:
+    driver: bridge 
