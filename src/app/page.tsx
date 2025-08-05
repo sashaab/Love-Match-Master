@@ -121,7 +121,7 @@ const CelebrityCard = ({
         {(showName || isMatched) && (
           <>
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end justify-center pb-2" />
-            <p className="absolute bottom-2 left-0 right-0 text-center font-bold text-white text-[0.5rem] sm:text-sm md:text-base px-1 leading-tight">
+            <p className="absolute bottom-2 left-0 right-0 text-center font-bold text-white text-[0.5rem] sm:text-xs md:text-sm px-1 leading-tight">
               {firstName}<br/>{lastName}
             </p>
           </>
@@ -722,7 +722,7 @@ export default function Home() {
               ))}
             </div>
             
-            <div className="w-full max-w-2xl mx-auto">
+            <div className="w-full max-w-3xl mx-auto">
               <div className="grid gap-2 md:gap-4 mb-8" style={gridDynamicStyle}>
                 {cells.map((cell, index) => (
                   <CelebrityCard
