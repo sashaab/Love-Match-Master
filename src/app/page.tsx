@@ -1015,21 +1015,21 @@ export default function Home() {
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                 <Button asChild className="bg-black hover:bg-gray-800 text-white mt-4">
-                    <a href={TELEGRAM_APP_URL} target="_blank">
-                      <TelegramIcon className="mr-2" />
-                      {i18n[lang].becomeCelebricy}
-                    </a>
+                <div className="w-full flex flex-col sm:flex-row gap-2">
+                  <Button asChild className="bg-black hover:bg-gray-800 text-white flex-1">
+                      <a href={TELEGRAM_APP_URL} target="_blank">
+                        <TelegramIcon className="mr-2" />
+                        {i18n[lang].becomeCelebricy}
+                      </a>
                   </Button>
-                <div className="flex flex-col sm:flex-row sm:justify-center sm:space-x-2 w-full gap-2 sm:gap-0 mt-2">
-                  <Button onClick={handleShare} variant="outline" className="w-full flex-1">
-                    <Share2 className="mr-2 h-4 w-4" />
-                    {i18n[lang].shareWithFriend}
-                  </Button>
-                  <AlertDialogAction onClick={handleReset} className="w-full flex-1">
-                    {i18n[lang].playAgain}
-                  </AlertDialogAction>
-                </div>
+                    <Button onClick={handleShare} variant="outline" className="flex-1">
+                      <Share2 className="mr-2 h-4 w-4" />
+                      {i18n[lang].shareWithFriend}
+                    </Button>
+                    <AlertDialogAction onClick={handleReset} className="flex-1">
+                      {i18n[lang].playAgain}
+                    </AlertDialogAction>
+                  </div>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
