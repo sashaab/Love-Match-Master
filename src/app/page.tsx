@@ -536,14 +536,22 @@ export default function Home() {
     }
     
     let hasMoves = false;
-    const nonMatchedCelebs = cells.filter(c => c.type === 'celebrity' && !localMatchedPairs.has(c.id));
-    const emptyCells = cells.filter(c => c.type === 'empty');
+    const nonMatchedCells = cells.map((cell, index) => ({ cell, index }))
+      .filter(({ cell }) => !localMatchedPairs.has(cell.id));
 
-    if (emptyCells.length > 0 || nonMatchedCelebs.length > 1) {
-       hasMoves = true;
+    if (nonMatchedCells.length > 1) {
+      for (let i = 0; i < nonMatchedCells.length; i++) {
+        for (let j = i + 1; j < nonMatchedCells.length; j++) {
+          if (areNeighbors(nonMatchedCells[i].index, nonMatchedCells[j].index)) {
+            hasMoves = true;
+            break;
+          }
+        }
+        if (hasMoves) break;
+      }
     }
     
-    if (!hasMoves && gameCouples.length > 0) {
+    if (!hasMoves && gameCouples.length > 0 && localMatchedPairs.size < gameCouples.length * 2) {
       setIsStuck(true);
     }
   }, [cells, matchedPairs, gameOver, isStuck, gameCouples, penalizedExPairs]);
