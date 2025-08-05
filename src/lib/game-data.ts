@@ -1,6 +1,27 @@
 
 import type { Celebrity } from './types';
 
+/**
+ * An array of celebrity objects used to populate the game.
+ *
+ * How to define relationships:
+ *
+ * 1.  **Couples:** To create a couple, add a `partner` field to both celebrity objects,
+ *     making sure the name in the `partner` field exactly matches the `name` of the other celebrity.
+ *     Example:
+ *     { name: { en: 'Justin Bieber', ... }, partner: { en: 'Hailey Bieber', ... } }
+ *     { name: { en: 'Hailey Bieber', ... }, partner: { en: 'Justin Bieber', ... } }
+ *
+ * 2.  **Exes:** To define an ex-relationship, add the ex's name to the `exes` array. This
+ *     is a one-way definition; you only need to add it to one of the celebrities.
+ *     Example:
+ *     { name: { en: 'Justin Bieber', ... }, exes: [{ en: 'Selena Gomez', ... }] }
+ *
+ * 3.  **Localization:** The `name`, `partner`, and `exes` fields can be a simple string
+ *     or an object with `en` and `ru` keys for multi-language support.
+ *
+ * 4.  **Fillers:** Celebrities without a `partner` or `exes` field will act as fillers in the game.
+ */
 export const celebritiesData: Celebrity[] = [
   // Hollywood Couples
   { id: '1', type: 'celebrity', name: { en: 'Justin Bieber', ru: 'Джастин Бибер' }, imageUrl: '/images/celebrities/Justin Bieber.png', partner: { en: 'Hailey Bieber', ru: 'Хейли Бибер' }, exes: [{ en: 'Selena Gomez', ru: 'Селена Гомес' }] },
