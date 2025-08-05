@@ -119,12 +119,20 @@ const CelebrityCard = ({
           unoptimized
         />
         {(showName || isMatched) && (
-          <>
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end justify-center pb-2" />
-            <p className="absolute bottom-2 left-0 right-0 text-center font-bold text-white text-[0.5rem] sm:text-[0.6rem] md:text-xs px-1 leading-tight">
-              {firstName}<br/>{lastName}
-            </p>
-          </>
+            <div className="absolute inset-x-0 bottom-2 flex flex-col items-center justify-center">
+              <p 
+                className="font-bold text-black text-[0.5rem] sm:text-[0.6rem] md:text-xs px-1 leading-tight"
+                style={{ textShadow: '0 0 2px white, 0 0 2px white, 0 0 2px white' }}
+              >
+                {firstName}
+              </p>
+              <p 
+                className="font-bold text-black text-[0.5rem] sm:text-[0.6rem] md:text-xs px-1 leading-tight"
+                style={{ textShadow: '0 0 2px white, 0 0 2px white, 0 0 2px white' }}
+              >
+                {lastName}
+              </p>
+            </div>
         )}
         {isMatched && (
           <div className="absolute inset-0 bg-accent/30 flex items-center justify-center">
@@ -425,7 +433,7 @@ export default function Home() {
     setGameOver(false);
     setIsStuck(false);
     setSelectedCardIndex(null);
-    setStartTime(Date.now());
+    setStartTime(null);
     setElapsedTime('00:00');
     setFinalTime(null);
   }, [getCelebrityDataByLang]);
@@ -443,6 +451,12 @@ export default function Home() {
       setHistory(prev => prev.slice(0, -1));
     }
   }
+
+  const startTimer = useCallback(() => {
+    if (startTime === null) {
+      setStartTime(Date.now());
+    }
+  }, [startTime]);
 
   useEffect(() => {
     if (startTime && !gameOver) {
@@ -604,6 +618,7 @@ export default function Home() {
   }, [cells, runChecks]);
 
   const swapCells = useCallback((index1: number, index2: number) => {
+    startTimer();
     const cell1 = cells[index1];
     const cell2 = cells[index2];
 
@@ -617,7 +632,7 @@ export default function Home() {
     setMoves(m => m + 1);
     updateCells(newCells);
 
-  }, [cells, matchedPairs]);
+  }, [cells, matchedPairs, startTimer]);
 
   const handleCardClick = (index: number) => {
     if (gameOver || isStuck) return;
@@ -655,7 +670,8 @@ export default function Home() {
   const handleDrop = (e: React.DragEvent<HTMLDivElement>, index: number) => {
     e.preventDefault();
     if (draggedItem.current === null) return;
-
+    
+    startTimer();
     const draggedIndex = draggedItem.current;
     draggedItem.current = null;
 
