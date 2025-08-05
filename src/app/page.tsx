@@ -753,7 +753,7 @@ export default function Home() {
         <main className="min-h-screen w-full bg-background p-4 sm:p-8">
           <div className="max-w-7xl mx-auto">
              <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
-                <div className="flex-none sm:w-[250px] order-2 sm:order-1 flex flex-col gap-2">
+                <div className="flex-none sm:w-[250px] order-2 sm:order-1 flex flex-row sm:flex-col justify-center gap-2">
                   <SidebarTrigger variant="outline" size="lg">
                       <Menu className="h-6 w-6" /> {i18n[lang].hints}
                   </SidebarTrigger>
