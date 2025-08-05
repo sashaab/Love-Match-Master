@@ -32,7 +32,7 @@ export const celebritiesData = [
   { id: '7', type: 'celebrity', name: { en: 'Beyoncé', ru: 'Бейонсе' }, imageUrl: '/images/celebrities/Beyoncé.png', partner: { en: 'Jay-Z', ru: 'Джей-Зи' }, exes: [] },
   { id: '8', type: 'celebrity', name: { en: 'Jay-Z', ru: 'Джей-Зи' }, imageUrl: '/images/celebrities/Jay-Z.png', partner: { en: 'Beyoncé', ru: 'Бейонсе' }, exes: [] },
   { id: '9', type: 'celebrity', name: { en: 'Bianca Censori', ru: 'Бьянка Цензори' }, imageUrl: '/images/celebrities/Bianca Censori.png', partner: { en: 'Kanye West', ru: 'Канье Уэст' }, exes: [{ en: 'Kim Kardashian', ru: 'Ким Кардашьян' }] },
-  { id: '10', type: 'celebrity', name: { en: 'Kanye West', ru: 'Канье Уэст' }, imageUrl: '/images/celebrities/Kanye West.png', partner: { en: 'Bianca Censori', ru: 'Бьянка Цензори' }, exes: [{ en: 'Amber Rose', ru: 'Амбер Роуз' }] },
+  { id: '10', type: 'celebrity', name: { en: 'Kanye West', ru: 'Канье Уэст' }, imageUrl: '/images/celebrities/Kanye West.png', partner: { en: 'Bianca Censori', ru: 'Бьянка Цензори' }, exes: [{ en: 'Amber Rose', ru: 'Эмбер Роуз' }] },
   { id: '11', type: 'celebrity', name: { en: 'Joe Jonas', ru: 'Джо Джонас' }, imageUrl: '/images/celebrities/Joe Jonas.png', partner: { en: 'Sophie Turner', ru: 'Софи Тёрнер' }, exes: [{ en: 'Taylor Swift', ru: 'Тейлор Свифт' }, { en: 'Gigi Hadid', ru: 'Джиджи Хадид' }] },
   { id: '12', type: 'celebrity', name: { en: 'Sophie Turner', ru: 'Софи Тёрнер' }, imageUrl: '/images/celebrities/Sophie Turner.png', partner: { en: 'Joe Jonas', ru: 'Джо Джонас' }, exes: [] },
   { id: '13', type: 'celebrity', name: { en: 'Rihanna', ru: 'Рианна' }, imageUrl: '/images/celebrities/Rihanna.png', partner: { en: 'ASAP Rocky', ru: 'ASAP Рокки' }, exes: [{ en: 'Chris Brown', ru: 'Крис Браун' }, { en: 'Drake', ru: 'Дрейк' }] },
@@ -119,9 +119,8 @@ export const celebritiesData = [
   { id: '94', type: 'celebrity', name: { en: 'Michael Bublé', ru: 'Майкл Бубле' }, imageUrl: '/images/celebrities/Michael Bublé.png', partner: undefined, exes: [] },
   { id: '95', type: 'celebrity', name: { en: 'Daisy Edgar-Jones', ru: 'Дэйзи Эдгар-Джонс' }, imageUrl: '/images/celebrities/Daisy Edgar-Jones.png', partner: undefined, exes: [] },
   { id: '96', type: 'celebrity', name: { en: 'Dakota Johnson', ru: 'Дакота Джонсон' }, imageUrl: '/images/celebrities/Dakota Johnson.png', partner: undefined, exes: [] },
-  { id: '97', type: 'celebrity', name: { en: 'Jamie Dornan', ru: 'Джейми Дорнан' }, imageUrl: '/images/celebrities/Jamie Dornan.png', partner: undefined, exes: [] },
-  { id: '98', type: 'celebrity', name: { en: 'Johnny Depp', ru: 'Джонни Депп' }, imageUrl: '/images/celebrities/Johnny Depp.png', partner: undefined, exes: [] },
-  { id: '99', type: 'celebrity', name: { en: 'Kate Moss', ru: 'Кейт Мосс' }, imageUrl: '/images/celebrities/Kate Moss.png', partner: undefined, exes: [] },
-  { id: '100', type: 'celebrity', name: { en: 'Paul Mescal', ru: 'Пол Мескал' }, imageUrl: '/images/celebrities/Paul Mescal.png', partner: undefined, exes: [] },
-  { id: '101', type: 'celebrity', name: { en: 'Pedro Pascal', ru: 'Педро Паскаль' }, imageUrl: '/images/celebrities/Pedro Pascal.png', partner: undefined, exes: [] }
+  { id: '97', type: 'celebrity', name: { en: 'Johnny Depp', ru: 'Джонни Депп' }, imageUrl: '/images/celebrities/Johnny Depp.png', partner: undefined, exes: [] },
+  { id: '98', type: 'celebrity', name: { en: 'Kate Moss', ru: 'Кейт Мосс' }, imageUrl: '/images/celebrities/Kate Moss.png', partner: undefined, exes: [] },
+  { id: '99', type: 'celebrity', name: { en: 'Paul Mescal', ru: 'Пол Мескал' }, imageUrl: '/images/celebrities/Paul Mescal.png', partner: undefined, exes: [] },
+  { id: '100', type: 'celebrity', name: { en: 'Pedro Pascal', ru: 'Педро Паскаль' }, imageUrl: '/images/celebrities/Pedro Pascal.png', partner: undefined, exes: [] }
 ];

@@ -87,10 +87,6 @@ const CelebrityCard = ({
     );
   }
 
-  const nameParts = cell.name.split(' ');
-  const firstName = nameParts[0];
-  const lastName = nameParts.slice(1).join(' ');
-
   const showName = namesVisible || cell.revealed;
 
   return (
@@ -136,10 +132,7 @@ const CelebrityCard = ({
       {(showName || isMatched) && (
         <div className="text-center h-8">
             <p className="font-bold text-foreground text-[0.5rem] sm:text-[0.6rem] md:text-xs leading-tight">
-              {firstName}
-            </p>
-            <p className="font-bold text-foreground text-[0.5rem] sm:text-[0.6rem] md:text-xs leading-tight">
-              {lastName}
+              {cell.name}
             </p>
         </div>
       )}
@@ -639,6 +632,8 @@ export default function Home() {
         setSelectedCardIndex(null);
         return;
     }
+    
+    startTimer();
 
     if (selectedCardIndex === null) {
       setSelectedCardIndex(index);
@@ -935,7 +930,5 @@ export default function Home() {
     </SidebarProvider>
   );
 }
-
-    
 
     
