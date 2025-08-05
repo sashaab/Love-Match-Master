@@ -8,7 +8,7 @@ import type { Celebrity, Cell } from "@/lib/types";
 import { celebritiesData } from "@/lib/game-data";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Heart, ZapOff, RotateCw, Trophy, Undo, Lock, Ban, Menu, HeartCrack, Share2, Info } from "lucide-react";
+import { Heart, ZapOff, RotateCw, Trophy, Undo, Lock, Ban, Menu, HeartCrack, Share2, Info, Timer } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,10 +46,10 @@ const gameModes = (lang: Language) => ({
 type GameModeKey = keyof ReturnType<typeof gameModes>;
 
 
-const ScoreBoard = ({ score, moves, lang }: { score: number, moves: number, lang: Language }) => (
+const ScoreBoard = ({ score, moves, time, lang }: { score: number, moves: number, time: string, lang: Language }) => (
   <div className="text-center">
     <h1 className="font-headline text-4xl md:text-5xl font-bold text-gray-800">Love Match Mania</h1>
-    <p className="mt-2 text-2xl font-semibold text-primary whitespace-nowrap">{i18n[lang].score}: {score} | {i18n[lang].moves}: {moves}</p>
+    <p className="mt-2 text-xl md:text-2xl font-semibold text-primary whitespace-nowrap">{i18n[lang].score}: {score} | {i18n[lang].moves}: {moves} | {i18n[lang].time}: {time}</p>
   </div>
 );
 
@@ -256,7 +256,11 @@ export default function Home() {
   const [lang, setLang] = useState<Language>('ru');
   const { toast } = useToast();
   const [showInstructionsPopup, setShowInstructionsPopup] = useState(false);
-
+  const [startTime, setStartTime] = useState<number | null>(null);
+  const [elapsedTime, setElapsedTime] = useState('00:00');
+  const [finalTime, setFinalTime] = useState<string | null>(null);
+  
+  const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const draggedItem = useRef<number | null>(null);
   const fightTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const GRID_SIZE = 36;
@@ -281,6 +285,8 @@ export default function Home() {
   }, []);
 
   const setupGame = useCallback((modeKey: GameModeKey, language: Language) => {
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    
     const currentModes = gameModes(language);
     const { hintsUnlocked } = currentModes[modeKey];
     setGameModeKey(modeKey);
@@ -419,6 +425,9 @@ export default function Home() {
     setGameOver(false);
     setIsStuck(false);
     setSelectedCardIndex(null);
+    setStartTime(Date.now());
+    setElapsedTime('00:00');
+    setFinalTime(null);
   }, [getCelebrityDataByLang]);
 
   const updateCells = (newCells: Cell[]) => {
@@ -434,6 +443,23 @@ export default function Home() {
       setHistory(prev => prev.slice(0, -1));
     }
   }
+
+  useEffect(() => {
+    if (startTime && !gameOver) {
+      timerIntervalRef.current = setInterval(() => {
+        const now = Date.now();
+        const diff = now - startTime;
+        const minutes = Math.floor(diff / 60000);
+        const seconds = Math.floor((diff % 60000) / 1000);
+        setElapsedTime(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+      }, 1000);
+    } else {
+      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    }
+    return () => {
+      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    };
+  }, [startTime, gameOver]);
 
 
   useEffect(() => {
@@ -545,7 +571,9 @@ export default function Home() {
     }
     
     if (gameCouples.length > 0 && localMatchedPairs.size === gameCouples.length * 2) {
+      setFinalTime(elapsedTime);
       setGameOver(true);
+      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
       return;
     }
     
@@ -560,9 +588,10 @@ export default function Home() {
     }
     
     if (!hasMoves && gameCouples.length > 0 && localMatchedPairs.size < gameCouples.length * 2) {
+      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
       setIsStuck(true);
     }
-  }, [cells, matchedPairs, gameOver, isStuck, gameCouples, penalizedExPairs]);
+  }, [cells, matchedPairs, gameOver, isStuck, gameCouples, penalizedExPairs, elapsedTime]);
 
   useEffect(() => {
     const checkTimeout = setTimeout(runChecks, 300);
@@ -718,7 +747,7 @@ export default function Home() {
                    </Button>
                 </div>
                <div className="flex-grow order-1 sm:order-2 text-center">
-                 <ScoreBoard score={score} moves={moves} lang={lang} />
+                 <ScoreBoard score={score} moves={moves} time={elapsedTime} lang={lang} />
                </div>
                <div className="flex-none sm:w-[250px] flex justify-end gap-2 order-3">
                  <Button onClick={() => setLang('en')} variant={lang === 'en' ? 'default' : 'outline'} size="sm">EN</Button>
@@ -836,7 +865,8 @@ export default function Home() {
                 <AlertDialogDescription>
                   {i18n[lang].gameOverText
                     .replace('{moves}', moves.toString())
-                    .replace('{score}', score.toString())}
+                    .replace('{score}', score.toString())
+                    .replace('{time}', finalTime || '00:00')}
                 </AlertDialogDescription>
                 <AlertDialogDescription>
                   {i18n[lang].gameOverInviteLine1}
@@ -891,5 +921,7 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
+    
 
     

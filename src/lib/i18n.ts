@@ -5,6 +5,7 @@ export const i18n = {
   en: {
     score: 'Score',
     moves: 'Moves',
+    time: 'Time',
     pts: 'pts',
     hints: 'Hints',
     instructions: 'Instructions',
@@ -25,7 +26,7 @@ export const i18n = {
     tryAgain: 'Try Again',
     linkCopiedTitle: 'Link Copied!',
     linkCopiedDescription: 'You can now share the game with your friends.',
-    gameOverText: 'You found all the pairs in {moves} moves and earned {score} points!',
+    gameOverText: 'You found all the pairs in {time}, making {moves} moves and earning {score} points!',
     gameOverInviteLine1: "You've earned the right to become a Celebricy and participate in the big game!",
     gameOverInviteLine2: "Come in to find out your influence and get a special bonus⚡️",
     becomeCelebricy: 'Become a Celebricy',
@@ -49,6 +50,7 @@ export const i18n = {
   ru: {
     score: 'Счет',
     moves: 'Ходы',
+    time: 'Время',
     pts: 'очков',
     hints: 'Подсказки',
     instructions: 'Инструкция',
@@ -69,7 +71,7 @@ export const i18n = {
     tryAgain: 'Попробовать снова',
     linkCopiedTitle: 'Ссылка скопирована!',
     linkCopiedDescription: 'Теперь вы можете поделиться игрой с друзьями.',
-    gameOverText: 'Ты нашел все пары за {moves} ходов и заработал {score} очков!',
+    gameOverText: 'Ты нашел все пары за {time}, совершив {moves} ходов и заработав {score} очков!',
     gameOverInviteLine1: 'Ты заслужил право стать Селебриси и участвовать в большой игре!',
     gameOverInviteLine2: 'Заходи, чтобы узнать свое влияние и получить специальный бонус⚡️',
     becomeCelebricy: 'Стать Селебриси',
@@ -91,3 +93,5 @@ export const i18n = {
     levelHard: "Настоящий вызов! Имена знаменитостей скрыты, пока ты не соберешь пару.",
   },
 };
+
+    
