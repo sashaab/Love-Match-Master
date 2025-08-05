@@ -21,4 +21,10 @@ export type Cell = (Omit<Celebrity, 'name' | 'partner' | 'exes'> & {
     revealed: boolean;
 }) | EmptyCell;
 
-    
+export interface LeaderboardEntry {
+  name: string;
+  score: number;
+  moves: number;
+  time: string;
+  timestamp: number;
+}

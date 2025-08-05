@@ -4,20 +4,30 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { cn } from "@/lib/utils";
-import type { Celebrity, Cell } from "@/lib/types";
+import type { Celebrity, Cell, LeaderboardEntry } from "@/lib/types";
 import { celebritiesData } from "@/lib/game-data";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Heart, ZapOff, RotateCw, Trophy, Undo, Lock, Ban, Menu, HeartCrack, Share2, Info, Timer } from "lucide-react";
+import { Heart, ZapOff, RotateCw, Trophy, Undo, Lock, Ban, Menu, HeartCrack, Share2, Info, Timer, Crown } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter
+} from "@/components/ui/dialog"
 import {
   Sidebar,
   SidebarContent,
@@ -26,6 +36,17 @@ import {
   SidebarTrigger,
   SidebarInset
 } from "@/components/ui/sidebar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator";
 import { shuffle } from 'lodash';
 import { useToast } from "@/hooks/use-toast";
@@ -240,6 +261,79 @@ const HintSidebar = ({
   );
 };
 
+const Leaderboard = ({ lang, open, onOpenChange }: { lang: Language, open: boolean, onOpenChange: (open: boolean) => void }) => {
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+
+  useEffect(() => {
+    const savedLeaderboard = localStorage.getItem('loveMatchLeaderboard');
+    if (savedLeaderboard) {
+      setLeaderboard(JSON.parse(savedLeaderboard));
+    }
+  }, [open]);
+
+  const sortData = (data: LeaderboardEntry[], criteria: 'score' | 'moves' | 'time') => {
+    return [...data].sort((a, b) => {
+      switch (criteria) {
+        case 'score':
+          return b.score - a.score;
+        case 'moves':
+          return a.moves - b.moves;
+        case 'time':
+          const timeA = a.time.split(':').reduce((acc, time) => (60 * acc) + +time);
+          const timeB = b.time.split(':').reduce((acc, time) => (60 * acc) + +time);
+          return timeA - timeB;
+        default:
+          return 0;
+      }
+    });
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center justify-center text-2xl font-headline">
+            <Crown className="mr-2 h-6 w-6 text-yellow-500" />
+            {i18n[lang].leaderboard}
+          </DialogTitle>
+        </DialogHeader>
+        <Tabs defaultValue="score" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="score">{i18n[lang].score}</TabsTrigger>
+            <TabsTrigger value="moves">{i18n[lang].moves}</TabsTrigger>
+            <TabsTrigger value="time">{i18n[lang].time}</TabsTrigger>
+          </TabsList>
+          {(['score', 'moves', 'time'] as const).map(criteria => (
+            <TabsContent key={criteria} value={criteria}>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>#</TableHead>
+                    <TableHead>{i18n[lang].name}</TableHead>
+                    <TableHead className="text-right">{i18n[lang][criteria]}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sortData(leaderboard, criteria).slice(0, 10).map((entry, index) => (
+                    <TableRow key={entry.timestamp}>
+                      <TableCell>{index + 1}</TableCell>
+                      <TableCell>{entry.name}</TableCell>
+                      <TableCell className="text-right">{entry[criteria]}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TabsContent>
+          ))}
+        </Tabs>
+        <DialogFooter>
+            <Button onClick={() => onOpenChange(false)} variant="outline">{i18n[lang].close}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 
 export default function Home() {
   const [cells, setCells] = useState<Cell[]>([]);
@@ -261,6 +355,9 @@ export default function Home() {
   const [lang, setLang] = useState<Language>('ru');
   const { toast } = useToast();
   const [showInstructionsPopup, setShowInstructionsPopup] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [showSubmitScore, setShowSubmitScore] = useState(false);
+  const [playerName, setPlayerName] = useState("");
   const [startTime, setStartTime] = useState<number | null>(null);
   const [elapsedTime, setElapsedTime] = useState('00:00');
   const [finalTime, setFinalTime] = useState<string | null>(null);
@@ -584,6 +681,7 @@ export default function Home() {
     if (gameCouples.length > 0 && localMatchedPairs.size === gameCouples.length * 2) {
       setFinalTime(elapsedTime);
       setGameOver(true);
+      setShowSubmitScore(true);
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
       return;
     }
@@ -725,6 +823,26 @@ export default function Home() {
     });
   };
 
+  const handleSubmitScore = () => {
+    if (!playerName.trim()) return;
+
+    const newEntry: LeaderboardEntry = {
+      name: playerName.trim(),
+      score,
+      moves,
+      time: finalTime || '00:00',
+      timestamp: Date.now(),
+    };
+    
+    const savedLeaderboard = localStorage.getItem('loveMatchLeaderboard');
+    const leaderboard = savedLeaderboard ? JSON.parse(savedLeaderboard) : [];
+    leaderboard.push(newEntry);
+    localStorage.setItem('loveMatchLeaderboard', JSON.stringify(leaderboard));
+    
+    setShowSubmitScore(false);
+    setShowLeaderboard(true);
+  };
+
   
   if (!isClient) {
     return null;
@@ -753,7 +871,7 @@ export default function Home() {
         <main className="min-h-screen w-full bg-background p-4 sm:p-8">
           <div className="max-w-7xl mx-auto">
              <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
-                <div className="flex-none sm:w-[250px] order-2 sm:order-1 flex flex-row sm:flex-col justify-center gap-2">
+                <div className="flex-none sm:w-[250px] order-2 sm:order-1 flex flex-row justify-center sm:flex-col gap-2">
                   <SidebarTrigger variant="outline" size="lg">
                       <Menu className="h-6 w-6" /> {i18n[lang].hints}
                   </SidebarTrigger>
@@ -770,7 +888,7 @@ export default function Home() {
                </div>
              </div>
 
-            <div className="flex justify-center gap-4 mb-8">
+            <div className="flex justify-center gap-4 mb-4">
               {(Object.keys(currentModes) as GameModeKey[]).map(key => (
                   <Button 
                     key={key} 
@@ -780,6 +898,12 @@ export default function Home() {
                     {currentModes[key].label}
                   </Button>
               ))}
+            </div>
+
+            <div className="flex justify-center mb-8">
+              <Button variant="secondary" onClick={() => setShowLeaderboard(true)}>
+                <Crown className="mr-2 h-4 w-4" /> {i18n[lang].leaderboard}
+              </Button>
             </div>
             
             <div className="w-full max-w-3xl mx-auto">
@@ -870,7 +994,7 @@ export default function Home() {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-          <AlertDialog open={gameOver}>
+          <AlertDialog open={gameOver && !showSubmitScore}>
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle className="flex items-center justify-center text-2xl font-headline">
@@ -909,6 +1033,38 @@ export default function Home() {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+          <AlertDialog open={showSubmitScore}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{i18n[lang].congratulations}</AlertDialogTitle>
+                   <AlertDialogDescription>
+                    {i18n[lang].gameOverText
+                    .replace('{moves}', moves.toString())
+                    .replace('{score}', score.toString())
+                    .replace('{time}', finalTime || '00:00')}
+                    <br/>
+                    {i18n[lang].enterYourName}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="name" className="text-right">
+                      {i18n[lang].name}
+                    </Label>
+                    <Input
+                      id="name"
+                      value={playerName}
+                      onChange={(e) => setPlayerName(e.target.value)}
+                      className="col-span-3"
+                    />
+                  </div>
+                </div>
+                <AlertDialogFooter>
+                  <AlertDialogCancel onClick={() => setShowSubmitScore(false)}>{i18n[lang].skip}</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleSubmitScore}>{i18n[lang].submitScore}</AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
           <AlertDialog open={isStuck}>
             <AlertDialogContent>
               <AlertDialogHeader>
@@ -931,14 +1087,9 @@ export default function Home() {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+           <Leaderboard lang={lang} open={showLeaderboard} onOpenChange={setShowLeaderboard} />
         </main>
       </SidebarInset>
     </SidebarProvider>
   );
 }
-
-    
-
-    
-
-    

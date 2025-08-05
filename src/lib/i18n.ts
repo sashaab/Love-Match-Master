@@ -46,6 +46,12 @@ export const i18n = {
     levelEasy: "All hints are unlocked from the start.",
     levelMedium: "Standard mode. Unlock hints with points.",
     levelHard: "A real challenge! Celebrity names are hidden until you make a match.",
+    leaderboard: 'Leaderboard',
+    name: 'Name',
+    enterYourName: 'Enter your name to save your score to the leaderboard!',
+    submitScore: 'Submit Score',
+    skip: 'Skip',
+    close: 'Close',
   },
   ru: {
     score: 'Счет',
@@ -91,7 +97,11 @@ export const i18n = {
     levelEasy: "Все подсказки открыты с самого начала.",
     levelMedium: "Стандартный режим. Открывай подсказки за очки.",
     levelHard: "Настоящий вызов! Имена знаменитостей скрыты, пока ты не соберешь пару.",
+    leaderboard: 'Таблица лидеров',
+    name: 'Имя',
+    enterYourName: 'Введите ваше имя, чтобы сохранить результат в таблице лидеров!',
+    submitScore: 'Сохранить',
+    skip: 'Пропустить',
+    close: 'Закрыть',
   },
 };
-
-    
