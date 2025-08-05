@@ -94,58 +94,56 @@ const CelebrityCard = ({
   const showName = namesVisible || cell.revealed;
 
   return (
-    <Card
+    <div
       draggable={!isMatched}
       onDragStart={(e) => onDragStart(e, index)}
       onDragOver={onDragOver}
       onDrop={(e) => onDrop(e, index)}
       onClick={() => onClick(index)}
-      className={cn(
-        "aspect-square transition-all duration-300 ease-in-out transform hover:scale-105",
-        "relative group overflow-hidden rounded-full shadow-lg",
-        isMatched ? "border-accent border-4 shadow-accent/50 cursor-not-allowed" : "cursor-grab active:cursor-grabbing",
-        isFighting && "animate-shake border-destructive border-4 shadow-destructive/50",
-        isSelected && !isMatched && "ring-4 ring-blue-500 ring-offset-2"
-      )}
+      className="flex flex-col items-center justify-start gap-1"
     >
-      <CardContent className="p-0 relative h-full w-full">
-        <Image
-          src={cell.imageUrl}
-          alt={cell.name}
-          fill={true}
-          sizes="(max-width: 768px) 30vw, (max-width: 1200px) 15vw, 10vw"
-          className="w-full h-full object-cover"
-          data-ai-hint="celebrity portrait"
-          unoptimized
-        />
-        {(showName || isMatched) && (
-            <div className="absolute inset-x-0 bottom-2 flex flex-col items-center justify-center">
-              <p 
-                className="font-bold text-black text-[0.5rem] sm:text-[0.6rem] md:text-xs px-1 leading-tight"
-                style={{ textShadow: '0 0 2px white, 0 0 2px white, 0 0 2px white' }}
-              >
-                {firstName}
-              </p>
-              <p 
-                className="font-bold text-black text-[0.5rem] sm:text-[0.6rem] md:text-xs px-1 leading-tight"
-                style={{ textShadow: '0 0 2px white, 0 0 2px white, 0 0 2px white' }}
-              >
-                {lastName}
-              </p>
+      <Card
+        className={cn(
+          "aspect-square w-full transition-all duration-300 ease-in-out transform hover:scale-105",
+          "relative group overflow-hidden rounded-full shadow-lg",
+          isMatched ? "border-accent border-4 shadow-accent/50 cursor-not-allowed" : "cursor-grab active:cursor-grabbing",
+          isFighting && "animate-shake border-destructive border-4 shadow-destructive/50",
+          isSelected && !isMatched && "ring-4 ring-blue-500 ring-offset-2"
+        )}
+      >
+        <CardContent className="p-0 relative h-full w-full">
+          <Image
+            src={cell.imageUrl}
+            alt={cell.name}
+            fill={true}
+            sizes="(max-width: 768px) 30vw, (max-width: 1200px) 15vw, 10vw"
+            className="w-full h-full object-cover"
+            data-ai-hint="celebrity portrait"
+            unoptimized
+          />
+          {isMatched && (
+            <div className="absolute inset-0 bg-accent/30 flex items-center justify-center">
+              <Heart className="w-8 h-8 md:w-16 md:h-16 text-white animate-pulse" fill="white" />
             </div>
-        )}
-        {isMatched && (
-          <div className="absolute inset-0 bg-accent/30 flex items-center justify-center">
-            <Heart className="w-8 h-8 md:w-16 md:h-16 text-white animate-pulse" fill="white" />
-          </div>
-        )}
-        {isFighting && (
-          <div className="absolute inset-0 bg-destructive/30 flex items-center justify-center">
-            <ZapOff className="w-8 h-8 md:w-16 md:h-16 text-white" fill="white" />
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          )}
+          {isFighting && (
+            <div className="absolute inset-0 bg-destructive/30 flex items-center justify-center">
+              <ZapOff className="w-8 h-8 md:w-16 md:h-16 text-white" fill="white" />
+            </div>
+          )}
+        </CardContent>
+      </Card>
+      {(showName || isMatched) && (
+        <div className="text-center h-8">
+            <p className="font-bold text-foreground text-[0.5rem] sm:text-[0.6rem] md:text-xs leading-tight">
+              {firstName}
+            </p>
+            <p className="font-bold text-foreground text-[0.5rem] sm:text-[0.6rem] md:text-xs leading-tight">
+              {lastName}
+            </p>
+        </div>
+      )}
+    </div>
   );
 };
 
