@@ -121,7 +121,7 @@ const CelebrityCard = ({
         {(showName || isMatched) && (
           <>
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end justify-center pb-2" />
-            <p className="absolute bottom-2 left-0 right-0 text-center font-bold text-white text-[0.5rem] sm:text-xs md:text-sm px-1 leading-tight">
+            <p className="absolute bottom-2 left-0 right-0 text-center font-bold text-white text-[0.5rem] sm:text-[0.6rem] md:text-xs px-1 leading-tight">
               {firstName}<br/>{lastName}
             </p>
           </>
@@ -292,10 +292,10 @@ export default function Home() {
         c.partner && localizedCelebrities.find(p => p.name === c.partner) && (c.exes && c.exes.length > 0)
     ));
     
-    let selectedCouples: Celebrity[] = [];
+    let initialCouples: Celebrity[] = [];
     let celebsForGrid = new Set<string>();
 
-    while (selectedCouples.length < couplesToInclude && potentialCouples.length > 0) {
+    while (initialCouples.length < couplesToInclude && potentialCouples.length > 0) {
         const coupleCandidate = potentialCouples.pop()!;
         const partner = localizedCelebrities.find(p => p.name === coupleCandidate.partner)!;
         
@@ -322,14 +322,12 @@ export default function Home() {
         }
         
         if (coupleHasValidExPair) {
-            selectedCouples.push(coupleCandidate);
+            initialCouples.push(coupleCandidate);
             celebsForGrid.add(coupleCandidate.name);
             celebsForGrid.add(partner.name);
             exCelebsInGame.forEach(ex => celebsForGrid.add(ex.name));
         }
     }
-    
-    setGameCouples(selectedCouples);
     
     const fillers = shuffle(localizedCelebrities.filter(c => !celebsForGrid.has(c.name)));
     const remainingSlots = GRID_SIZE - celebsForGrid.size;
@@ -349,11 +347,22 @@ export default function Home() {
         }
     }
 
-    const exesInGame: { p1: string, p2: string }[] = [];
-    const finalCelebNames = new Set(finalCells.filter(c => c.type === 'celebrity').map(c => (c as Celebrity).name));
+    const finalCelebObjects = finalCells.filter(c => c.type === 'celebrity') as Celebrity[];
+    const finalCelebNames = new Set(finalCelebObjects.map(c => c.name));
+
+    const allPossibleCouplesInGrid: Celebrity[] = [];
+    finalCelebObjects.forEach(celeb => {
+        if (celeb.partner && finalCelebNames.has(celeb.partner)) {
+            if (!allPossibleCouplesInGrid.some(c => c.name === celeb.partner)) {
+                allPossibleCouplesInGrid.push(celeb);
+            }
+        }
+    });
+    setGameCouples(allPossibleCouplesInGrid);
     
-    for (const celeb of finalCells) {
-        if (celeb.type === 'celebrity' && celeb.exes) {
+    const exesInGame: { p1: string, p2: string }[] = [];
+    for (const celeb of finalCelebObjects) {
+        if (celeb.exes) {
             for (const exName of celeb.exes) {
                 if (finalCelebNames.has(exName)) {
                     if (!exesInGame.some(e => (e.p1 === exName && e.p2 === celeb.name) || (e.p1 === celeb.name && e.p2 === exName))) {
@@ -366,7 +375,7 @@ export default function Home() {
     setGameExes(exesInGame);
 
     if (hintsUnlocked) {
-      setUnlockedCoupleNames(new Set(selectedCouples.map(c => c.name)));
+      setUnlockedCoupleNames(new Set(allPossibleCouplesInGrid.map(c => c.name)));
       setUnlockedExesCount(exesInGame.length);
     } else {
       setUnlockedCoupleNames(new Set());
@@ -882,3 +891,5 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
+    
