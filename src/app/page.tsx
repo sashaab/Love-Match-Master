@@ -483,8 +483,13 @@ export default function Home() {
               newPenalizedPairs.add(pairKey);
           }
         }
+        
+        const isGameCouple = gameCouples.some(c => 
+          (c.name === cell.name && c.partner === neighbor.name) ||
+          (c.name === neighbor.name && c.partner === cell.name)
+        );
 
-        if (cell.partner === neighbor.name) {
+        if (cell.partner === neighbor.name && isGameCouple) {
           localMatchedPairs.add(cell.id);
           localMatchedPairs.add(neighbor.id);
           scoreDelta += 100;
@@ -536,19 +541,13 @@ export default function Home() {
     }
     
     let hasMoves = false;
-    const nonMatchedCells = cells.map((cell, index) => ({ cell, index }))
-      .filter(({ cell }) => !localMatchedPairs.has(cell.id));
-
-    if (nonMatchedCells.length > 1) {
-      for (let i = 0; i < nonMatchedCells.length; i++) {
-        for (let j = i + 1; j < nonMatchedCells.length; j++) {
-          if (areNeighbors(nonMatchedCells[i].index, nonMatchedCells[j].index)) {
-            hasMoves = true;
-            break;
-          }
-        }
-        if (hasMoves) break;
-      }
+    const allCellsButEmpty = cells.filter(c => c.type !== 'empty');
+    const nonMatchedCellsIndices = allCellsButEmpty
+      .filter(c => !localMatchedPairs.has(c.id))
+      .map(c => cells.findIndex(cell => cell.id === c.id));
+    
+    if(cells.some(c => c.type === 'empty') || nonMatchedCellsIndices.length > 1) {
+        hasMoves = true;
     }
     
     if (!hasMoves && gameCouples.length > 0 && localMatchedPairs.size < gameCouples.length * 2) {
