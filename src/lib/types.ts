@@ -1,3 +1,4 @@
+
 export interface Celebrity {
   type: 'celebrity';
   id: string;
@@ -19,3 +20,5 @@ export type Cell = (Omit<Celebrity, 'name' | 'partner' | 'exes'> & {
     exes?: string[];
     revealed: boolean;
 }) | EmptyCell;
+
+    

@@ -88,6 +88,10 @@ const CelebrityCard = ({
   }
 
   const showName = namesVisible || cell.revealed;
+  const nameParts = cell.name.split(' ');
+  const firstName = nameParts[0];
+  const lastName = nameParts.slice(1).join(' ');
+
 
   return (
     <div
@@ -127,9 +131,12 @@ const CelebrityCard = ({
             </div>
           )}
           {(showName || isMatched) && (
-             <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-1 text-center">
-                <p className="font-bold text-white text-[0.5rem] sm:text-[0.6rem] md:text-xs leading-tight truncate">
-                  {cell.name}
+            <div className="absolute bottom-2 left-0 right-0 text-center px-1">
+                <p className="font-bold text-white text-[0.5rem] sm:text-[0.6rem] md:text-xs leading-tight drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)]">
+                  {firstName}
+                </p>
+                <p className="font-bold text-white text-[0.5rem] sm:text-[0.6rem] md:text-xs leading-tight drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)]">
+                  {lastName}
                 </p>
             </div>
           )}
@@ -929,6 +936,8 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
+    
 
     
 
