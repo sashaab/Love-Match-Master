@@ -96,7 +96,6 @@ const CelebrityCard = ({
       onDragOver={onDragOver}
       onDrop={(e) => onDrop(e, index)}
       onClick={() => onClick(index)}
-      className="flex flex-col items-center justify-start gap-1"
     >
       <Card
         className={cn(
@@ -127,15 +126,15 @@ const CelebrityCard = ({
               <ZapOff className="w-8 h-8 md:w-16 md:h-16 text-white" fill="white" />
             </div>
           )}
+          {(showName || isMatched) && (
+             <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-1 text-center">
+                <p className="font-bold text-white text-[0.5rem] sm:text-[0.6rem] md:text-xs leading-tight truncate">
+                  {cell.name}
+                </p>
+            </div>
+          )}
         </CardContent>
       </Card>
-      {(showName || isMatched) && (
-        <div className="text-center h-8">
-            <p className="font-bold text-foreground text-[0.5rem] sm:text-[0.6rem] md:text-xs leading-tight">
-              {cell.name}
-            </p>
-        </div>
-      )}
     </div>
   );
 };
@@ -930,5 +929,7 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
+    
 
     
