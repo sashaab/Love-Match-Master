@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import type { Celebrity, Cell } from "@/lib/types";
 import { celebritiesData } from "@/lib/game-data";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Heart, ZapOff, RotateCw, Trophy, Undo, Lock, Ban, Menu, HeartCrack, Share2, Info } from "lucide-react";
 import {
   AlertDialog,
@@ -31,6 +31,7 @@ import { shuffle } from 'lodash';
 import { useToast } from "@/hooks/use-toast";
 import { i18n, Language } from '@/lib/i18n';
 import { TelegramIcon } from '@/components/ui/telegram-icon';
+import { TELEGRAM_APP_URL } from '@/lib/config';
 
 
 const COUPLE_HINT_COST = 100;
@@ -48,7 +49,7 @@ type GameModeKey = keyof ReturnType<typeof gameModes>;
 const ScoreBoard = ({ score, moves, lang }: { score: number, moves: number, lang: Language }) => (
   <div className="text-center">
     <h1 className="font-headline text-4xl md:text-5xl font-bold text-gray-800">Love Match Mania</h1>
-    <p className="mt-2 text-2xl font-semibold text-primary">{i18n[lang].score}: {score} | {i18n[lang].moves}: {moves}</p>
+    <p className="mt-2 text-2xl font-semibold text-primary whitespace-nowrap">{i18n[lang].score}: {score} | {i18n[lang].moves}: {moves}</p>
   </div>
 );
 
@@ -751,11 +752,13 @@ export default function Home() {
             </div>
           </div>
           <AlertDialog open={showInstructionsPopup} onOpenChange={setShowInstructionsPopup}>
-            <AlertDialogContent>
+            <AlertDialogContent className="max-h-[80svh] overflow-y-auto">
               <AlertDialogHeader>
                 <AlertDialogTitle className="text-center text-2xl font-headline">
                   {i18n[lang].welcomeTitle}
                 </AlertDialogTitle>
+              </AlertDialogHeader>
+              <AlertDialogDescription asChild>
                 <div className="text-sm text-muted-foreground space-y-4 py-4 text-left">
                   <div>
                     <p className="font-bold mb-2">{i18n[lang].rulesTitle}</p>
@@ -793,10 +796,10 @@ export default function Home() {
                     <p><strong>{i18n[lang].hard}:</strong> {i18n[lang].levelHard}</p>
                   </div>
                 </div>
-              </AlertDialogHeader>
+              </AlertDialogDescription>
               <AlertDialogFooter>
                  <Button asChild className="bg-black hover:bg-gray-800 text-white">
-                    <a href="https://t.me/celebricy_bot/startttt?startapp=fOYOCKlN" target="_blank">
+                    <a href={TELEGRAM_APP_URL} target="_blank">
                       <TelegramIcon className="mr-2" />
                       {i18n[lang].becomeCelebricy}
                     </a>
@@ -828,7 +831,7 @@ export default function Home() {
               </AlertDialogHeader>
               <AlertDialogFooter>
                  <Button asChild className="bg-black hover:bg-gray-800 text-white mt-4">
-                    <a href="https://t.me/celebricy_bot/startttt?startapp=fOYOCKlN" target="_blank">
+                    <a href={TELEGRAM_APP_URL} target="_blank">
                       <TelegramIcon className="mr-2" />
                       {i18n[lang].becomeCelebricy}
                     </a>
