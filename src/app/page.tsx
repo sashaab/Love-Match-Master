@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import type { Celebrity, Cell, LeaderboardEntry } from "@/lib/types";
 import { celebritiesData } from "@/lib/game-data";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heart, ZapOff, RotateCw, Trophy, Undo, Lock, Ban, Menu, HeartCrack, Share2, Info, Timer, Crown } from "lucide-react";
 import {
   AlertDialog,
@@ -989,9 +989,11 @@ export default function Home() {
               <Button onClick={handleReset} size="lg">
                 <RotateCw className="mr-2 h-4 w-4" /> {i18n[lang].resetGame}
               </Button>
-              <Button onClick={undoMove} size="lg" variant="outline" disabled={history.length <= 1}>
-                <Undo className="mr-2 h-4 w-4" /> {i18n[lang].undo}
-              </Button>
+              {gameModeKey === 'easy' && (
+                <Button onClick={undoMove} size="lg" variant="outline" disabled={history.length <= 1}>
+                  <Undo className="mr-2 h-4 w-4" /> {i18n[lang].undo}
+                </Button>
+              )}
             </div>
           </div>
           <AlertDialog open={showInstructionsPopup} onOpenChange={setShowInstructionsPopup}>
