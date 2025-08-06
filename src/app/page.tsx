@@ -918,7 +918,10 @@ export default function Home() {
              <div className="relative flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
                 <div className="md:flex-1 flex justify-start order-2 md:order-1">
                    <div className="flex flex-row md:flex-col items-center md:items-start gap-2">
-                      <SidebarTrigger variant="outline" size="lg" className="md:min-w-[210px] justify-start">
+                      <SidebarTrigger variant="outline" size="icon" className="md:hidden">
+                          <Menu className="h-6 w-6" />
+                      </SidebarTrigger>
+                      <SidebarTrigger variant="outline" size="lg" className="hidden md:flex min-w-[210px] justify-start">
                          <Menu className="h-6 w-6" /> {i18n[lang].hints}
                       </SidebarTrigger>
                       <Button variant="outline" size="lg" onClick={() => setShowInstructionsPopup(true)} className="min-w-[210px] justify-start hidden md:flex">
@@ -1131,5 +1134,3 @@ export default function Home() {
     </SidebarProvider>
   );
 }
-
-    
