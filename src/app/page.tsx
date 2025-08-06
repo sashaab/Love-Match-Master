@@ -61,9 +61,9 @@ const WIN_SCORE = 500;
 
 
 const gameModes = (lang: Language) => ({
-  easy: { label: i18n[lang].easy, hintsUnlocked: true, namesVisible: true },
-  medium: { label: i18n[lang].medium, hintsUnlocked: false, namesVisible: true },
-  hard: { label: i18n[lang].hard, hintsUnlocked: false, namesVisible: false },
+  easy: { label: i18n[lang].easy, hintsUnlocked: true, namesVisible: true, gridSize: 16 },
+  medium: { label: i18n[lang].medium, hintsUnlocked: false, namesVisible: true, gridSize: 25 },
+  hard: { label: i18n[lang].hard, hintsUnlocked: false, namesVisible: false, gridSize: 36 },
 });
 
 type GameModeKey = keyof ReturnType<typeof gameModes>;
@@ -353,7 +353,7 @@ export default function Home() {
   const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
   const [unlockedCoupleNames, setUnlockedCoupleNames] = useState<Set<string>>(new Set());
   const [unlockedExesCount, setUnlockedExesCount] = useState(0);
-  const [gameModeKey, setGameModeKey] = useState<GameModeKey>('medium');
+  const [gameModeKey, setGameModeKey] = useState<GameModeKey>('hard');
   const [lang, setLang] = useState<Language>('ru');
   const { toast } = useToast();
   const [showInstructionsPopup, setShowInstructionsPopup] = useState(false);
@@ -363,14 +363,14 @@ export default function Home() {
   const [startTime, setStartTime] = useState<number | null>(null);
   const [elapsedTime, setElapsedTime] = useState('00:00');
   const [finalTime, setFinalTime] = useState<string | null>(null);
+  const [gridSize, setGridSize] = useState(36);
   
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const draggedItem = useRef<number | null>(null);
   const fightTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const GRID_SIZE = 36;
 
   const areNeighbors = (index1: number, index2: number) => {
-    const gridWidth = Math.sqrt(GRID_SIZE);
+    const gridWidth = Math.sqrt(gridSize);
     const row1 = Math.floor(index1 / gridWidth);
     const col1 = index1 % gridWidth;
     const row2 = Math.floor(index2 / gridWidth);
@@ -392,9 +392,11 @@ export default function Home() {
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     
     const currentModes = gameModes(language);
-    const { hintsUnlocked } = currentModes[modeKey];
+    const { hintsUnlocked, gridSize: newGridSize } = currentModes[modeKey];
     setGameModeKey(modeKey);
-    const couplesToInclude = Math.floor(Math.random() * 2) + 4; // Randomly 4 or 5
+    setGridSize(newGridSize);
+    
+    const couplesToInclude = Math.floor(newGridSize / 9) + 2; // Scales with grid size
     
     const localizedCelebrities = getCelebrityDataByLang(language);
 
@@ -416,7 +418,7 @@ export default function Home() {
         const exCelebsInGame = allExesForPair.map(name => localizedCelebrities.find(c => c.name === name)).filter(Boolean) as Celebrity[];
 
         const tempCelebs = new Set([coupleCandidate.name, partner.name, ...exCelebsInGame.map(c => c.name)]);
-        if (celebsForGrid.size + tempCelebs.size > GRID_SIZE) {
+        if (celebsForGrid.size + tempCelebs.size > newGridSize) {
             continue;
         }
 
@@ -440,7 +442,7 @@ export default function Home() {
     }
     
     const fillers = shuffle(localizedCelebrities.filter(c => !celebsForGrid.has(c.name)));
-    const remainingSlots = GRID_SIZE - celebsForGrid.size;
+    const remainingSlots = newGridSize - celebsForGrid.size;
     if (remainingSlots > 0) {
         fillers.slice(0, remainingSlots).forEach(f => celebsForGrid.add(f.name));
     }
@@ -450,8 +452,8 @@ export default function Home() {
         return {...celeb, type: 'celebrity' as const, revealed: false};
     });
     
-    if (finalCells.length < GRID_SIZE) {
-        const emptyCellsCount = GRID_SIZE - finalCells.length;
+    if (finalCells.length < newGridSize) {
+        const emptyCellsCount = newGridSize - finalCells.length;
         for (let i = 0; i < emptyCellsCount; i++) {
             finalCells.push({ type: 'empty', id: `empty-${Date.now()}-${i}` });
         }
@@ -493,7 +495,7 @@ export default function Home() {
     }
 
     const isLayoutInvalid = (layout: Cell[]): boolean => {
-      const gridWidth = Math.sqrt(GRID_SIZE);
+      const gridWidth = Math.sqrt(newGridSize);
       for (let i = 0; i < layout.length; i++) {
         const cell = layout[i];
         if (cell.type === 'empty') continue;
@@ -594,7 +596,7 @@ export default function Home() {
     let newFightingIds = new Set<string>();
     let localMatchedPairs = new Set(matchedPairs);
     let scoreDelta = 0;
-    const gridWidth = Math.sqrt(GRID_SIZE);
+    const gridWidth = Math.sqrt(gridSize);
     
     const currentlyFightingPairs = new Set<string>();
     const newPenalizedPairs = new Set(penalizedExPairs);
@@ -704,7 +706,7 @@ export default function Home() {
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
       setIsStuck(true);
     }
-  }, [cells, matchedPairs, gameOver, isStuck, gameCouples, penalizedExPairs, elapsedTime, score]);
+  }, [cells, matchedPairs, gameOver, isStuck, gameCouples, penalizedExPairs, elapsedTime, score, gridSize]);
 
   useEffect(() => {
     const checkTimeout = setTimeout(runChecks, 300);
@@ -853,7 +855,7 @@ export default function Home() {
   }
   
   const gridDynamicStyle = {
-    gridTemplateColumns: `repeat(${Math.sqrt(GRID_SIZE)}, minmax(0, 1fr))`
+    gridTemplateColumns: `repeat(${Math.sqrt(gridSize)}, minmax(0, 1fr))`
   };
 
   const currentModes = gameModes(lang);
@@ -875,7 +877,7 @@ export default function Home() {
         <main className="min-h-screen w-full bg-background p-4 sm:p-8">
           <div className="max-w-7xl mx-auto relative">
              <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
-                <div className="flex-none sm:w-[250px] order-2 sm:order-1 flex flex-row justify-center sm:flex-col gap-2">
+                <div className="flex-none sm:w-[250px] order-2 sm:order-1 flex flex-row justify-center sm:justify-start gap-2">
                   <SidebarTrigger variant="outline" size="lg">
                       <Menu className="h-6 w-6" /> {i18n[lang].hints}
                   </SidebarTrigger>
@@ -889,7 +891,7 @@ export default function Home() {
                <div className="flex-grow order-1 sm:order-2 text-center">
                  <ScoreBoard score={score} moves={moves} time={elapsedTime} lang={lang} />
                </div>
-               <div className="flex-none sm:w-[250px] flex justify-end gap-2 order-3 absolute sm:static top-0 right-0">
+               <div className="flex-none sm:w-[250px] flex justify-center sm:justify-end gap-2 order-3 absolute sm:static top-4 right-4 sm:top-0 sm:right-0">
                  <Button onClick={() => setLang('en')} variant={lang === 'en' ? 'default' : 'outline'} size="sm">EN</Button>
                  <Button onClick={() => setLang('ru')} variant={lang === 'ru' ? 'default' : 'outline'} size="sm">RU</Button>
                </div>
