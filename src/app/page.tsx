@@ -353,8 +353,8 @@ export default function Home() {
   const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
   const [unlockedCoupleNames, setUnlockedCoupleNames] = useState<Set<string>>(new Set());
   const [unlockedExesCount, setUnlockedExesCount] = useState(0);
-  const [gameModeKey, setGameModeKey] = useState<GameModeKey>('hard');
-  const [lang, setLang] = useState<Language>('ru');
+  const [gameModeKey, setGameModeKey] = useState<GameModeKey>('medium');
+  const [lang, setLang] = useState<Language>('en');
   const { toast } = useToast();
   const [showInstructionsPopup, setShowInstructionsPopup] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
@@ -885,13 +885,16 @@ export default function Home() {
         <main className="min-h-screen w-full bg-background p-4 sm:p-8">
           <div className="max-w-7xl mx-auto relative">
              <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
-                <div className="flex-none sm:w-auto order-2 sm:order-1 flex flex-row justify-center sm:justify-start gap-2">
+                <div className="flex-none sm:w-auto order-2 sm:order-1 flex flex-col items-start gap-2">
                   <SidebarTrigger variant="outline" size="lg">
                       <Menu className="h-6 w-6" /> {i18n[lang].hints}
                   </SidebarTrigger>
                    <Button variant="outline" size="lg" onClick={() => setShowInstructionsPopup(true)}>
                       <Info className="h-6 w-6" /> {i18n[lang].instructions}
                    </Button>
+                   <Button variant="outline" size="lg" onClick={() => setShowLeaderboard(true)}>
+                    <Crown className="mr-2 h-6 w-6" /> {i18n[lang].leaderboard}
+                </Button>
                 </div>
                <div className="flex-grow order-1 sm:order-2 text-center">
                  <ScoreBoard score={score} moves={moves} time={elapsedTime} lang={lang} />
@@ -902,7 +905,7 @@ export default function Home() {
                </div>
              </div>
 
-            <div className="flex justify-center gap-4 mb-4">
+            <div className="flex justify-center gap-4 mb-8">
               {(Object.keys(currentModes) as GameModeKey[]).map(key => (
                   <Button 
                     key={key} 
@@ -913,11 +916,6 @@ export default function Home() {
                   </Button>
               ))}
             </div>
-             <div className="flex justify-center gap-4 mb-8">
-                <Button variant="outline" size="lg" onClick={() => setShowLeaderboard(true)}>
-                    <Crown className="mr-2 h-6 w-6" /> {i18n[lang].leaderboard}
-                </Button>
-             </div>
             
             <div className="w-full max-w-3xl mx-auto">
               <div className="grid gap-2 md:gap-4 mb-8" style={gridDynamicStyle}>
