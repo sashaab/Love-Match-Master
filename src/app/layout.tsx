@@ -1,6 +1,7 @@
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
+import Script from 'next/script';
 
 export const metadata: Metadata = {
   title: 'Love Match Mania',
@@ -24,6 +25,16 @@ export default async function RootLayout({
       <body className="font-body antialiased" suppressHydrationWarning>
         {children}
         <Toaster />
+        <Script async src="https://www.googletagmanager.com/gtag/js?id=G-73Z7P5T108"></Script>
+        <Script id="google-analytics">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-73Z7P5T108');
+          `}
+        </Script>
       </body>
     </html>
   );

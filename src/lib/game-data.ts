@@ -29,7 +29,7 @@ export const celebritiesData = [
   { id: '4', type: 'celebrity', name: { en: 'Mila Kunis', ru: 'Мила Кунис' }, imageUrl: '/images/celebrities/Mila Kunis.png', partner: { en: 'Ashton Kutcher', ru: 'Эштон Кутчер' }, exes: [{ en: 'Macaulay Culkin', ru: 'Макаulay Калкин' }] },
   { id: '5', type: 'celebrity', name: { en: 'Priyanka Chopra', ru: 'Приянка Чопра' }, imageUrl: '/images/celebrities/Priyanka Chopra.png', partner: { en: 'Nick Jonas', ru: 'Ник Джонас' }, exes: [] },
   { id: '6', type: 'celebrity', name: { en: 'Nick Jonas', ru: 'Ник Джонас' }, imageUrl: '/images/celebrities/Nick Jonas.png', partner: { en: 'Priyanka Chopra', ru: 'Приянка Чопра' }, exes: [{ en: 'Miley Cyrus', ru: 'Майли Сайрус' }, { en: 'Selena Gomez', ru: 'Селена Гомес' }] },
-  { id: '7', type: 'celebrity', name: { en: 'Beyoncé', ru: 'Бейонсе' }, imageUrl: '/images/celebrities/Beyoncé.png', partner: { en: 'Jay-Z', ru: 'Джей-Зи' }, exes: [] },
+  { id: '7', type: 'celebrity', name: { en: 'Beyoncé', ru: 'Бейонсе' }, imageUrl: '/images/celebrities/Beyonce.png', partner: { en: 'Jay-Z', ru: 'Джей-Зи' }, exes: [] },
   { id: '8', type: 'celebrity', name: { en: 'Jay-Z', ru: 'Джей-Зи' }, imageUrl: '/images/celebrities/Jay-Z.png', partner: { en: 'Beyoncé', ru: 'Бейонсе' }, exes: [] },
   { id: '9', type: 'celebrity', name: { en: 'Bianca Censori', ru: 'Бьянка Цензори' }, imageUrl: '/images/celebrities/Bianca Censori.png', partner: { en: 'Kanye West', ru: 'Канье Уэст' }, exes: [{ en: 'Kim Kardashian', ru: 'Ким Кардашьян' }] },
   { id: '10', type: 'celebrity', name: { en: 'Kanye West', ru: 'Канье Уэст' }, imageUrl: '/images/celebrities/Kanye West.png', partner: { en: 'Bianca Censori', ru: 'Бьянка Цензори' }, exes: [{ en: 'Amber Rose', ru: 'Эмбер Роуз' }] },
@@ -99,7 +99,7 @@ export const celebritiesData = [
   { id: '74', type: 'celebrity', name: { en: 'Talulah Riley', ru: 'Талула Райли' }, imageUrl: '/images/celebrities/Talulah Riley.png', partner: undefined, exes: [] },
   { id: '75', type: 'celebrity', name: { en: 'Kelly Blatz', ru: 'Келли Блатц' }, imageUrl: '/images/celebrities/Kelly Blatz.png', partner: undefined, exes: [] },
   { id: '76', type: 'celebrity', name: { en: 'Scarlett Johansson', ru: 'Скарлетт Йоханссон' }, imageUrl: '/images/celebrities/Scarlett Johansson.png', partner: undefined, exes: [] },
-  { id: '77', type: 'celebrity', name: { en: 'Maksim Vitorgan', ru: 'Максим Виторган' }, imageUrl: '/images/celebrities/Maksim Vitorgan.png', partner: undefined, exes: [] },
+  { id: '77', type: 'celebrity', name: { en: 'Maksim Vitorgan', ru: 'Максим Виторган' }, imageUrl: '/images/celebrities/Maksim Vitorgan.png', partner: undefined, exes: [{ en: 'Nino Ninidze', ru: 'Нино Нининдизе' }] },
   { id: '78', type: 'celebrity', name: { en: 'Darya Moroz', ru: 'Дарья Мороз' }, imageUrl: '/images/celebrities/Darya Moroz.png', partner: undefined, exes: [] },
   { id: '79', type: 'celebrity', name: { en: 'Agata Muceniece', ru: 'Агата Муцениеце' }, imageUrl: '/images/celebrities/Agata Muceniece.png', partner: { en: 'Petr Dranga', ru: 'Петр Дранга' }, exes: [] },
   { id: '80', type: 'celebrity', name: { en: 'Irina Starshenbaum', ru: 'Ирина Старшенбаум' }, imageUrl: '/images/celebrities/Irina Starshenbaum.png', partner: undefined, exes: [] },
@@ -122,5 +122,6 @@ export const celebritiesData = [
   { id: '97', type: 'celebrity', name: { en: 'Johnny Depp', ru: 'Джонни Депп' }, imageUrl: '/images/celebrities/Johnny Depp.png', partner: undefined, exes: [] },
   { id: '98', type: 'celebrity', name: { en: 'Kate Moss', ru: 'Кейт Мосс' }, imageUrl: '/images/celebrities/Kate Moss.png', partner: undefined, exes: [] },
   { id: '99', type: 'celebrity', name: { en: 'Paul Mescal', ru: 'Пол Мескал' }, imageUrl: '/images/celebrities/Paul Mescal.png', partner: undefined, exes: [] },
-  { id: '100', type: 'celebrity', name: { en: 'Pedro Pascal', ru: 'Педро Паскаль' }, imageUrl: '/images/celebrities/Pedro Pascal.png', partner: undefined, exes: [] }
+  { id: '100', type: 'celebrity', name: { en: 'Pedro Pascal', ru: 'Педро Паскаль' }, imageUrl: '/images/celebrities/Pedro Pascal.png', partner: undefined, exes: [] },
+  { id: '101', type: 'celebrity', name: { en: 'Nino Ninidze', ru: 'Нино Нинидзе' }, imageUrl: '/images/celebrities/Nino Ninidze.png', partner: undefined, exes: [] }
 ];
