@@ -885,15 +885,15 @@ export default function Home() {
         <main className="min-h-screen w-full bg-background p-4 sm:p-8">
           <div className="max-w-7xl mx-auto relative">
              <div className="relative flex flex-wrap sm:flex-nowrap justify-between items-center mb-4 gap-4">
-                <div className="w-auto order-2 sm:order-1">
+                 <div className="w-auto order-2 sm:order-1 flex-shrink-0">
                    <div className="flex flex-col items-start gap-2">
-                      <SidebarTrigger variant="outline" size="lg">
+                      <SidebarTrigger variant="outline" size="lg" className="min-w-[210px] justify-start">
                          <Menu className="h-6 w-6" /> {i18n[lang].hints}
                       </SidebarTrigger>
-                      <Button variant="outline" size="lg" onClick={() => setShowInstructionsPopup(true)}>
+                      <Button variant="outline" size="lg" onClick={() => setShowInstructionsPopup(true)} className="min-w-[210px] justify-start">
                          <Info className="h-6 w-6" /> {i18n[lang].instructions}
                       </Button>
-                      <Button variant="outline" size="lg" onClick={() => setShowLeaderboard(true)}>
+                      <Button variant="outline" size="lg" onClick={() => setShowLeaderboard(true)} className="min-w-[210px] justify-start">
                        <Crown className="mr-2 h-6 w-6" /> {i18n[lang].leaderboard}
                       </Button>
                    </div>
@@ -901,7 +901,7 @@ export default function Home() {
                <div className="flex-1 order-1 sm:order-2 text-center">
                  <ScoreBoard score={score} moves={moves} time={elapsedTime} lang={lang} />
                </div>
-               <div className="w-auto order-3 flex justify-end gap-2 absolute top-0 right-0 sm:static">
+                <div className="w-auto order-3 flex-shrink-0 flex justify-end gap-2 absolute top-0 right-0 sm:static">
                  <Button onClick={() => setLang('en')} variant={lang === 'en' ? 'default' : 'outline'} size="sm">EN</Button>
                  <Button onClick={() => setLang('ru')} variant={lang === 'ru' ? 'default' : 'outline'} size="sm">RU</Button>
                </div>
@@ -1104,3 +1104,4 @@ export default function Home() {
     
 
     
+
