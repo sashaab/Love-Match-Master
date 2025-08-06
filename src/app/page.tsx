@@ -886,15 +886,15 @@ export default function Home() {
           <div className="max-w-7xl mx-auto relative">
              <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
                 <div className="flex-none sm:w-auto order-2 sm:order-1 flex flex-col items-start gap-2">
-                  <SidebarTrigger variant="outline" size="lg">
+                   <SidebarTrigger variant="outline" size="lg" className="w-full justify-start">
                       <Menu className="h-6 w-6" /> {i18n[lang].hints}
-                  </SidebarTrigger>
-                   <Button variant="outline" size="lg" onClick={() => setShowInstructionsPopup(true)}>
+                   </SidebarTrigger>
+                   <Button variant="outline" size="lg" onClick={() => setShowInstructionsPopup(true)} className="w-full justify-start">
                       <Info className="h-6 w-6" /> {i18n[lang].instructions}
                    </Button>
-                   <Button variant="outline" size="lg" onClick={() => setShowLeaderboard(true)}>
+                   <Button variant="outline" size="lg" onClick={() => setShowLeaderboard(true)} className="w-full justify-start">
                     <Crown className="mr-2 h-6 w-6" /> {i18n[lang].leaderboard}
-                </Button>
+                   </Button>
                 </div>
                <div className="flex-grow order-1 sm:order-2 text-center">
                  <ScoreBoard score={score} moves={moves} time={elapsedTime} lang={lang} />
