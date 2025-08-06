@@ -57,6 +57,8 @@ import { TELEGRAM_APP_URL } from '@/lib/config';
 
 const COUPLE_HINT_COST = 100;
 const EX_HINT_COST = 50;
+const WIN_SCORE = 500;
+
 
 const gameModes = (lang: Language) => ({
   easy: { label: i18n[lang].easy, hintsUnlocked: true, namesVisible: true },
@@ -656,8 +658,10 @@ export default function Home() {
     });
     setPenalizedExPairs(newPenalizedPairs);
     
+    let finalScore = score;
     if (scoreDelta !== 0) {
-      setScore(prev => prev + scoreDelta);
+      finalScore = score + scoreDelta;
+      setScore(finalScore);
     }
     
     if (fightTimeoutRef.current) {
@@ -678,7 +682,7 @@ export default function Home() {
         setMatchedPairs(localMatchedPairs);
     }
     
-    if (gameCouples.length > 0 && localMatchedPairs.size === gameCouples.length * 2) {
+    if (finalScore >= WIN_SCORE) {
       setFinalTime(elapsedTime);
       setGameOver(true);
       setShowSubmitScore(true);
@@ -696,11 +700,11 @@ export default function Home() {
         hasMoves = true;
     }
     
-    if (!hasMoves && gameCouples.length > 0 && localMatchedPairs.size < gameCouples.length * 2) {
+    if (!hasMoves && finalScore < WIN_SCORE) {
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
       setIsStuck(true);
     }
-  }, [cells, matchedPairs, gameOver, isStuck, gameCouples, penalizedExPairs, elapsedTime]);
+  }, [cells, matchedPairs, gameOver, isStuck, gameCouples, penalizedExPairs, elapsedTime, score]);
 
   useEffect(() => {
     const checkTimeout = setTimeout(runChecks, 300);
@@ -943,7 +947,7 @@ export default function Home() {
                 <div className="text-sm text-muted-foreground space-y-4 py-4 text-left">
                   <div>
                     <p className="font-bold mb-2">{i18n[lang].rulesTitle}</p>
-                    <p className='mb-2'>{i18n[lang].rule1}</p>
+                    <p className='mb-2'>{i18n[lang].rule1.replace('{win_score}', WIN_SCORE.toString())}</p>
                     <div className="flex items-center justify-center gap-2 my-2 p-2 rounded-md bg-green-100/50">
                         <div className="relative w-16 h-16">
                             <Image src="/images/celebrities/Justin Bieber.png" alt="Justin Bieber" layout="fill" className="rounded-full object-cover" unoptimized/>
@@ -979,12 +983,6 @@ export default function Home() {
                 </div>
               </AlertDialogDescription>
               <AlertDialogFooter>
-                 <Button asChild className="bg-black hover:bg-gray-800 text-white">
-                    <a href={TELEGRAM_APP_URL} target="_blank">
-                      <TelegramIcon className="mr-2" />
-                      {i18n[lang].becomeCelebricy}
-                    </a>
-                  </Button>
                   <AlertDialogAction onClick={() => setShowInstructionsPopup(false)} className="w-full flex-1">
                     {i18n[lang].letsPlay}
                   </AlertDialogAction>
