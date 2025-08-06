@@ -525,7 +525,7 @@ export default function Home() {
         const cell = layout[i];
         if (cell.type === 'empty') continue;
 
-        const neighbors = [i - 1, i + 1, i - gridWidth, i - gridWidth].filter(n =>
+        const neighbors = [i - 1, i + 1, i - gridWidth, i + gridWidth].filter(n =>
           n >= 0 && n < layout.length &&
           !((i % gridWidth === 0 && n === i - 1) || ((i + 1) % gridWidth === 0 && n === i + 1))
         );
@@ -631,7 +631,7 @@ export default function Home() {
       const cell = cells[i];
       if (cell.type === 'empty') continue;
 
-      const neighbors = [i - 1, i + 1, i - gridWidth, i - gridWidth].filter(n =>
+      const neighbors = [i - 1, i + 1, i - gridWidth, i + gridWidth].filter(n =>
         n >= 0 && n < cells.length &&
         !((i % gridWidth === 0 && n === i - 1) || ((i + 1) % gridWidth === 0 && n === i + 1))
       );
@@ -842,10 +842,8 @@ export default function Home() {
   };
 
   const handleUnlockEx = () => {
-    if (unlockedExesCount < gameExes.length) {
-      setScore(s => s - EX_HINT_COST);
-      setUnlockedExesCount(e => e + 1);
-    }
+    setScore(s => s - EX_HINT_COST);
+    setUnlockedExesCount(e => e + 1);
   };
 
   const handleReset = () => {
@@ -1069,9 +1067,14 @@ export default function Home() {
                     </AlertDialogDescription>
                   </>
                 ) : (
-                  allMatched && <AlertDialogDescription>
-                     {i18n[lang].gameOverNonWinner.replace('{win_score}', WIN_SCORE.toString())}
-                  </AlertDialogDescription>
+                  allMatched && (
+                    <AlertDialogDescription className="pt-4 font-bold text-foreground/80">
+                      {i18n[lang].gameOverNonWinner.replace(
+                        '{win_score}',
+                        WIN_SCORE.toString()
+                      )}
+                    </AlertDialogDescription>
+                  )
                 )}
               </AlertDialogHeader>
               <AlertDialogFooter>
