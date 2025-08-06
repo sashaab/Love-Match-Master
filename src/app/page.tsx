@@ -186,6 +186,8 @@ const HintSidebar = ({
   lang,
   onShowInstructions,
   onShowLeaderboard,
+  onSetLang,
+  currentLang
 }: {
   couples: Celebrity[];
   exes: { p1: string; p2: string }[];
@@ -198,6 +200,8 @@ const HintSidebar = ({
   lang: Language;
   onShowInstructions: () => void;
   onShowLeaderboard: () => void;
+  onSetLang: (lang: Language) => void;
+  currentLang: Language;
 }) => {
   const isMobile = useIsMobile();
   const unlockedByPoints = couples.filter(c => unlockedCoupleNames.has(c.name));
@@ -224,15 +228,19 @@ const HintSidebar = ({
             <SidebarGroup>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <Button variant="outline" size="lg" onClick={onShowInstructions} className="w-full justify-start">
+                  <Button variant="outline" size="lg" onClick={onShowInstructions} className="w-full justify-start text-sidebar-foreground hover:text-sidebar-accent-foreground">
                       <Info className="h-6 w-6" /> {i18n[lang].instructions}
                   </Button>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <Button variant="outline" size="lg" onClick={onShowLeaderboard} className="w-full justify-start">
+                  <Button variant="outline" size="lg" onClick={onShowLeaderboard} className="w-full justify-start text-sidebar-foreground hover:text-sidebar-accent-foreground">
                     <Crown className="mr-2 h-6 w-6" /> {i18n[lang].leaderboard}
                   </Button>
                 </SidebarMenuItem>
+                 <SidebarMenuItem className="flex justify-center gap-2 pt-4">
+                    <Button onClick={() => onSetLang('en')} variant={currentLang === 'en' ? 'default' : 'outline'} size="sm" className="text-sidebar-foreground hover:text-sidebar-accent-foreground">EN</Button>
+                    <Button onClick={() => onSetLang('ru')} variant={currentLang === 'ru' ? 'default' : 'outline'} size="sm" className="text-sidebar-foreground hover:text-sidebar-accent-foreground">RU</Button>
+                 </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroup>
             <Separator className="my-4" />
@@ -911,6 +919,8 @@ export default function Home() {
         lang={lang}
         onShowInstructions={() => setShowInstructionsPopup(true)}
         onShowLeaderboard={() => setShowLeaderboard(true)}
+        onSetLang={setLang}
+        currentLang={lang}
       />
       <SidebarInset>
         <main className="min-h-screen w-full bg-background p-4 sm:p-8">
@@ -936,8 +946,10 @@ export default function Home() {
                  <ScoreBoard score={score} moves={moves} time={elapsedTime} lang={lang} />
                </div>
                 <div className="md:flex-1 order-3 flex justify-center md:justify-end gap-2">
-                 <Button onClick={() => setLang('en')} variant={lang === 'en' ? 'default' : 'outline'} size="sm">EN</Button>
-                 <Button onClick={() => setLang('ru')} variant={lang === 'ru' ? 'default' : 'outline'} size="sm">RU</Button>
+                  <div className="hidden md:flex gap-2">
+                    <Button onClick={() => setLang('en')} variant={lang === 'en' ? 'default' : 'outline'} size="sm">EN</Button>
+                    <Button onClick={() => setLang('ru')} variant={lang === 'ru' ? 'default' : 'outline'} size="sm">RU</Button>
+                  </div>
                </div>
              </div>
 
