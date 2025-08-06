@@ -57,6 +57,7 @@ import { useToast } from "@/hooks/use-toast";
 import { i18n, Language } from '@/lib/i18n';
 import { TelegramIcon } from '@/components/ui/telegram-icon';
 import { TELEGRAM_APP_URL } from '@/lib/config';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 
 const COUPLE_HINT_COST = 100;
@@ -198,6 +199,7 @@ const HintSidebar = ({
   onShowInstructions: () => void;
   onShowLeaderboard: () => void;
 }) => {
+  const isMobile = useIsMobile();
   const unlockedByPoints = couples.filter(c => unlockedCoupleNames.has(c.name));
 
   const matchedOnBoard = couples.filter(couple => {
@@ -217,21 +219,25 @@ const HintSidebar = ({
         <h3 className="text-2xl font-bold font-headline text-sidebar-primary-foreground text-center">{i18n[lang].gameHints}</h3>
       </SidebarHeader>
       <SidebarContent className="bg-sidebar p-4">
-        <SidebarGroup>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <Button variant="outline" size="lg" onClick={onShowInstructions} className="w-full justify-start">
-                  <Info className="h-6 w-6" /> {i18n[lang].instructions}
-              </Button>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <Button variant="outline" size="lg" onClick={onShowLeaderboard} className="w-full justify-start">
-                <Crown className="mr-2 h-6 w-6" /> {i18n[lang].leaderboard}
-              </Button>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup>
-        <Separator className="my-4" />
+        {isMobile && (
+          <>
+            <SidebarGroup>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <Button variant="outline" size="lg" onClick={onShowInstructions} className="w-full justify-start">
+                      <Info className="h-6 w-6" /> {i18n[lang].instructions}
+                  </Button>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <Button variant="outline" size="lg" onClick={onShowLeaderboard} className="w-full justify-start">
+                    <Crown className="mr-2 h-6 w-6" /> {i18n[lang].leaderboard}
+                  </Button>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroup>
+            <Separator className="my-4" />
+          </>
+        )}
         <div className="space-y-6">
           <Card className="bg-sidebar-accent border-accent/50 text-sidebar-foreground">
             <CardHeader>
@@ -912,7 +918,7 @@ export default function Home() {
              <div className="relative flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
                 <div className="md:flex-1 flex justify-start order-2 md:order-1">
                    <div className="flex flex-row md:flex-col items-center md:items-start gap-2">
-                      <SidebarTrigger variant="outline" size="lg" className="min-w-[210px] justify-start">
+                      <SidebarTrigger variant="outline" size="lg" className="md:min-w-[210px] justify-start">
                          <Menu className="h-6 w-6" /> {i18n[lang].hints}
                       </SidebarTrigger>
                       <Button variant="outline" size="lg" onClick={() => setShowInstructionsPopup(true)} className="min-w-[210px] justify-start hidden md:flex">
@@ -1125,3 +1131,5 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
+    
