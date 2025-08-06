@@ -63,12 +63,14 @@ import { useIsMobile } from '@/hooks/use-mobile';
 const COUPLE_HINT_COST = 100;
 const EX_HINT_COST = 50;
 const WIN_SCORE = 500;
+const COUPLE_MATCH_SCORE = 100;
+const EASY_COUPLE_MATCH_SCORE = 200;
 
 
 const gameModes = (lang: Language) => ({
-  easy: { label: i18n[lang].easy, hintsUnlocked: true, namesVisible: true, gridSize: 16 },
-  medium: { label: i18n[lang].medium, hintsUnlocked: false, namesVisible: true, gridSize: 25 },
-  hard: { label: i18n[lang].hard, hintsUnlocked: false, namesVisible: false, gridSize: 36 },
+  easy: { label: i18n[lang].easy, hintsUnlocked: true, namesVisible: true, gridSize: 16, couples: 3 },
+  medium: { label: i18n[lang].medium, hintsUnlocked: false, namesVisible: true, gridSize: 25, couples: 5 },
+  hard: { label: i18n[lang].hard, hintsUnlocked: false, namesVisible: false, gridSize: 36, couples: 5 },
 });
 
 type GameModeKey = keyof ReturnType<typeof gameModes>;
@@ -429,11 +431,9 @@ export default function Home() {
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     
     const currentModes = gameModes(language);
-    const { hintsUnlocked, gridSize: newGridSize } = currentModes[modeKey];
+    const { hintsUnlocked, gridSize: newGridSize, couples: couplesToInclude } = currentModes[modeKey];
     setGameModeKey(modeKey);
     setGridSize(newGridSize);
-    
-    const couplesToInclude = Math.floor(newGridSize / 9) + 2; // Scales with grid size
     
     const localizedCelebrities = getCelebrityDataByLang(language);
 
@@ -676,7 +676,7 @@ export default function Home() {
         if (cell.partner === neighbor.name && isGameCouple) {
           localMatchedPairs.add(cell.id);
           localMatchedPairs.add(neighbor.id);
-          scoreDelta += 100;
+          scoreDelta += gameModeKey === 'easy' ? EASY_COUPLE_MATCH_SCORE : COUPLE_MATCH_SCORE;
 
           const cellInNew = newCells.find(c => c.id === cell.id);
           const neighborInNew = newCells.find(c => c.id === neighbor.id);
@@ -723,7 +723,7 @@ export default function Home() {
 
     const allCouplesMatched = gameCouples.length > 0 && localMatchedPairs.size === gameCouples.length * 2;
     
-    if (finalScore >= WIN_SCORE || (allCouplesMatched && finalScore > 0)) {
+    if (finalScore >= WIN_SCORE) {
       setFinalTime(elapsedTime);
       setGameOver(true);
       setShowSubmitScore(true);
@@ -731,7 +731,7 @@ export default function Home() {
       return;
     }
     
-    if (allCouplesMatched && finalScore <= 0) {
+    if (allCouplesMatched && finalScore < WIN_SCORE) {
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
       setIsStuck(true);
       return;
@@ -751,7 +751,7 @@ export default function Home() {
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
       setIsStuck(true);
     }
-  }, [cells, matchedPairs, gameOver, isStuck, gameCouples, penalizedExPairs, elapsedTime, score, gridSize]);
+  }, [cells, matchedPairs, gameOver, isStuck, gameCouples, penalizedExPairs, elapsedTime, score, gridSize, gameModeKey]);
 
   useEffect(() => {
     const checkTimeout = setTimeout(runChecks, 300);
@@ -1144,3 +1144,5 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
+    
