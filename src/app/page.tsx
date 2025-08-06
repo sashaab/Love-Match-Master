@@ -884,22 +884,24 @@ export default function Home() {
       <SidebarInset>
         <main className="min-h-screen w-full bg-background p-4 sm:p-8">
           <div className="max-w-7xl mx-auto relative">
-             <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
-                <div className="flex-none sm:w-auto order-2 sm:order-1 flex flex-col items-start gap-2">
-                   <SidebarTrigger variant="outline" size="lg" className="w-full justify-start">
-                      <Menu className="h-6 w-6" /> {i18n[lang].hints}
-                   </SidebarTrigger>
-                   <Button variant="outline" size="lg" onClick={() => setShowInstructionsPopup(true)} className="w-full justify-start">
-                      <Info className="h-6 w-6" /> {i18n[lang].instructions}
-                   </Button>
-                   <Button variant="outline" size="lg" onClick={() => setShowLeaderboard(true)} className="w-full justify-start">
-                    <Crown className="mr-2 h-6 w-6" /> {i18n[lang].leaderboard}
-                   </Button>
+             <div className="relative flex flex-wrap sm:flex-nowrap justify-between items-center mb-4 gap-4">
+                <div className="w-1/3 order-2 sm:order-1">
+                   <div className="flex flex-col items-start gap-2">
+                      <SidebarTrigger variant="outline" size="lg" className="w-full justify-start">
+                         <Menu className="h-6 w-6" /> {i18n[lang].hints}
+                      </SidebarTrigger>
+                      <Button variant="outline" size="lg" onClick={() => setShowInstructionsPopup(true)} className="w-full justify-start">
+                         <Info className="h-6 w-6" /> {i18n[lang].instructions}
+                      </Button>
+                      <Button variant="outline" size="lg" onClick={() => setShowLeaderboard(true)} className="w-full justify-start">
+                       <Crown className="mr-2 h-6 w-6" /> {i18n[lang].leaderboard}
+                      </Button>
+                   </div>
                 </div>
-               <div className="flex-grow order-1 sm:order-2 text-center">
+               <div className="w-full sm:w-1/3 order-1 sm:order-2 text-center absolute left-1/2 top-1/2 sm:static -translate-x-1/2 -translate-y-1/2 sm:translate-x-0 sm:translate-y-0">
                  <ScoreBoard score={score} moves={moves} time={elapsedTime} lang={lang} />
                </div>
-               <div className="flex-none sm:w-auto flex justify-center sm:justify-end gap-2 order-3 absolute sm:static top-4 right-4 sm:top-0 sm:right-0">
+               <div className="w-1/3 order-3 flex justify-end gap-2">
                  <Button onClick={() => setLang('en')} variant={lang === 'en' ? 'default' : 'outline'} size="sm">EN</Button>
                  <Button onClick={() => setLang('ru')} variant={lang === 'ru' ? 'default' : 'outline'} size="sm">RU</Button>
                </div>
@@ -1098,5 +1100,7 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
+    
 
     
