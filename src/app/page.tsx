@@ -878,6 +878,9 @@ export default function Home() {
                    <Button variant="outline" size="lg" onClick={() => setShowInstructionsPopup(true)}>
                       <Info className="h-6 w-6" /> {i18n[lang].instructions}
                    </Button>
+                   <Button variant="outline" size="lg" onClick={() => setShowLeaderboard(true)}>
+                    <Crown className="mr-2 h-6 w-6" /> {i18n[lang].leaderboard}
+                  </Button>
                 </div>
                <div className="flex-grow order-1 sm:order-2 text-center">
                  <ScoreBoard score={score} moves={moves} time={elapsedTime} lang={lang} />
@@ -888,7 +891,7 @@ export default function Home() {
                </div>
              </div>
 
-            <div className="flex justify-center gap-4 mb-4">
+            <div className="flex justify-center gap-4 mb-8">
               {(Object.keys(currentModes) as GameModeKey[]).map(key => (
                   <Button 
                     key={key} 
@@ -898,12 +901,6 @@ export default function Home() {
                     {currentModes[key].label}
                   </Button>
               ))}
-            </div>
-
-            <div className="flex justify-center mb-8">
-              <Button variant="secondary" onClick={() => setShowLeaderboard(true)}>
-                <Crown className="mr-2 h-4 w-4" /> {i18n[lang].leaderboard}
-              </Button>
             </div>
             
             <div className="w-full max-w-3xl mx-auto">
