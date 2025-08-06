@@ -884,9 +884,9 @@ export default function Home() {
       <SidebarInset>
         <main className="min-h-screen w-full bg-background p-4 sm:p-8">
           <div className="max-w-7xl mx-auto relative">
-             <div className="relative flex justify-between items-center mb-4 gap-4">
-                 <div className="flex-1">
-                   <div className="flex flex-col items-start gap-2">
+             <div className="relative flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
+                <div className="md:flex-1 order-2 md:order-1">
+                   <div className="flex flex-row md:flex-col items-center md:items-start gap-2">
                       <SidebarTrigger variant="outline" size="lg" className="min-w-[210px] justify-start">
                          <Menu className="h-6 w-6" /> {i18n[lang].hints}
                       </SidebarTrigger>
@@ -898,10 +898,10 @@ export default function Home() {
                       </Button>
                    </div>
                 </div>
-               <div className="flex-1 text-center">
+               <div className="md:flex-1 order-1 md:order-2 text-center">
                  <ScoreBoard score={score} moves={moves} time={elapsedTime} lang={lang} />
                </div>
-                <div className="flex-1 flex justify-end gap-2">
+                <div className="md:flex-1 order-3 flex justify-center md:justify-end gap-2">
                  <Button onClick={() => setLang('en')} variant={lang === 'en' ? 'default' : 'outline'} size="sm">EN</Button>
                  <Button onClick={() => setLang('ru')} variant={lang === 'ru' ? 'default' : 'outline'} size="sm">RU</Button>
                </div>
@@ -1100,9 +1100,3 @@ export default function Home() {
     </SidebarProvider>
   );
 }
-
-    
-
-    
-
-
