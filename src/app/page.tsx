@@ -228,18 +228,18 @@ const HintSidebar = ({
             <SidebarGroup>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <Button variant="outline" size="lg" onClick={onShowInstructions} className="w-full justify-start text-sidebar-foreground hover:text-sidebar-accent-foreground">
+                  <Button variant="outline" size="lg" onClick={onShowInstructions} className="w-full justify-start text-foreground hover:text-primary-foreground">
                       <Info className="h-6 w-6" /> {i18n[lang].instructions}
                   </Button>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <Button variant="outline" size="lg" onClick={onShowLeaderboard} className="w-full justify-start text-sidebar-foreground hover:text-sidebar-accent-foreground">
+                  <Button variant="outline" size="lg" onClick={onShowLeaderboard} className="w-full justify-start text-foreground hover:text-primary-foreground">
                     <Crown className="mr-2 h-6 w-6" /> {i18n[lang].leaderboard}
                   </Button>
                 </SidebarMenuItem>
                  <SidebarMenuItem className="flex justify-center gap-2 pt-4">
-                    <Button onClick={() => onSetLang('en')} variant={currentLang === 'en' ? 'default' : 'outline'} size="sm" className="text-sidebar-foreground hover:text-sidebar-accent-foreground">EN</Button>
-                    <Button onClick={() => onSetLang('ru')} variant={currentLang === 'ru' ? 'default' : 'outline'} size="sm" className="text-sidebar-foreground hover:text-sidebar-accent-foreground">RU</Button>
+                    <Button onClick={() => onSetLang('en')} variant={currentLang === 'en' ? 'default' : 'outline'} size="sm" className="text-foreground hover:text-primary-foreground">EN</Button>
+                    <Button onClick={() => onSetLang('ru')} variant={currentLang === 'ru' ? 'default' : 'outline'} size="sm" className="text-foreground hover:text-primary-foreground">RU</Button>
                  </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroup>
@@ -942,7 +942,7 @@ export default function Home() {
                       </Button>
                    </div>
                 </div>
-               <div className="md:flex-1 order-1 md:order-2 text-center">
+               <div className="flex-1 order-1 md:order-2 text-center">
                  <ScoreBoard score={score} moves={moves} time={elapsedTime} lang={lang} />
                </div>
                 <div className="md:flex-1 order-3 flex justify-center md:justify-end gap-2">
