@@ -500,7 +500,7 @@ export default function Home() {
         const cell = layout[i];
         if (cell.type === 'empty') continue;
 
-        const neighbors = [i - 1, i + 1, i - gridWidth, i + gridWidth].filter(n =>
+        const neighbors = [i - 1, i + 1, i - gridWidth, i - gridWidth].filter(n =>
           n >= 0 && n < layout.length &&
           !((i % gridWidth === 0 && n === i - 1) || ((i + 1) % gridWidth === 0 && n === i + 1))
         );
@@ -606,7 +606,7 @@ export default function Home() {
       const cell = cells[i];
       if (cell.type === 'empty') continue;
 
-      const neighbors = [i - 1, i + 1, i - gridWidth, i + gridWidth].filter(n =>
+      const neighbors = [i - 1, i + 1, i - gridWidth, i - gridWidth].filter(n =>
         n >= 0 && n < cells.length &&
         !((i % gridWidth === 0 && n === i - 1) || ((i + 1) % gridWidth === 0 && n === i + 1))
       );
@@ -683,12 +683,20 @@ export default function Home() {
     if(localMatchedPairs.size > matchedPairs.size) {
         setMatchedPairs(localMatchedPairs);
     }
+
+    const allCouplesMatched = gameCouples.length > 0 && localMatchedPairs.size === gameCouples.length * 2;
     
-    if (finalScore >= WIN_SCORE) {
+    if (finalScore >= WIN_SCORE || (allCouplesMatched && finalScore > 0)) {
       setFinalTime(elapsedTime);
       setGameOver(true);
       setShowSubmitScore(true);
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+      return;
+    }
+    
+    if (allCouplesMatched && finalScore <= 0) {
+      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+      setIsStuck(true);
       return;
     }
     
@@ -702,7 +710,7 @@ export default function Home() {
         hasMoves = true;
     }
     
-    if (!hasMoves && finalScore < WIN_SCORE) {
+    if (!hasMoves && !allCouplesMatched) {
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
       setIsStuck(true);
     }
@@ -877,7 +885,7 @@ export default function Home() {
         <main className="min-h-screen w-full bg-background p-4 sm:p-8">
           <div className="max-w-7xl mx-auto relative">
              <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
-                <div className="flex-none sm:w-[250px] order-2 sm:order-1 flex flex-row justify-center sm:justify-start gap-2">
+                <div className="flex-none sm:w-auto order-2 sm:order-1 flex flex-row justify-center sm:justify-start gap-2">
                   <SidebarTrigger variant="outline" size="lg">
                       <Menu className="h-6 w-6" /> {i18n[lang].hints}
                   </SidebarTrigger>
@@ -891,7 +899,7 @@ export default function Home() {
                <div className="flex-grow order-1 sm:order-2 text-center">
                  <ScoreBoard score={score} moves={moves} time={elapsedTime} lang={lang} />
                </div>
-               <div className="flex-none sm:w-[250px] flex justify-center sm:justify-end gap-2 order-3 absolute sm:static top-4 right-4 sm:top-0 sm:right-0">
+               <div className="flex-none sm:w-auto flex justify-center sm:justify-end gap-2 order-3 absolute sm:static top-4 right-4 sm:top-0 sm:right-0">
                  <Button onClick={() => setLang('en')} variant={lang === 'en' ? 'default' : 'outline'} size="sm">EN</Button>
                  <Button onClick={() => setLang('ru')} variant={lang === 'ru' ? 'default' : 'outline'} size="sm">RU</Button>
                </div>
@@ -1090,3 +1098,5 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
+    
