@@ -363,7 +363,7 @@ export default function Home() {
   const [startTime, setStartTime] = useState<number | null>(null);
   const [elapsedTime, setElapsedTime] = useState('00:00');
   const [finalTime, setFinalTime] = useState<string | null>(null);
-  const [gridSize, setGridSize] = useState(36);
+  const [gridSize, setGridSize] = useState(25);
   
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const draggedItem = useRef<number | null>(null);
@@ -885,23 +885,23 @@ export default function Home() {
         <main className="min-h-screen w-full bg-background p-4 sm:p-8">
           <div className="max-w-7xl mx-auto relative">
              <div className="relative flex flex-wrap sm:flex-nowrap justify-between items-center mb-4 gap-4">
-                <div className="w-1/3 order-2 sm:order-1">
+                <div className="w-auto order-2 sm:order-1">
                    <div className="flex flex-col items-start gap-2">
-                      <SidebarTrigger variant="outline" size="lg" className="w-full justify-start">
+                      <SidebarTrigger variant="outline" size="lg">
                          <Menu className="h-6 w-6" /> {i18n[lang].hints}
                       </SidebarTrigger>
-                      <Button variant="outline" size="lg" onClick={() => setShowInstructionsPopup(true)} className="w-full justify-start">
+                      <Button variant="outline" size="lg" onClick={() => setShowInstructionsPopup(true)}>
                          <Info className="h-6 w-6" /> {i18n[lang].instructions}
                       </Button>
-                      <Button variant="outline" size="lg" onClick={() => setShowLeaderboard(true)} className="w-full justify-start">
+                      <Button variant="outline" size="lg" onClick={() => setShowLeaderboard(true)}>
                        <Crown className="mr-2 h-6 w-6" /> {i18n[lang].leaderboard}
                       </Button>
                    </div>
                 </div>
-               <div className="w-full sm:w-1/3 order-1 sm:order-2 text-center absolute left-1/2 top-1/2 sm:static -translate-x-1/2 -translate-y-1/2 sm:translate-x-0 sm:translate-y-0">
+               <div className="flex-1 order-1 sm:order-2 text-center">
                  <ScoreBoard score={score} moves={moves} time={elapsedTime} lang={lang} />
                </div>
-               <div className="w-1/3 order-3 flex justify-end gap-2">
+               <div className="w-auto order-3 flex justify-end gap-2 absolute top-0 right-0 sm:static">
                  <Button onClick={() => setLang('en')} variant={lang === 'en' ? 'default' : 'outline'} size="sm">EN</Button>
                  <Button onClick={() => setLang('ru')} variant={lang === 'ru' ? 'default' : 'outline'} size="sm">RU</Button>
                </div>
