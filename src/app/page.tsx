@@ -443,6 +443,7 @@ export default function Home() {
 
     const shuffledCouples = shuffle(allAvailableCouples);
     const selectedCouples = shuffledCouples.slice(0, couplesToInclude);
+    setGameCouples(selectedCouples);
 
     let celebsForGrid = new Set<string>();
     selectedCouples.forEach(c => {
@@ -450,23 +451,29 @@ export default function Home() {
         if(c.partner) celebsForGrid.add(c.partner);
     });
 
-    const exesOfSelectedCouples = new Set<string>();
-    const allCelebsInGrid = [...selectedCouples, ...selectedCouples.map(c => localizedCelebrities.find(p => p.name === c.partner))].filter(Boolean) as Celebrity[];
+    const allCelebsInGridSoFar = [...selectedCouples, ...selectedCouples.map(c => localizedCelebrities.find(p => p.name === c.partner))].filter(Boolean) as Celebrity[];
     
-    allCelebsInGrid.forEach(c => {
+    let exesOfSelectedCouples = new Set<string>();
+    allCelebsInGridSoFar.forEach(c => {
       c.exes?.forEach(exName => {
+        // Ensure the ex is a real person in our data
         if (localizedCelebrities.some(celeb => celeb.name === exName)) {
-            exesOfSelectedCouples.add(exName);
+             // Don't add if they are already part of a couple in the grid
+            if (!celebsForGrid.has(exName)) {
+                exesOfSelectedCouples.add(exName);
+            }
         }
       });
     });
 
+    // Add exes to the grid if there is space
     exesOfSelectedCouples.forEach(exName => {
         if (celebsForGrid.size < newGridSize) {
             celebsForGrid.add(exName);
         }
     });
 
+    // Add fillers if there is still space
     const fillers = shuffle(localizedCelebrities.filter(c => !celebsForGrid.has(c.name)));
     while (celebsForGrid.size < newGridSize && fillers.length > 0) {
         const filler = fillers.pop()!;
@@ -478,6 +485,7 @@ export default function Home() {
         return {...celeb, type: 'celebrity' as const, revealed: false};
     });
     
+    // This handles cases where we have fewer celebs than grid size (e.g., small dataset)
     if (finalCells.length < newGridSize) {
         const emptyCellsCount = newGridSize - finalCells.length;
         for (let i = 0; i < emptyCellsCount; i++) {
@@ -487,13 +495,13 @@ export default function Home() {
 
     const finalCelebObjects = finalCells.filter(c => c.type === 'celebrity') as Celebrity[];
     const finalCelebNames = new Set(finalCelebObjects.map(c => c.name));
-    setGameCouples(selectedCouples);
     
     const exesInGame: { p1: string, p2: string }[] = [];
     for (const celeb of finalCelebObjects) {
         if (celeb.exes) {
             for (const exName of celeb.exes) {
                 if (finalCelebNames.has(exName)) {
+                    // Avoid duplicates like [A,B] and [B,A]
                     if (!exesInGame.some(e => (e.p1 === exName && e.p2 === celeb.name) || (e.p1 === celeb.name && e.p2 === exName))) {
                         exesInGame.push({ p1: celeb.name, p2: exName });
                     }
@@ -707,7 +715,7 @@ export default function Home() {
         return p1 && p2 && localMatchedPairs.has(p1.id) && localMatchedPairs.has(p2.id);
     });
     
-    if (finalScore >= WIN_SCORE) {
+    if (score >= WIN_SCORE) {
       setFinalTime(elapsedTime);
       setGameOver(true);
       setShowSubmitScore(true);
@@ -887,6 +895,12 @@ export default function Home() {
 
   const currentModes = gameModes(lang);
   const isWinner = score >= WIN_SCORE;
+  const allMatched = gameCouples.length > 0 && gameCouples.every(c => {
+      const p1 = cells.find(cell => cell.type === 'celebrity' && cell.name === c.name);
+      const p2 = cells.find(cell => cell.type === 'celebrity' && cell.name === c.partner);
+      return p1 && p2 && matchedPairs.has(p1.id) && matchedPairs.has(p2.id);
+  });
+
 
   return (
     <SidebarProvider>
@@ -1045,7 +1059,7 @@ export default function Home() {
                     .replace('{score}', score.toString())
                     .replace('{time}', finalTime || '00:00')}
                 </AlertDialogDescription>
-                {isWinner && (
+                {isWinner ? (
                   <>
                     <AlertDialogDescription>
                       {i18n[lang].gameOverInviteLine1}
@@ -1054,6 +1068,10 @@ export default function Home() {
                       {i18n[lang].gameOverInviteLine2}
                     </AlertDialogDescription>
                   </>
+                ) : (
+                  allMatched && <AlertDialogDescription>
+                     {i18n[lang].gameOverNonWinner.replace('{win_score}', WIN_SCORE.toString())}
+                  </AlertDialogDescription>
                 )}
               </AlertDialogHeader>
               <AlertDialogFooter>
