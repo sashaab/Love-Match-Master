@@ -451,12 +451,12 @@ export default function Home() {
     });
 
     const exesOfSelectedCouples = new Set<string>();
-    selectedCouples.forEach(c => {
-      const partner = localizedCelebrities.find(p => p.name === c.partner);
-      const allExes = [...(c.exes || []), ...(partner?.exes || [])];
-      allExes.forEach(exName => {
+    const allCelebsInGrid = [...selectedCouples, ...selectedCouples.map(c => localizedCelebrities.find(p => p.name === c.partner))].filter(Boolean) as Celebrity[];
+    
+    allCelebsInGrid.forEach(c => {
+      c.exes?.forEach(exName => {
         if (localizedCelebrities.some(celeb => celeb.name === exName)) {
-          exesOfSelectedCouples.add(exName);
+            exesOfSelectedCouples.add(exName);
         }
       });
     });
@@ -487,16 +487,7 @@ export default function Home() {
 
     const finalCelebObjects = finalCells.filter(c => c.type === 'celebrity') as Celebrity[];
     const finalCelebNames = new Set(finalCelebObjects.map(c => c.name));
-
-    const allPossibleCouplesInGrid: Celebrity[] = [];
-    finalCelebObjects.forEach(celeb => {
-        if (celeb.partner && finalCelebNames.has(celeb.partner)) {
-            if (!allPossibleCouplesInGrid.some(c => c.name === celeb.partner)) {
-                allPossibleCouplesInGrid.push(celeb);
-            }
-        }
-    });
-    setGameCouples(allPossibleCouplesInGrid);
+    setGameCouples(selectedCouples);
     
     const exesInGame: { p1: string, p2: string }[] = [];
     for (const celeb of finalCelebObjects) {
@@ -513,7 +504,7 @@ export default function Home() {
     setGameExes(exesInGame);
 
     if (hintsUnlocked) {
-      setUnlockedCoupleNames(new Set(allPossibleCouplesInGrid.map(c => c.name)));
+      setUnlockedCoupleNames(new Set(selectedCouples.map(c => c.name)));
       setUnlockedExesCount(exesInGame.length);
     } else {
       setUnlockedCoupleNames(new Set());
@@ -724,9 +715,11 @@ export default function Home() {
       return;
     }
     
-    if (allCouplesMatched && finalScore < WIN_SCORE) {
+    if (allCouplesMatched) {
+      setFinalTime(elapsedTime);
+      setGameOver(true);
+      setShowSubmitScore(true);
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-      setIsStuck(true);
       return;
     }
     
@@ -893,6 +886,7 @@ export default function Home() {
   };
 
   const currentModes = gameModes(lang);
+  const isWinner = score >= WIN_SCORE;
 
   return (
     <SidebarProvider>
@@ -1051,21 +1045,27 @@ export default function Home() {
                     .replace('{score}', score.toString())
                     .replace('{time}', finalTime || '00:00')}
                 </AlertDialogDescription>
-                <AlertDialogDescription>
-                  {i18n[lang].gameOverInviteLine1}
-                </AlertDialogDescription>
-                <AlertDialogDescription>
-                  {i18n[lang].gameOverInviteLine2}
-                </AlertDialogDescription>
+                {isWinner && (
+                  <>
+                    <AlertDialogDescription>
+                      {i18n[lang].gameOverInviteLine1}
+                    </AlertDialogDescription>
+                    <AlertDialogDescription>
+                      {i18n[lang].gameOverInviteLine2}
+                    </AlertDialogDescription>
+                  </>
+                )}
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <div className="w-full flex flex-col sm:flex-row gap-2">
-                  <Button asChild className="bg-black hover:bg-gray-800 text-white flex-1">
-                      <a href={TELEGRAM_APP_URL} target="_blank">
-                        <TelegramIcon className="mr-2" />
-                        {i18n[lang].becomeCelebricy}
-                      </a>
-                  </Button>
+                  {isWinner && (
+                    <Button asChild className="bg-black hover:bg-gray-800 text-white flex-1">
+                        <a href={TELEGRAM_APP_URL} target="_blank">
+                          <TelegramIcon className="mr-2" />
+                          {i18n[lang].becomeCelebricy}
+                        </a>
+                    </Button>
+                  )}
                     <Button onClick={handleShare} variant="outline" className="flex-1">
                       <Share2 className="mr-2 h-4 w-4" />
                       {i18n[lang].shareWithFriend}
