@@ -34,7 +34,11 @@ import {
   SidebarHeader,
   SidebarProvider,
   SidebarTrigger,
-  SidebarInset
+  SidebarInset,
+  SidebarGroup,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
 } from "@/components/ui/sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
@@ -179,6 +183,8 @@ const HintSidebar = ({
   matchedPairs,
   allCells,
   lang,
+  onShowInstructions,
+  onShowLeaderboard,
 }: {
   couples: Celebrity[];
   exes: { p1: string; p2: string }[];
@@ -189,6 +195,8 @@ const HintSidebar = ({
   matchedPairs: Set<string>;
   allCells: Cell[];
   lang: Language;
+  onShowInstructions: () => void;
+  onShowLeaderboard: () => void;
 }) => {
   const unlockedByPoints = couples.filter(c => unlockedCoupleNames.has(c.name));
 
@@ -209,6 +217,21 @@ const HintSidebar = ({
         <h3 className="text-2xl font-bold font-headline text-sidebar-primary-foreground text-center">{i18n[lang].gameHints}</h3>
       </SidebarHeader>
       <SidebarContent className="bg-sidebar p-4">
+        <SidebarGroup>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <Button variant="outline" size="lg" onClick={onShowInstructions} className="w-full justify-start">
+                  <Info className="h-6 w-6" /> {i18n[lang].instructions}
+              </Button>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <Button variant="outline" size="lg" onClick={onShowLeaderboard} className="w-full justify-start">
+                <Crown className="mr-2 h-6 w-6" /> {i18n[lang].leaderboard}
+              </Button>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
+        <Separator className="my-4" />
         <div className="space-y-6">
           <Card className="bg-sidebar-accent border-accent/50 text-sidebar-foreground">
             <CardHeader>
@@ -880,20 +903,22 @@ export default function Home() {
         matchedPairs={matchedPairs}
         allCells={cells}
         lang={lang}
+        onShowInstructions={() => setShowInstructionsPopup(true)}
+        onShowLeaderboard={() => setShowLeaderboard(true)}
       />
       <SidebarInset>
         <main className="min-h-screen w-full bg-background p-4 sm:p-8">
           <div className="max-w-7xl mx-auto relative">
              <div className="relative flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
-                <div className="md:flex-1 order-2 md:order-1">
+                <div className="md:flex-1 flex justify-start order-2 md:order-1">
                    <div className="flex flex-row md:flex-col items-center md:items-start gap-2">
                       <SidebarTrigger variant="outline" size="lg" className="min-w-[210px] justify-start">
                          <Menu className="h-6 w-6" /> {i18n[lang].hints}
                       </SidebarTrigger>
-                      <Button variant="outline" size="lg" onClick={() => setShowInstructionsPopup(true)} className="min-w-[210px] justify-start">
+                      <Button variant="outline" size="lg" onClick={() => setShowInstructionsPopup(true)} className="min-w-[210px] justify-start hidden md:flex">
                          <Info className="h-6 w-6" /> {i18n[lang].instructions}
                       </Button>
-                      <Button variant="outline" size="lg" onClick={() => setShowLeaderboard(true)} className="min-w-[210px] justify-start">
+                      <Button variant="outline" size="lg" onClick={() => setShowLeaderboard(true)} className="min-w-[210px] justify-start hidden md:flex">
                        <Crown className="mr-2 h-6 w-6" /> {i18n[lang].leaderboard}
                       </Button>
                    </div>
