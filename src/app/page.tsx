@@ -437,51 +437,40 @@ export default function Home() {
     
     const localizedCelebrities = getCelebrityDataByLang(language);
 
-    let potentialCouples = shuffle(localizedCelebrities.filter(c =>
-        c.partner && localizedCelebrities.find(p => p.name === c.partner) && (c.exes && c.exes.length > 0)
-    ));
-    
-    let initialCouples: Celebrity[] = [];
+    const allAvailableCouples = localizedCelebrities.filter(c => 
+        c.partner && localizedCelebrities.find(p => p.name === c.partner)
+    );
+
+    const shuffledCouples = shuffle(allAvailableCouples);
+    const selectedCouples = shuffledCouples.slice(0, couplesToInclude);
+
     let celebsForGrid = new Set<string>();
+    selectedCouples.forEach(c => {
+        celebsForGrid.add(c.name);
+        if(c.partner) celebsForGrid.add(c.partner);
+    });
 
-    while (initialCouples.length < couplesToInclude && potentialCouples.length > 0) {
-        const coupleCandidate = potentialCouples.pop()!;
-        const partner = localizedCelebrities.find(p => p.name === coupleCandidate.partner)!;
-        
-        const exesOfCandidate = coupleCandidate.exes || [];
-        const exesOfPartner = partner.exes || [];
-        const allExesForPair = [...new Set([...exesOfCandidate, ...exesOfPartner])];
-
-        const exCelebsInGame = allExesForPair.map(name => localizedCelebrities.find(c => c.name === name)).filter(Boolean) as Celebrity[];
-
-        const tempCelebs = new Set([coupleCandidate.name, partner.name, ...exCelebsInGame.map(c => c.name)]);
-        if (celebsForGrid.size + tempCelebs.size > newGridSize) {
-            continue;
+    const exesOfSelectedCouples = new Set<string>();
+    selectedCouples.forEach(c => {
+      const partner = localizedCelebrities.find(p => p.name === c.partner);
+      const allExes = [...(c.exes || []), ...(partner?.exes || [])];
+      allExes.forEach(exName => {
+        if (localizedCelebrities.some(celeb => celeb.name === exName)) {
+          exesOfSelectedCouples.add(exName);
         }
+      });
+    });
 
-        let coupleHasValidExPair = false;
-        for (const celeb of [coupleCandidate, partner]) {
-            if (celeb.exes) {
-                for (const exName of celeb.exes) {
-                    if (exCelebsInGame.find(c => c.name === exName)) {
-                        coupleHasValidExPair = true;
-                    }
-                }
-            }
+    exesOfSelectedCouples.forEach(exName => {
+        if (celebsForGrid.size < newGridSize) {
+            celebsForGrid.add(exName);
         }
-        
-        if (coupleHasValidExPair) {
-            initialCouples.push(coupleCandidate);
-            celebsForGrid.add(coupleCandidate.name);
-            celebsForGrid.add(partner.name);
-            exCelebsInGame.forEach(ex => celebsForGrid.add(ex.name));
-        }
-    }
-    
+    });
+
     const fillers = shuffle(localizedCelebrities.filter(c => !celebsForGrid.has(c.name)));
-    const remainingSlots = newGridSize - celebsForGrid.size;
-    if (remainingSlots > 0) {
-        fillers.slice(0, remainingSlots).forEach(f => celebsForGrid.add(f.name));
+    while (celebsForGrid.size < newGridSize && fillers.length > 0) {
+        const filler = fillers.pop()!;
+        celebsForGrid.add(filler.name);
     }
     
     let finalCells: Cell[] = Array.from(celebsForGrid).map(name => {
@@ -721,7 +710,11 @@ export default function Home() {
         setMatchedPairs(localMatchedPairs);
     }
 
-    const allCouplesMatched = gameCouples.length > 0 && localMatchedPairs.size === gameCouples.length * 2;
+    const allCouplesMatched = gameCouples.length > 0 && gameCouples.every(c => {
+        const p1 = cells.find(cell => cell.type === 'celebrity' && cell.name === c.name);
+        const p2 = cells.find(cell => cell.type === 'celebrity' && cell.name === c.partner);
+        return p1 && p2 && localMatchedPairs.has(p1.id) && localMatchedPairs.has(p2.id);
+    });
     
     if (finalScore >= WIN_SCORE) {
       setFinalTime(elapsedTime);
@@ -1144,5 +1137,3 @@ export default function Home() {
     </SidebarProvider>
   );
 }
-
-    
