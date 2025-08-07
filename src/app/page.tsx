@@ -451,28 +451,28 @@ export default function Home() {
     const allAvailableCouples = Array.from(allCouplesMap.values());
     const shuffledCouples = shuffle(allAvailableCouples);
     const selectedCouples = shuffledCouples.slice(0, couplesToInclude);
+    
     setGameCouples(selectedCouples);
     
-    const celebsForGridSet = new Set<string>();
-    const couplePartnersSet = new Set<string>();
+    const celebsForGrid = new Set<Celebrity>();
+    const celebNamesInGrid = new Set<string>();
+
     selectedCouples.forEach(c => {
-        celebsForGridSet.add(c.name);
-        if (c.partner) {
-          celebsForGridSet.add(c.partner);
-          couplePartnersSet.add(c.name);
-          couplePartnersSet.add(c.partner);
-        }
+      const partnerName = c.partner!;
+      const p1 = localizedCelebrities.find(celeb => celeb.name === c.name);
+      const p2 = localizedCelebrities.find(celeb => celeb.name === partnerName);
+      if(p1) { celebsForGrid.add(p1); celebNamesInGrid.add(p1.name); }
+      if(p2) { celebsForGrid.add(p2); celebNamesInGrid.add(p2.name); }
     });
 
-    const nonPairedCelebs = localizedCelebrities.filter(c => !couplePartnersSet.has(c.name));
+    const nonPairedCelebs = localizedCelebrities.filter(c => !celebNamesInGrid.has(c.name) && !c.partner);
     const shuffledOthers = shuffle(nonPairedCelebs);
 
-    const fillersNeeded = newGridSize - celebsForGridSet.size;
+    const fillersNeeded = newGridSize - celebsForGrid.size;
     const fillers = shuffledOthers.slice(0, fillersNeeded);
-    fillers.forEach(f => celebsForGridSet.add(f.name));
+    fillers.forEach(f => celebsForGrid.add(f));
 
-    let finalCells: Cell[] = Array.from(celebsForGridSet).map(name => {
-        const celeb = localizedCelebrities.find(c => c.name === name)!;
+    let finalCells: Cell[] = Array.from(celebsForGrid).map(celeb => {
         return {...celeb, type: 'celebrity' as const, revealed: false};
     });
 
@@ -866,6 +866,7 @@ export default function Home() {
   };
 
   const handleUnlockCouple = () => {
+    setScore(s => s - COUPLE_HINT_COST);
     const matchedOnBoard = gameCouples.filter(couple => {
       const p1 = cells.find(c => c.type === 'celebrity' && c.name === couple.name);
       const p2 = cells.find(c => c.type === 'celebrity' && c.name === couple.partner);
@@ -877,7 +878,6 @@ export default function Home() {
     const nextUnrevealedCouple = gameCouples.find(c => !revealedCoupleNames.has(c.name));
 
     if (nextUnrevealedCouple) {
-      setScore(s => s - COUPLE_HINT_COST);
       setUnlockedCoupleNames(prev => new Set(prev).add(nextUnrevealedCouple.name));
     }
   };
@@ -932,7 +932,6 @@ export default function Home() {
     gridTemplateColumns: `repeat(${Math.sqrt(gridSize)}, minmax(0, 1fr))`
   };
 
-  const currentModes = gameModes(lang);
   const isWinner = score >= WIN_SCORE;
   const allMatched = gameCouples.length > 0 && gameCouples.every(c => {
       const p1 = cells.find(cell => cell.type === 'celebrity' && cell.name === c.name);
@@ -1004,19 +1003,20 @@ export default function Home() {
             <div className="w-full max-w-3xl mx-auto">
               <div className="grid gap-2 md:gap-4 mb-8" style={gridDynamicStyle}>
                 {cells.map((cell, index) => (
-                  <CelebrityCard
-                    key={cell.id}
-                    cell={cell}
-                    index={index}
-                    isMatched={matchedPairs.has(cell.id)}
-                    isFighting={fightingIds.has(cell.id)}
-                    isSelected={selectedCardIndex === index}
-                    onDragStart={handleDragStart}
-                    onDragOver={handleDragOver}
-                    onDrop={handleDrop}
-                    onClick={handleCardClick}
-                    namesVisible={currentModes[gameModeKey].namesVisible}
-                  />
+                  <div key={cell.id}>
+                    <CelebrityCard
+                      cell={cell}
+                      index={index}
+                      isMatched={matchedPairs.has(cell.id)}
+                      isFighting={fightingIds.has(cell.id)}
+                      isSelected={selectedCardIndex === index}
+                      onDragStart={handleDragStart}
+                      onDragOver={handleDragOver}
+                      onDrop={handleDrop}
+                      onClick={handleCardClick}
+                      namesVisible={currentModes[gameModeKey].namesVisible}
+                    />
+                  </div>
                 ))}
               </div>
             </div>
