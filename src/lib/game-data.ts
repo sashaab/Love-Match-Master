@@ -124,5 +124,7 @@ export const celebritiesData = [
   { id: '99', type: 'celebrity', name: { en: 'Paul Mescal', ru: 'Пол Мескал' }, imageUrl: '/images/celebrities/Paul Mescal.png', partner: undefined, exes: [] },
   { id: '100', type: 'celebrity', name: { en: 'Pedro Pascal', ru: 'Педро Паскаль' }, imageUrl: '/images/celebrities/Pedro Pascal.png', partner: undefined, exes: [] },
   { id: '101', type: 'celebrity', name: { en: 'Nino Ninidze', ru: 'Нино Нинидзе' }, imageUrl: '/images/celebrities/Nino Ninidze.png', partner: undefined, exes: [] },
-  { id: '102', type: 'celebrity', name: { en: 'Elsina Khayrova', ru: 'Эльсина Хайрова' }, imageUrl: '/images/celebrities/Elsina Khayrova.png', partner: { en: 'Tom Cruise', ru: 'Том Круз' }, exes: [] }
+  { id: '102', type: 'celebrity', name: { en: 'Elsina Khayrova', ru: 'Эльсина Хайрова' }, imageUrl: '/images/celebrities/Elsina Khayrova.png', partner: { en: 'Tom Cruise', ru: 'Том Круз' }, exes: [] },
+  { id: '103', type: 'celebrity', name: { en: 'Petr Dranga', ru: 'Петр Дранга' }, imageUrl: '/images/celebrities/Petr Dranga.png', partner: { en: 'Agata Muceniece', ru: 'Агата Муцениеце' }, exes: [] },
+  { id: '104', type: 'celebrity', name: { en: 'Julia Vlasova', ru: 'Юлия Власова' }, imageUrl: '/images/celebrities/Johnny Depp.png', partner: { en: 'Johnny Depp', ru: 'Джонни Депп' }, exes: [] }
 ];
