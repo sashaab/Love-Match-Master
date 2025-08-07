@@ -240,8 +240,8 @@ const HintSidebar = ({
                   </Button>
                 </SidebarMenuItem>
                  <SidebarMenuItem className="flex justify-center gap-2 pt-4">
-                    <Button onClick={() => onSetLang('en')} variant={currentLang === 'en' ? 'default' : 'outline'} size="sm" className="text-foreground hover:text-primary-foreground">EN</Button>
-                    <Button onClick={() => onSetLang('ru')} variant={currentLang === 'ru' ? 'default' : 'outline'} size="sm" className="text-foreground hover:text-primary-foreground">RU</Button>
+                    <Button onClick={() => onSetLang('en')} variant={currentLang === 'en' ? 'default' : 'outline'} size="sm">EN</Button>
+                    <Button onClick={() => onSetLang('ru')} variant={currentLang === 'ru' ? 'default' : 'outline'} size="sm">RU</Button>
                  </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroup>
@@ -387,6 +387,7 @@ export default function Home() {
   const [isClient, setIsClient] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [isStuck, setIsStuck] = useState(false);
+  const [unmatchedStuckCouples, setUnmatchedStuckCouples] = useState<Celebrity[]>([]);
   const [gameCouples, setGameCouples] = useState<Celebrity[]>([]);
   const [gameExes, setGameExes] = useState<{p1: string, p2: string}[]>([]);
   const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
@@ -472,7 +473,6 @@ export default function Home() {
     const allPossibleCouplesOnGrid = new Map<string, Celebrity>();
     allAvailableCouples.forEach(c => {
         if(finalCelebNames.has(c.name) && c.partner && finalCelebNames.has(c.partner)) {
-             // Use a consistent key to avoid duplicates (e.g., sorted names)
              const key = [c.name, c.partner].sort().join('-');
              if(!allPossibleCouplesOnGrid.has(key)) {
                 allPossibleCouplesOnGrid.set(key, c);
@@ -541,6 +541,7 @@ export default function Home() {
     setPenalizedExPairs(new Set());
     setGameOver(false);
     setIsStuck(false);
+    setUnmatchedStuckCouples([]);
     setSelectedCardIndex(null);
     setStartTime(null);
     setElapsedTime('00:00');
@@ -568,7 +569,7 @@ export default function Home() {
   }, [startTime]);
 
   useEffect(() => {
-    if (startTime && !gameOver) {
+    if (startTime && !gameOver && !isStuck) {
       timerIntervalRef.current = setInterval(() => {
         const now = Date.now();
         const diff = now - startTime;
@@ -582,7 +583,7 @@ export default function Home() {
     return () => {
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     };
-  }, [startTime, gameOver]);
+  }, [startTime, gameOver, isStuck]);
 
 
   useEffect(() => {
@@ -601,75 +602,66 @@ export default function Home() {
   }, [setupGame, gameModeKey, lang, isClient]);
 
   const isGameStuck = useCallback((currentCells: Cell[], currentMatchedPairs: Set<string>, couples: Celebrity[]) => {
-    const gridWidth = Math.sqrt(gridSize);
-    const nonMatchedCelebs = currentCells.filter(c => c.type === 'celebrity' && !currentMatchedPairs.has(c.id)) as (Celebrity & { type: 'celebrity' })[];
-    
-    // Find couples that are on the board but not matched yet
-    const unmatchedCouples = couples.filter(c => {
-        const p1 = nonMatchedCelebs.find(celeb => celeb.name === c.name);
-        const p2 = nonMatchedCelebs.find(celeb => celeb.name === c.partner);
-        return p1 && p2;
-    });
+      const gridWidth = Math.sqrt(gridSize);
+      const unmatchedCouples = couples.filter(c => {
+          const p1 = currentCells.find(cell => cell.type === 'celebrity' && cell.name === c.name);
+          const p2 = currentCells.find(cell => cell.type === 'celebrity' && cell.name === c.partner);
+          return p1 && p2 && !currentMatchedPairs.has(p1.id) && !currentMatchedPairs.has(p2.id);
+      });
 
-    if (unmatchedCouples.length === 0) return false;
+      if (unmatchedCouples.length === 0) return { stuck: false, couples: [] };
 
-    // A map of all cells that can be moved or moved into
-    const movableIndices = new Set<number>();
-    currentCells.forEach((cell, index) => {
-        if (cell.type === 'empty' || (cell.type === 'celebrity' && !currentMatchedPairs.has(cell.id))) {
-            movableIndices.add(index);
-        }
-    });
+      const getReachable = (startIndex: number, board: Cell[], blockedIds: Set<string>): Set<number> => {
+          const queue = [startIndex];
+          const visited = new Set<number>([startIndex]);
+          
+          while(queue.length > 0) {
+              const currentIndex = queue.shift()!;
+              const neighbors = [currentIndex - 1, currentIndex + 1, currentIndex - gridWidth, currentIndex + gridWidth].filter(n =>
+                  n >= 0 && n < gridSize &&
+                  !((currentIndex % gridWidth === 0 && n === currentIndex - 1) || ((currentIndex + 1) % gridWidth === 0 && n === currentIndex + 1))
+              );
 
-    for (const couple of unmatchedCouples) {
-        const p1 = nonMatchedCelebs.find(c => c.name === couple.name);
-        const p2 = nonMatchedCelebs.find(c => c.name === couple.partner);
-        if (!p1 || !p2) continue;
+              for (const neighborIndex of neighbors) {
+                  const neighborCell = board[neighborIndex];
+                  if (!visited.has(neighborIndex) && (neighborCell.type === 'empty' || !blockedIds.has(neighborCell.id))) {
+                      visited.add(neighborIndex);
+                      queue.push(neighborIndex);
+                  }
+              }
+          }
+          return visited;
+      };
 
-        const p1Index = currentCells.findIndex(c => c.id === p1.id);
-        const p2Index = currentCells.findIndex(c => c.id === p2.id);
+      const movableCelebrities = currentCells
+          .map((c, i) => ({...c, index: i}))
+          .filter(c => c.type === 'celebrity' && !currentMatchedPairs.has(c.id));
 
-        // BFS to find if p1 can reach a position adjacent to p2
-        const queue: number[] = [p1Index];
-        const visited = new Set<number>([p1Index]);
-        let pathFound = false;
+      for(const couple of unmatchedCouples) {
+          const p1 = movableCelebrities.find(c => c.name === couple.name);
+          const p2 = movableCelebrities.find(c => c.name === couple.partner);
+          if (!p1 || !p2) continue;
 
-        while (queue.length > 0) {
-            const currentIndex = queue.shift()!;
-            
-            const p2Neighbors = [p2Index - 1, p2Index + 1, p2Index - gridWidth, p2Index + gridWidth].filter(n =>
-                n >= 0 && n < gridSize &&
-                !((p2Index % gridWidth === 0 && n === p2Index - 1) || ((p2Index + 1) % gridWidth === 0 && n === p2Index + 1))
-            );
+          // IDs of all cells that act as blockers (matched pairs)
+          const blockedIds = new Set(currentMatchedPairs);
 
-            // If the current cell in the path is a neighbor of p2, they can be united
-            if (p2Neighbors.includes(currentIndex)) {
-                pathFound = true;
-                break;
-            }
-            
-            // Explore neighbors of the current cell
-            const neighbors = [currentIndex - 1, currentIndex + 1, currentIndex - gridWidth, currentIndex + gridWidth].filter(n =>
-                n >= 0 && n < gridSize &&
-                !((currentIndex % gridWidth === 0 && n === currentIndex - 1) || ((currentIndex + 1) % gridWidth === 0 && n === currentIndex + 1))
-            );
-            
-            for (const neighborIndex of neighbors) {
-                // We can only move through empty cells or other unmatched/unmovable cells
-                if (movableIndices.has(neighborIndex) && !visited.has(neighborIndex)) {
-                    visited.add(neighborIndex);
-                    queue.push(neighborIndex);
-                }
-            }
-        }
-
-        // If a path is not found for even one couple, the game might be stuck
-        if (!pathFound) {
-            return true;
-        }
-    }
-    
-    return false;
+          // Can p1 reach a cell adjacent to p2's current location?
+          const p1Reachable = getReachable(p1.index, currentCells, blockedIds);
+          
+          const p2Neighbors = [p2.index - 1, p2.index + 1, p2.index - gridWidth, p2.index + gridWidth].filter(n =>
+              n >= 0 && n < gridSize &&
+              !((p2.index % gridWidth === 0 && n === p2.index - 1) || ((p2.index + 1) % gridWidth === 0 && n === p2.index + 1))
+          );
+          
+          const canUnite = p2Neighbors.some(n => p1Reachable.has(n));
+          
+          if (canUnite) {
+              return { stuck: false, couples: [] }; // At least one couple can be united, so game is not stuck
+          }
+      }
+      
+      // If we loop through all couples and none can be united, game is stuck.
+      return { stuck: true, couples: unmatchedCouples };
   }, [gridSize]);
 
   const runChecks = useCallback(() => {
@@ -778,12 +770,13 @@ export default function Home() {
       if (finalScore >= WIN_SCORE) {
         setShowSubmitScore(true);
       }
-      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
       return;
     }
 
-    if (isGameStuck(cells, localMatchedPairs, gameCouples)) {
-        if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    const stuckCheck = isGameStuck(cells, localMatchedPairs, gameCouples);
+    if (stuckCheck.stuck) {
+        setUnmatchedStuckCouples(stuckCheck.couples);
+        setFinalTime(elapsedTime);
         setIsStuck(true);
     }
 
@@ -1174,24 +1167,36 @@ export default function Home() {
           </AlertDialog>
           <AlertDialog open={isStuck}>
             <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle className="flex items-center justify-center text-2xl font-headline">
-                  <Ban className="mr-4 h-10 w-10 text-destructive" />
-                  {i18n[lang].noMoreMoves}
-                </AlertDialogTitle>
-                <AlertDialogDescription>
-                  {i18n[lang].noMoreSwaps}
-                </AlertDialogDescription>
-                <AlertDialogDescription>
-                  {i18n[lang].yourFinalScore}
-                  <span className="font-bold text-primary">{score}</span>
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogAction onClick={handleReset} className="w-full">
-                  {i18n[lang].tryAgain}
-                </AlertDialogAction>
-              </AlertDialogFooter>
+                <AlertDialogHeader>
+                    <AlertDialogTitle className="flex items-center justify-center text-2xl font-headline">
+                        <Ban className="mr-4 h-10 w-10 text-destructive" />
+                        {i18n[lang].stuckTitle}
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                        {i18n[lang].stuckDescription.replace('{score}', score.toString()).replace('{time}', finalTime || '00:00')}
+                    </AlertDialogDescription>
+                    {unmatchedStuckCouples.length > 0 && (
+                        <div className="text-sm text-center pt-2">
+                            <p className="font-bold">{i18n[lang].stuckUnmatchedPairs}</p>
+                            <ul className="list-disc list-inside text-muted-foreground">
+                                {unmatchedStuckCouples.map(c => (
+                                    <li key={c.id}>{c.name} & {c.partner}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <div className="w-full flex flex-col sm:flex-row gap-2">
+                        <Button onClick={handleShare} variant="outline" className="flex-1">
+                            <Share2 className="mr-2 h-4 w-4" />
+                            {i18n[lang].shareWithFriend}
+                        </Button>
+                        <AlertDialogAction onClick={handleReset} className="flex-1">
+                            {i18n[lang].tryAgain}
+                        </AlertDialogAction>
+                    </div>
+                </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
            <Leaderboard lang={lang} open={showLeaderboard} onOpenChange={setShowLeaderboard} />
