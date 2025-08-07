@@ -437,24 +437,37 @@ export default function Home() {
     setGridSize(newGridSize);
     
     const localizedCelebrities = getCelebrityDataByLang(language);
-    const allAvailableCouples = localizedCelebrities.filter(c => c.partner && localizedCelebrities.find(p => p.name === c.partner));
-    const shuffledCouples = shuffle(allAvailableCouples);
-    const selectedCouplesBase = shuffledCouples.slice(0, couplesToInclude);
     
-    let celebsForGrid = new Set<string>();
-    selectedCouplesBase.forEach(c => {
-        celebsForGrid.add(c.name);
-        if(c.partner) celebsForGrid.add(c.partner);
+    // Create a map to avoid duplicate couples (e.g. A-B and B-A) and filter only those with partners
+    const allCouplesMap = new Map<string, Celebrity>();
+    localizedCelebrities.forEach(c => {
+        if (c.partner) {
+            const key = [c.name, c.partner].sort().join('-');
+            if (!allCouplesMap.has(key)) {
+                allCouplesMap.set(key, c);
+            }
+        }
     });
 
-    const singleCelebs = localizedCelebrities.filter(c => !celebsForGrid.has(c.name));
-    const shuffledSingles = shuffle(singleCelebs);
-    const fillersNeeded = newGridSize - celebsForGrid.size;
-    const fillers = shuffledSingles.slice(0, fillersNeeded);
+    const allAvailableCouples = Array.from(allCouplesMap.values());
+    const shuffledCouples = shuffle(allAvailableCouples);
+    const selectedCouples = shuffledCouples.slice(0, couplesToInclude);
+    setGameCouples(selectedCouples);
+    
+    let celebsForGridSet = new Set<string>();
+    selectedCouples.forEach(c => {
+        celebsForGridSet.add(c.name);
+        if(c.partner) celebsForGridSet.add(c.partner);
+    });
 
-    fillers.forEach(f => celebsForGrid.add(f.name));
+    const otherCelebs = localizedCelebrities.filter(c => !celebsForGridSet.has(c.name));
+    const shuffledOthers = shuffle(otherCelebs);
+    
+    const fillersNeeded = newGridSize - celebsForGridSet.size;
+    const fillers = shuffledOthers.slice(0, fillersNeeded);
+    fillers.forEach(f => celebsForGridSet.add(f.name));
 
-    let finalCells: Cell[] = Array.from(celebsForGrid).map(name => {
+    let finalCells: Cell[] = Array.from(celebsForGridSet).map(name => {
         const celeb = localizedCelebrities.find(c => c.name === name)!;
         return {...celeb, type: 'celebrity' as const, revealed: false};
     });
@@ -469,7 +482,7 @@ export default function Home() {
     const finalCelebObjects = finalCells.filter(c => c.type === 'celebrity') as Celebrity[];
     const finalCelebNames = new Set(finalCelebObjects.map(c => c.name));
 
-    // Auto-include any pairs that ended up on the grid by chance
+    // Auto-include any pairs that ended up on the grid by chance from fillers
     const allPossibleCouplesOnGrid = new Map<string, Celebrity>();
     allAvailableCouples.forEach(c => {
         if(finalCelebNames.has(c.name) && c.partner && finalCelebNames.has(c.partner)) {
@@ -614,6 +627,8 @@ export default function Home() {
       const getReachable = (startIndex: number, board: Cell[], blockedIds: Set<string>): Set<number> => {
           const queue = [startIndex];
           const visited = new Set<number>([startIndex]);
+          const path: { [key: number]: number[] } = {};
+          path[startIndex] = [startIndex];
           
           while(queue.length > 0) {
               const currentIndex = queue.shift()!;
@@ -623,8 +638,10 @@ export default function Home() {
               );
 
               for (const neighborIndex of neighbors) {
+                  if (visited.has(neighborIndex)) continue;
+
                   const neighborCell = board[neighborIndex];
-                  if (!visited.has(neighborIndex) && (neighborCell.type === 'empty' || !blockedIds.has(neighborCell.id))) {
+                  if (neighborCell.type === 'empty' || !blockedIds.has(neighborCell.id)) {
                       visited.add(neighborIndex);
                       queue.push(neighborIndex);
                   }
@@ -645,7 +662,6 @@ export default function Home() {
           // IDs of all cells that act as blockers (matched pairs)
           const blockedIds = new Set(currentMatchedPairs);
 
-          // Can p1 reach a cell adjacent to p2's current location?
           const p1Reachable = getReachable(p1.index, currentCells, blockedIds);
           
           const p2Neighbors = [p2.index - 1, p2.index + 1, p2.index - gridWidth, p2.index + gridWidth].filter(n =>
@@ -656,11 +672,10 @@ export default function Home() {
           const canUnite = p2Neighbors.some(n => p1Reachable.has(n));
           
           if (canUnite) {
-              return { stuck: false, couples: [] }; // At least one couple can be united, so game is not stuck
+              return { stuck: false, couples: [] }; 
           }
       }
       
-      // If we loop through all couples and none can be united, game is stuck.
       return { stuck: true, couples: unmatchedCouples };
   }, [gridSize]);
 
