@@ -438,7 +438,6 @@ export default function Home() {
     
     const localizedCelebrities = getCelebrityDataByLang(language);
     
-    // Create a map to avoid duplicate couples (e.g. A-B and B-A) and filter only those with partners
     const allCouplesMap = new Map<string, Celebrity>();
     localizedCelebrities.forEach(c => {
         if (c.partner) {
@@ -452,16 +451,22 @@ export default function Home() {
     const allAvailableCouples = Array.from(allCouplesMap.values());
     const shuffledCouples = shuffle(allAvailableCouples);
     const selectedCouples = shuffledCouples.slice(0, couplesToInclude);
+    setGameCouples(selectedCouples);
     
-    let celebsForGridSet = new Set<string>();
+    const celebsForGridSet = new Set<string>();
+    const couplePartnersSet = new Set<string>();
     selectedCouples.forEach(c => {
         celebsForGridSet.add(c.name);
-        if(c.partner) celebsForGridSet.add(c.partner);
+        if (c.partner) {
+          celebsForGridSet.add(c.partner);
+          couplePartnersSet.add(c.name);
+          couplePartnersSet.add(c.partner);
+        }
     });
 
-    const otherCelebs = localizedCelebrities.filter(c => !celebsForGridSet.has(c.name));
-    const shuffledOthers = shuffle(otherCelebs);
-    
+    const nonPairedCelebs = localizedCelebrities.filter(c => !couplePartnersSet.has(c.name));
+    const shuffledOthers = shuffle(nonPairedCelebs);
+
     const fillersNeeded = newGridSize - celebsForGridSet.size;
     const fillers = shuffledOthers.slice(0, fillersNeeded);
     fillers.forEach(f => celebsForGridSet.add(f.name));
@@ -481,20 +486,6 @@ export default function Home() {
     const finalCelebObjects = finalCells.filter(c => c.type === 'celebrity') as Celebrity[];
     const finalCelebNames = new Set(finalCelebObjects.map(c => c.name));
 
-    // Auto-include any pairs that ended up on the grid by chance from fillers
-    const allPossibleCouplesOnGrid = new Map<string, Celebrity>();
-    allAvailableCouples.forEach(c => {
-        if(finalCelebNames.has(c.name) && c.partner && finalCelebNames.has(c.partner)) {
-             const key = [c.name, c.partner].sort().join('-');
-             if(!allPossibleCouplesOnGrid.has(key)) {
-                allPossibleCouplesOnGrid.set(key, c);
-             }
-        }
-    });
-
-    const finalGameCouples = Array.from(allPossibleCouplesOnGrid.values());
-    setGameCouples(finalGameCouples);
-    
     const exesInGame: { p1: string, p2: string }[] = [];
     for (const celeb of finalCelebObjects) {
         if (celeb.exes) {
@@ -510,7 +501,7 @@ export default function Home() {
     setGameExes(exesInGame);
 
     if (hintsUnlocked) {
-      setUnlockedCoupleNames(new Set(finalGameCouples.map(c => c.name)));
+      setUnlockedCoupleNames(new Set(selectedCouples.map(c => c.name)));
       setUnlockedExesCount(exesInGame.length);
     } else {
       setUnlockedCoupleNames(new Set());
@@ -626,9 +617,12 @@ export default function Home() {
       const getReachable = (startIndex: number, board: Cell[], blockedIds: Set<string>): Set<number> => {
           const queue = [startIndex];
           const visited = new Set<number>([startIndex]);
+          const path = [];
           
           while(queue.length > 0) {
               const currentIndex = queue.shift()!;
+              path.push(currentIndex);
+
               const neighbors = [currentIndex - 1, currentIndex + 1, currentIndex - gridWidth, currentIndex + gridWidth].filter(n =>
                   n >= 0 && n < gridSize &&
                   !((currentIndex % gridWidth === 0 && n === currentIndex - 1) || ((currentIndex + 1) % gridWidth === 0 && n === currentIndex + 1))
@@ -636,7 +630,7 @@ export default function Home() {
 
               for (const neighborIndex of neighbors) {
                   if (visited.has(neighborIndex)) continue;
-
+                  
                   const neighborCell = board[neighborIndex];
                   if (neighborCell.type === 'empty' || !blockedIds.has(neighborCell.id)) {
                       visited.add(neighborIndex);
@@ -655,9 +649,9 @@ export default function Home() {
           const p1 = movableCelebrities.find(c => c.name === couple.name);
           const p2 = movableCelebrities.find(c => c.name === couple.partner);
           if (!p1 || !p2) continue;
-
-          // IDs of all cells that act as blockers (matched pairs)
+          
           const blockedIds = new Set(currentMatchedPairs);
+          blockedIds.add(p2.id); 
 
           const p1Reachable = getReachable(p1.index, currentCells, blockedIds);
           
@@ -1191,8 +1185,8 @@ export default function Home() {
                         <div className="text-sm text-center pt-2">
                             <p className="font-bold">{i18n[lang].stuckUnmatchedPairs}</p>
                             <ul className="list-disc list-inside text-muted-foreground">
-                                {unmatchedStuckCouples.map(c => (
-                                    <li key={c.id}>{c.name} & {c.partner}</li>
+                                {unmatchedStuckCouples.map((c, i) => (
+                                    <li key={i}>{c.name} & {c.partner}</li>
                                 ))}
                             </ul>
                         </div>
