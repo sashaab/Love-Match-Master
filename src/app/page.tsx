@@ -452,7 +452,6 @@ export default function Home() {
     const allAvailableCouples = Array.from(allCouplesMap.values());
     const shuffledCouples = shuffle(allAvailableCouples);
     const selectedCouples = shuffledCouples.slice(0, couplesToInclude);
-    setGameCouples(selectedCouples);
     
     let celebsForGridSet = new Set<string>();
     selectedCouples.forEach(c => {
@@ -627,8 +626,6 @@ export default function Home() {
       const getReachable = (startIndex: number, board: Cell[], blockedIds: Set<string>): Set<number> => {
           const queue = [startIndex];
           const visited = new Set<number>([startIndex]);
-          const path: { [key: number]: number[] } = {};
-          path[startIndex] = [startIndex];
           
           while(queue.length > 0) {
               const currentIndex = queue.shift()!;
