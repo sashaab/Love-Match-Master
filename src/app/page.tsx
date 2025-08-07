@@ -436,60 +436,52 @@ export default function Home() {
     setGridSize(newGridSize);
     
     const localizedCelebrities = getCelebrityDataByLang(language);
-
-    const allAvailableCouples = localizedCelebrities.filter(c => 
-        c.partner && localizedCelebrities.find(p => p.name === c.partner)
-    );
-
+    const allAvailableCouples = localizedCelebrities.filter(c => c.partner && localizedCelebrities.find(p => p.name === c.partner));
     const shuffledCouples = shuffle(allAvailableCouples);
-    const selectedCouples = shuffledCouples.slice(0, couplesToInclude);
-    setGameCouples(selectedCouples);
-
+    const selectedCouplesBase = shuffledCouples.slice(0, couplesToInclude);
+    
     let celebsForGrid = new Set<string>();
-    selectedCouples.forEach(c => {
+    selectedCouplesBase.forEach(c => {
         celebsForGrid.add(c.name);
         if(c.partner) celebsForGrid.add(c.partner);
     });
 
-    const allCelebsInGridSoFar = [...selectedCouples, ...selectedCouples.map(c => localizedCelebrities.find(p => p.name === c.partner))].filter(Boolean) as Celebrity[];
-    
-    let exesOfSelectedCouples = new Set<string>();
-    allCelebsInGridSoFar.forEach(c => {
-      c.exes?.forEach(exName => {
-        if (localizedCelebrities.some(celeb => celeb.name === exName)) {
-            if (!celebsForGrid.has(exName)) {
-                exesOfSelectedCouples.add(exName);
-            }
-        }
-      });
-    });
+    const singleCelebs = localizedCelebrities.filter(c => !celebsForGrid.has(c.name));
+    const shuffledSingles = shuffle(singleCelebs);
+    const fillersNeeded = newGridSize - celebsForGrid.size;
+    const fillers = shuffledSingles.slice(0, fillersNeeded);
 
-    exesOfSelectedCouples.forEach(exName => {
-        if (celebsForGrid.size < newGridSize) {
-            celebsForGrid.add(exName);
-        }
-    });
+    fillers.forEach(f => celebsForGrid.add(f.name));
 
-    const fillers = shuffle(localizedCelebrities.filter(c => !celebsForGrid.has(c.name)));
-    while (celebsForGrid.size < newGridSize && fillers.length > 0) {
-        const filler = fillers.pop()!;
-        celebsForGrid.add(filler.name);
-    }
-    
     let finalCells: Cell[] = Array.from(celebsForGrid).map(name => {
         const celeb = localizedCelebrities.find(c => c.name === name)!;
         return {...celeb, type: 'celebrity' as const, revealed: false};
     });
-    
+
     if (finalCells.length < newGridSize) {
         const emptyCellsCount = newGridSize - finalCells.length;
         for (let i = 0; i < emptyCellsCount; i++) {
             finalCells.push({ type: 'empty', id: `empty-${Date.now()}-${i}` });
         }
     }
-
+    
     const finalCelebObjects = finalCells.filter(c => c.type === 'celebrity') as Celebrity[];
     const finalCelebNames = new Set(finalCelebObjects.map(c => c.name));
+
+    // Auto-include any pairs that ended up on the grid by chance
+    const allPossibleCouplesOnGrid = new Map<string, Celebrity>();
+    allAvailableCouples.forEach(c => {
+        if(finalCelebNames.has(c.name) && c.partner && finalCelebNames.has(c.partner)) {
+             // Use a consistent key to avoid duplicates (e.g., sorted names)
+             const key = [c.name, c.partner].sort().join('-');
+             if(!allPossibleCouplesOnGrid.has(key)) {
+                allPossibleCouplesOnGrid.set(key, c);
+             }
+        }
+    });
+
+    const finalGameCouples = Array.from(allPossibleCouplesOnGrid.values());
+    setGameCouples(finalGameCouples);
     
     const exesInGame: { p1: string, p2: string }[] = [];
     for (const celeb of finalCelebObjects) {
@@ -506,7 +498,7 @@ export default function Home() {
     setGameExes(exesInGame);
 
     if (hintsUnlocked) {
-      setUnlockedCoupleNames(new Set(selectedCouples.map(c => c.name)));
+      setUnlockedCoupleNames(new Set(finalGameCouples.map(c => c.name)));
       setUnlockedExesCount(exesInGame.length);
     } else {
       setUnlockedCoupleNames(new Set());
@@ -611,6 +603,8 @@ export default function Home() {
   const isGameStuck = useCallback((currentCells: Cell[], currentMatchedPairs: Set<string>, couples: Celebrity[]) => {
     const gridWidth = Math.sqrt(gridSize);
     const nonMatchedCelebs = currentCells.filter(c => c.type === 'celebrity' && !currentMatchedPairs.has(c.id)) as (Celebrity & { type: 'celebrity' })[];
+    
+    // Find couples that are on the board but not matched yet
     const unmatchedCouples = couples.filter(c => {
         const p1 = nonMatchedCelebs.find(celeb => celeb.name === c.name);
         const p2 = nonMatchedCelebs.find(celeb => celeb.name === c.partner);
@@ -619,59 +613,62 @@ export default function Home() {
 
     if (unmatchedCouples.length === 0) return false;
 
-    // Build a map of traversable nodes (empty or unmatched cells)
-    const traversableIndices = new Set<number>();
+    // A map of all cells that can be moved or moved into
+    const movableIndices = new Set<number>();
     currentCells.forEach((cell, index) => {
         if (cell.type === 'empty' || (cell.type === 'celebrity' && !currentMatchedPairs.has(cell.id))) {
-            traversableIndices.add(index);
+            movableIndices.add(index);
         }
     });
 
     for (const couple of unmatchedCouples) {
-        const p1Index = currentCells.findIndex(c => c.id === couple.id);
+        const p1 = nonMatchedCelebs.find(c => c.name === couple.name);
         const p2 = nonMatchedCelebs.find(c => c.name === couple.partner);
-        if (!p2) continue; 
+        if (!p1 || !p2) continue;
+
+        const p1Index = currentCells.findIndex(c => c.id === p1.id);
         const p2Index = currentCells.findIndex(c => c.id === p2.id);
 
-        // Check path between p1 and p2 using only traversable nodes
-        const visited = new Set<number>();
+        // BFS to find if p1 can reach a position adjacent to p2
         const queue: number[] = [p1Index];
-        visited.add(p1Index);
+        const visited = new Set<number>([p1Index]);
         let pathFound = false;
 
         while (queue.length > 0) {
             const currentIndex = queue.shift()!;
             
-            // If we can reach a neighbor of p2, they can be connected
             const p2Neighbors = [p2Index - 1, p2Index + 1, p2Index - gridWidth, p2Index + gridWidth].filter(n =>
                 n >= 0 && n < gridSize &&
                 !((p2Index % gridWidth === 0 && n === p2Index - 1) || ((p2Index + 1) % gridWidth === 0 && n === p2Index + 1))
             );
 
+            // If the current cell in the path is a neighbor of p2, they can be united
             if (p2Neighbors.includes(currentIndex)) {
                 pathFound = true;
                 break;
             }
-
+            
+            // Explore neighbors of the current cell
             const neighbors = [currentIndex - 1, currentIndex + 1, currentIndex - gridWidth, currentIndex + gridWidth].filter(n =>
                 n >= 0 && n < gridSize &&
                 !((currentIndex % gridWidth === 0 && n === currentIndex - 1) || ((currentIndex + 1) % gridWidth === 0 && n === currentIndex + 1))
             );
-
+            
             for (const neighborIndex of neighbors) {
-                if (traversableIndices.has(neighborIndex) && !visited.has(neighborIndex)) {
+                // We can only move through empty cells or other unmatched/unmovable cells
+                if (movableIndices.has(neighborIndex) && !visited.has(neighborIndex)) {
                     visited.add(neighborIndex);
                     queue.push(neighborIndex);
                 }
             }
         }
 
+        // If a path is not found for even one couple, the game might be stuck
         if (!pathFound) {
-            // At least one couple cannot be united.
             return true;
         }
     }
-
+    
     return false;
   }, [gridSize]);
 
@@ -774,23 +771,17 @@ export default function Home() {
         const p2 = cells.find(cell => cell.type === 'celebrity' && cell.name === c.partner);
         return p1 && p2 && localMatchedPairs.has(p1.id) && localMatchedPairs.has(p2.id);
     });
-    
-    if (score >= WIN_SCORE) {
+
+    if (allCouplesMatched || finalScore >= WIN_SCORE) {
       setFinalTime(elapsedTime);
       setGameOver(true);
-      setShowSubmitScore(true);
+      if (finalScore >= WIN_SCORE) {
+        setShowSubmitScore(true);
+      }
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
       return;
     }
-    
-    if (allCouplesMatched) {
-      setFinalTime(elapsedTime);
-      setGameOver(true);
-      setShowSubmitScore(true);
-      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-      return;
-    }
-    
+
     if (isGameStuck(cells, localMatchedPairs, gameCouples)) {
         if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
         setIsStuck(true);
@@ -978,10 +969,10 @@ export default function Home() {
                           <Menu className="h-6 w-6" />
                       </SidebarTrigger>
                       <SidebarTrigger variant="outline" size="lg" className="hidden md:flex min-w-[210px] justify-start">
-                         <Menu className="h-6 w-6" /> {i18n[lang].hints}
+                         <Menu className="mr-2 h-6 w-6" /> {i18n[lang].hints}
                       </SidebarTrigger>
                       <Button variant="outline" size="lg" onClick={() => setShowInstructionsPopup(true)} className="min-w-[210px] justify-start hidden md:flex">
-                         <Info className="h-6 w-6" /> {i18n[lang].instructions}
+                         <Info className="mr-2 h-6 w-6" /> {i18n[lang].instructions}
                       </Button>
                       <Button variant="outline" size="lg" onClick={() => setShowLeaderboard(true)} className="min-w-[210px] justify-start hidden md:flex">
                        <Crown className="mr-2 h-6 w-6" /> {i18n[lang].leaderboard}
