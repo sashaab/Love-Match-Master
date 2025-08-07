@@ -408,6 +408,7 @@ export default function Home() {
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const draggedItem = useRef<number | null>(null);
   const fightTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const currentModes = gameModes(lang);
 
   const areNeighbors = (index1: number, index2: number) => {
     const gridWidth = Math.sqrt(gridSize);
@@ -430,14 +431,14 @@ export default function Home() {
 
   const setupGame = useCallback((modeKey: GameModeKey, language: Language) => {
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-    
+
     const currentModes = gameModes(language);
     const { hintsUnlocked, gridSize: newGridSize, couples: couplesToInclude } = currentModes[modeKey];
     setGameModeKey(modeKey);
     setGridSize(newGridSize);
-    
+
     const localizedCelebrities = getCelebrityDataByLang(language);
-    
+
     const allCouplesMap = new Map<string, Celebrity>();
     localizedCelebrities.forEach(c => {
         if (c.partner) {
@@ -456,21 +457,35 @@ export default function Home() {
     
     const celebsForGrid = new Set<Celebrity>();
     const celebNamesInGrid = new Set<string>();
+    const coupleNames = new Set<string>();
 
     selectedCouples.forEach(c => {
       const partnerName = c.partner!;
       const p1 = localizedCelebrities.find(celeb => celeb.name === c.name);
       const p2 = localizedCelebrities.find(celeb => celeb.name === partnerName);
-      if(p1) { celebsForGrid.add(p1); celebNamesInGrid.add(p1.name); }
-      if(p2) { celebsForGrid.add(p2); celebNamesInGrid.add(p2.name); }
+      if(p1) { celebsForGrid.add(p1); celebNamesInGrid.add(p1.name); coupleNames.add(p1.name); }
+      if(p2) { celebsForGrid.add(p2); celebNamesInGrid.add(p2.name); coupleNames.add(p2.name); }
     });
 
-    const nonPairedCelebs = localizedCelebrities.filter(c => !celebNamesInGrid.has(c.name) && !c.partner);
+    // Select fillers, ensuring they don't form unplanned couples
+    const nonPairedCelebs = localizedCelebrities.filter(c => !celebNamesInGrid.has(c.name));
     const shuffledOthers = shuffle(nonPairedCelebs);
 
     const fillersNeeded = newGridSize - celebsForGrid.size;
-    const fillers = shuffledOthers.slice(0, fillersNeeded);
-    fillers.forEach(f => celebsForGrid.add(f));
+    let fillersAdded = 0;
+    for (const celeb of shuffledOthers) {
+      if (fillersAdded >= fillersNeeded) break;
+      
+      const partner = localizedCelebrities.find(p => p.name === celeb.partner);
+      // Avoid adding a celeb whose partner is already a filler
+      const partnerIsFiller = partner && Array.from(celebsForGrid).some(f => f.name === partner.name && !coupleNames.has(f.name));
+
+      if (!partnerIsFiller) {
+        celebsForGrid.add(celeb);
+        fillersAdded++;
+      }
+    }
+
 
     let finalCells: Cell[] = Array.from(celebsForGrid).map(celeb => {
         return {...celeb, type: 'celebrity' as const, revealed: false};
